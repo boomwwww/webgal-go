@@ -1,0 +1,15 @@
+{
+  "name": "webgal-go",
+  "version": "0.0.1",
+  "description": "webgal-go",
+  "keywords": [
+    "webgal"
+  ],
+  "author": "boomwwww",
+  "license": "MPL-2.0",
+  "type": "module",
+  "main": "index.js",
+  "files": [
+    "index.js"
+  ]
+}

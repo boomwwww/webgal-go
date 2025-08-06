@@ -1,0 +1,8 @@
+say: 你好！ -speaker=WebGAL\ \- -next;
+say: 你好！
+ - speaker = WebGAL 
+ - next;
+WebGAL: 你好！ -next;
+WebGAL: 你好！
+ - next;
+WebGAL：“你好！” -next;
