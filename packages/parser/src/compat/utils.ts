@@ -1,4 +1,4 @@
-import type { IScene } from './config';
+import { commandType, type IScene } from './config';
 import type { Scene } from '../lib/config';
 
 /**
@@ -264,20 +264,46 @@ function parseCSS(css: string): [Record<string, string>, string] {
   return [result, specialRules.trim()];
 }
 
-export const getCompatScene = (input: Scene): IScene => {
-  return {
-    sceneName: input.name,
-    sceneUrl: input.url,
-    sentenceList: input.sentenceList.map((sentence) => ({
-      command: 0,
+export const getCompatScene = (input: Scene): IScene => ({
+  sceneName: input.name,
+  sceneUrl: input.url,
+  sentenceList: input.sentenceList.map((sentence) => {
+    let commandIndex = 0;
+    while (true) {
+      if (commandType[commandIndex] === sentence.header) {
+        break;
+      }
+      if (commandType[commandIndex] === undefined) {
+        commandIndex = 0;
+        break;
+      }
+      commandIndex++;
+    }
+    return {
+      command: commandIndex,
       commandRaw: sentence.header,
       content: sentence.body,
       args: sentence.attributes,
       sentenceAssets: [],
       subScene: [],
       compat: sentence,
-    })),
-    assetsList: [],
-    subSceneList: [],
-  };
+    };
+  }),
+  assetsList: [],
+  subSceneList: [],
+});
+
+const loop = (continueLabel: () => boolean, fn: () => void) => {
+  while (!continueLabel()) {
+    fn();
+  }
 };
+
+let i = 0;
+loop(
+  () => i < 10,
+  () => {
+    console.log(i);
+    i++;
+  }
+);
