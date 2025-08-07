@@ -1,4 +1,4 @@
-import { PluginParser } from './config';
+import { Sentence, Scene, PluginParser } from './config';
 
 export const trimPlugin: PluginParser = {
   name: 'trim',
@@ -63,21 +63,32 @@ export const attributePlugin: PluginParser = {
   }),
 };
 //assetSetter
-// export const createSetAssetsPlugin = (
-//   assetSetter: (fileName: string, assetType: fileType) => string,
-// ) => ({
-//   parse: (input) => {},
-// });
-// export const createAssetsPrefetcherPlugin = (
-//   assetsPrefetcher: (assetList: IAsset[]) => void,
-// ): PluginParser => ({
-//   name: 'assetsPrefetcher',
+// export const createSetAssetsPlugin = <T>(assetSetter: (fileName: string, assetType: T) => string): PluginParser => ({
+//   name: 'setAssets',
 //   parse: (input) => {
-//     assetsPrefetcher(
-//       input.sentenceList.flatMap(
-//         (sentence) => (sentence as any).sentenceAssets,
-//       ),
-//     );
-//     return input;
+//     return {
+//       ...input,
+//       sentenceList: input.sentenceList.map((sentence) => ({
+//         ...sentence,
+//       })),
+//     };
 //   },
 // });
+
+// interface SentenceWithAssets extends Sentence {
+//   sentenceAssets: Array<IAsset>;
+// }
+
+interface SceneWithAssets<T> extends Scene {
+  assetList?: Array<T>;
+}
+
+export const createAssetsPrefetcherPlugin = <T>(assetsPrefetcher: (assetList: T[]) => void): PluginParser => ({
+  name: 'assetsPrefetcher',
+  parse: (input: SceneWithAssets<T>) => {
+    if (input.assetList) {
+      assetsPrefetcher(input.assetList);
+    }
+    return input;
+  },
+});

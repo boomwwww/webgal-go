@@ -40,7 +40,7 @@ export const createParser = (parserConfig?: ParserConfig): Parser => {
   const { commonParserConfig } = config;
   const commonParser = createCommonParser(commonParserConfig);
   const pluginParseList = config.pluginParsers
-    .map((plugin) => getPluginParser(config, plugin))
+    .map((plugin) => getPluginParse(config, plugin))
     .filter((p) => p !== null);
   const pluginParse = pipe(...pluginParseList);
   return {
@@ -83,7 +83,7 @@ export const createParser = (parserConfig?: ParserConfig): Parser => {
   };
 };
 
-const getPluginParser = (config: CompleteParserConfig, inputPlugin: PluginParserLike): PluginParse | null => {
+const getPluginParse = (config: CompleteParserConfig, inputPlugin: PluginParserLike): PluginParse | null => {
   if (typeof inputPlugin === 'string') {
     return config.plugins.find((plugin) => plugin.name === inputPlugin)?.parse ?? null;
   } else if (typeof inputPlugin === 'object' && inputPlugin !== null && 'parse' in inputPlugin) {
