@@ -8,8 +8,28 @@
   "author": "boomwwww",
   "license": "MPL-2.0",
   "type": "module",
-  "main": "index.js",
+  "scripts": {
+    "build": "tsdown",
+    "test": "vitest",
+    "lint": "npx oxlint@latest"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
-    "index.js"
-  ]
+    "dist"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
+  },
+  "devDependencies": {
+    "@types/node": "^24.2.1",
+    "tsdown": "^0.13.3",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
 }
