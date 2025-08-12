@@ -5,7 +5,10 @@
     "strict": true,
     "declaration": true,
     "types": ["node", "vitest/globals"],
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   "include": ["src", "tests"]
 }
