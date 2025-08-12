@@ -1,9 +1,16 @@
-import { type Webgal } from 'webgal-go';
+import { type Webgal, type Plugin } from 'webgal-go';
+// import 'webgal-go';
 
-export const myPlugin = {
+declare module 'webgal-go' {
+  export interface Context {
+    x: number;
+  }
+}
+
+type MyPlugin = Plugin;
+
+export const myPlugin: Plugin = {
   install: (wg: Webgal) => {
-    wg.ctx.myPlugin = {
-      name: 'myPlugin',
-    };
+    wg.ctx.x = 1;
   },
 };

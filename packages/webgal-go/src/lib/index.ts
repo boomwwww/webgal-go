@@ -20,7 +20,7 @@ export const createWebgal = (): Webgal => {
     ctx: {
       version: config.version,
     },
-    use: (plugin: Plugin) => {
+    use: <P extends Plugin>(plugin: P) => {
       plugin.install(wg);
       return wg;
     },
@@ -29,4 +29,3 @@ export const createWebgal = (): Webgal => {
   return wg;
 };
 const wg = createWebgal();
-
