@@ -1,3 +1,4 @@
 export const config = {
-  version: "0.0.1",
+  version: __VERSION__,
+  buildTime: __BUILD_TIME__,
 }
