@@ -1,7 +1,7 @@
 import { fileType } from './config';
 import type { ConfigMap, ConfigItem, IAsset, WebgalConfig, IWebGALStyleObj } from './config';
 import { scss2cssinjsParser } from './utils';
-import { createParser, defineParserConfig, plugins } from '../lib';
+import { createParser, defineParserConfig, plugins } from '@/lib';
 
 import { ADD_NEXT_ARG_LIST, SCRIPT_CONFIG } from './config';
 import { sceneTextPreProcess, getCompatScene } from './utils';

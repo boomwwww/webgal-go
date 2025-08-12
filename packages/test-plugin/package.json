@@ -1,18 +1,17 @@
 {
-  "name": "webgal-go",
+  "name": "@webgal-go/test-plugin",
   "version": "0.0.1",
-  "description": "webgal-go",
+  "description": "webgal-go-test-plugin",
   "keywords": [
     "webgal",
     "webgal-go",
-    "core"
+    "plugin"
   ],
   "author": "boomwwww",
   "license": "MPL-2.0",
   "type": "module",
   "scripts": {
     "build": "tsdown",
-    "test": "vitest",
     "lint": "npx oxlint@latest"
   },
   "publishConfig": {
@@ -31,10 +30,9 @@
   "devDependencies": {
     "@types/node": "^24.2.1",
     "tsdown": "^0.13.3",
-    "typescript": "^5.9.2",
-    "vitest": "^3.2.4"
+    "typescript": "^5.9.2"
   },
-  "dependencies": {
-    "@webgal-go/parser": "workspace:*"
+  "peerDependencies": {
+    "webgal-go": "workspace:*"
   }
 }

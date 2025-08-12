@@ -1,32 +1,25 @@
-import { createSceneManager } from '@/plugins/scene';
 import { createBus } from '@/utils/bus';
-// import { BacklogManager } from './backlog';
-
-// export const createWebgal0 = () => {
-//   const wg = {
-//     sceneManager: createSceneManager(),
-//     backlogManager: new BacklogManager(this.sceneManager),
-//     animationManager: new AnimationManager(),
-//     gameplay: new Gameplay(),
-//     gameName: '',
-//     gameKey: '',
-//     eventBus: 0,
-//   };
-//   return wg;
-// };
+import { config } from '@/config';
 
 export interface Webgal {
-  ctx: Record<string, any>;
+  ctx: Context;
   use: (plugin: Plugin) => Webgal;
   bus: ReturnType<typeof createBus>;
 }
+
+export interface Context {
+  version: string;
+}
+
 export interface Plugin {
   install: (wg: Webgal) => void;
 }
 
 export const createWebgal = (): Webgal => {
   const wg: Webgal = {
-    ctx: {},
+    ctx: {
+      version: config.version,
+    },
     use: (plugin: Plugin) => {
       plugin.install(wg);
       return wg;
@@ -35,3 +28,5 @@ export const createWebgal = (): Webgal => {
   };
   return wg;
 };
+const wg = createWebgal();
+

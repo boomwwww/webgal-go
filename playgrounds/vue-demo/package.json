@@ -16,7 +16,9 @@
   "dependencies": {
     "pinia": "^3.0.3",
     "vue": "^3.5.18",
-    "vue-router": "^4.5.1"
+    "vue-router": "^4.5.1",
+    "webgal-go": "workspace:*",
+    "@webgal-go/test-plugin": "workspace:*"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.2",

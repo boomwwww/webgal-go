@@ -1,5 +1,5 @@
 import { commandType, type IScene } from './config';
-import type { Scene } from '../lib/config';
+import type { Scene } from '@/lib/config';
 
 /**
  * Preprocessor for scene text.
