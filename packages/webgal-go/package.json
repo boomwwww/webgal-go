@@ -3,7 +3,9 @@
   "version": "0.0.1",
   "description": "webgal-go",
   "keywords": [
-    "webgal"
+    "webgal",
+    "webgal-go",
+    "core"
   ],
   "author": "boomwwww",
   "license": "MPL-2.0",
