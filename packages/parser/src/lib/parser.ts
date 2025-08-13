@@ -1,8 +1,10 @@
 import {
+  type CommonParserConfig,
   type ParserConfig,
   type CompleteParserConfig,
   type PluginParse,
   type PluginParserLike,
+  defaultCommonParserConfig,
   defaultParserConfig,
   type Scene,
   type Sentence,
@@ -93,3 +95,68 @@ const getPluginParse = (config: CompleteParserConfig, inputPlugin: PluginParserL
   }
   return null;
 };
+
+const getPluginParse0 = (inputPlugin: PluginParserLike): PluginParse | null => {
+  if (typeof inputPlugin === 'object' && inputPlugin !== null && 'parse' in inputPlugin) {
+    return inputPlugin.parse;
+  } else if (typeof inputPlugin === 'function') {
+    return inputPlugin;
+  }
+  return null;
+};
+
+export const createParserFactory = () => {
+  let config: CommonParserConfig = { ...defaultCommonParserConfig };
+  const plugins: Array<PluginParserLike> = [];
+  const parserFactory = {
+    setConfig: (userConfig: CommonParserConfig): void => {
+      config = userConfig; // todo
+    },
+    use: (inputPlugin: PluginParserLike): void => {
+      plugins.push(inputPlugin);
+    },
+    create: (): Parser => {
+      const commonParser = createCommonParser(config);
+      const pluginParseList = plugins.map((plugin) => getPluginParse0(plugin)).filter((p) => p !== null);
+      const pluginParse = pipe(...pluginParseList);
+      return {
+        parse: (rawScene) => {
+          const { name, url, str } = rawScene;
+          const initialStenceList = commonParser.parse(str);
+          const initialScene: Scene = {
+            name: name,
+            url: url,
+            sentenceList: initialStenceList,
+            raw: str,
+          };
+          return pluginParse(initialScene);
+        },
+
+        stringify: (input: Scene | Array<Sentence>, options?: unknown) => {
+          if (options) return '';
+          let arr = input;
+          let result = '';
+          if (!(input instanceof Array)) {
+            arr = input.sentenceList;
+          }
+          (arr as Array<Sentence>).forEach((sentence) => {
+            result += sentence.str;
+          });
+          return result;
+        },
+
+        commonParse: (str: string) => {
+          return commonParser.parse(str);
+        },
+
+        plugins: {},
+      };
+    },
+  };
+  return parserFactory;
+};
+
+const pf = createParserFactory();
+pf.setConfig({});
+pf.use('test-plugin');
+const SceneParser = pf.create();

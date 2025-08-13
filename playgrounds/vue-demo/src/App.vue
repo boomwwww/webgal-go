@@ -3,6 +3,7 @@ import { createWebgal } from 'webgal-go';
 import { myPlugin } from '@webgal-go/test-plugin';
 const wg = createWebgal();
 wg.use(myPlugin);
+wg.bus.emit('aabbcc', null);
 const x = wg.ctx.x;
 </script>
 
