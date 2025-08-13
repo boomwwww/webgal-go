@@ -1,8 +1,8 @@
 import {
-  type CommonParser,
-  type CommonParserConfig,
-  type CompleteCommonParserConfig,
-  defaultCommonParserConfig,
+  type PreParser,
+  type PreParserConfig,
+  type CompletePreParserConfig,
+  defaultPreParserConfig,
   type Sentence,
 } from './config';
 import { getPositionByIndex } from './utils';
@@ -27,12 +27,12 @@ type Context = {
   rest: string; // 剩余字符串
   sentences: Array<Sentence>; // 结果数组
   current: Current; // 当前语句的临时数据
-  config: CompleteCommonParserConfig; // 配置
+  config: CompletePreParserConfig; // 配置
 };
 
-/** Create a common parser */
-export const createCommonParser = (commonParserConfig?: CommonParserConfig): CommonParser => {
-  const config = getMergedConfig(commonParserConfig);
+/** Create a pre parser */
+export const createPreParser = (preParserConfig?: PreParserConfig): PreParser => {
+  const config = getMergedConfig(preParserConfig);
   return {
     parse: (str) => {
       const ctx = createContext(str, config); // 初始化上下文
@@ -55,21 +55,21 @@ export const createCommonParser = (commonParserConfig?: CommonParserConfig): Com
 };
 
 /** 合并用户配置与默认配置 */
-const getMergedConfig = (userConfig?: CommonParserConfig): CompleteCommonParserConfig => ({
+const getMergedConfig = (userConfig?: PreParserConfig): CompletePreParserConfig => ({
   separators: {
-    ...defaultCommonParserConfig.separators,
+    ...defaultPreParserConfig.separators,
     ...userConfig?.separators,
   },
   escapeConfigs: [
     ...(userConfig?.escapeConfigs || []),
-    ...defaultCommonParserConfig.escapeConfigs.filter(
+    ...defaultPreParserConfig.escapeConfigs.filter(
       (defCfg) => !userConfig?.escapeConfigs?.some((usrCfg) => usrCfg.key === defCfg.key)
     ),
   ],
 });
 
 /** 新建上下文对象 */
-const createContext = (str: string, config: CompleteCommonParserConfig): Context => ({
+const createContext = (str: string, config: CompletePreParserConfig): Context => ({
   raw: str,
   state: 'header',
   p: 0,

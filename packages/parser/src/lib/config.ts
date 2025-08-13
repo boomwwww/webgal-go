@@ -21,19 +21,19 @@ export interface Sentence {
 }
 
 /** 普通解析器 */
-export interface CommonParser {
+export interface PreParser {
   parse: (str: string) => Array<Sentence>;
   stringify: (input: Array<Sentence> | Sentence, options?: { raw: boolean }) => string;
 }
 
 /** 普通解析器配置 */
-export interface CommonParserConfig {
+export interface PreParserConfig {
   separators?: SeparatorConfig; // 分隔符配置
   escapeConfigs?: Array<EscapeConfig>; // 转义规则配置
 }
 
 /** 完整的普通解析器配置 */
-export interface CompleteCommonParserConfig {
+export interface CompletePreParserConfig {
   separators: Required<SeparatorConfig>;
   escapeConfigs: Array<EscapeConfig>;
 }
@@ -183,7 +183,7 @@ export const defaultEscapeConfigs: Array<EscapeConfig> = [
 ];
 
 // 解析器默认配置
-export const defaultCommonParserConfig: CompleteCommonParserConfig = {
+export const defaultPreParserConfig: CompletePreParserConfig = {
   separators: {
     bodyStart: [':'],
     attributeStart: [' -'],
@@ -194,7 +194,7 @@ export const defaultCommonParserConfig: CompleteCommonParserConfig = {
   escapeConfigs: defaultEscapeConfigs,
 };
 
-export const compatibleCommonParserConfig: CompleteCommonParserConfig = {
+export const compatiblePreParserConfig: CompletePreParserConfig = {
   separators: {
     bodyStart: [':'],
     attributeStart: [' -'],
@@ -206,7 +206,7 @@ export const compatibleCommonParserConfig: CompleteCommonParserConfig = {
 };
 
 export interface ParserConfig {
-  commonParserConfig?: CommonParserConfig;
+  preParserConfig?: PreParserConfig;
   plugins?: Array<PluginParser>;
   pluginParsers?: Array<PluginParserLike>;
 }
@@ -223,14 +223,14 @@ export interface PluginParser {
 export type PluginParse = (input: Scene, ...args: unknown[]) => Scene;
 
 export const defaultParserConfig: CompleteParserConfig = {
-  commonParserConfig: {},
+  preParserConfig: {},
   plugins: [],
   pluginParsers: [],
 };
 
 export const defineParserConfig = (...args: unknown[]): CompleteParserConfig => {
   return {
-    commonParserConfig: {},
+    preParserConfig: {},
     plugins: [],
     pluginParsers: [],
   };

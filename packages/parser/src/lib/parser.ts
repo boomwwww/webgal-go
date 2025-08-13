@@ -1,31 +1,31 @@
 import {
-  type CommonParserConfig,
+  type PreParserConfig,
   type ParserConfig,
   type CompleteParserConfig,
   type PluginParse,
   type PluginParserLike,
-  defaultCommonParserConfig,
+  defaultPreParserConfig,
   defaultParserConfig,
   type Scene,
   type Sentence,
 } from './config';
-import { createCommonParser } from './common';
+import { createPreParser } from './pre';
 import { pipe } from './utils';
 
 export type Parser = {
   parse: (rawScene: { name: string; url: string; str: string }) => Scene;
   stringify: (input: Scene | Array<Sentence>, options?: unknown) => string;
-  commonParse: (str: string) => Array<Sentence>;
+  preParse: (str: string) => Array<Sentence>;
   plugins: Record<string, PluginParse>;
 };
 
 const getMergedConfig = (userConfig?: ParserConfig): CompleteParserConfig => {
   const merged = { ...defaultParserConfig };
   if (!userConfig) return merged;
-  if (userConfig.commonParserConfig) {
-    merged.commonParserConfig = {
-      ...merged.commonParserConfig,
-      ...userConfig.commonParserConfig,
+  if (userConfig.preParserConfig) {
+    merged.preParserConfig = {
+      ...merged.preParserConfig,
+      ...userConfig.preParserConfig,
     };
   }
   if (userConfig.plugins) {
@@ -39,8 +39,8 @@ const getMergedConfig = (userConfig?: ParserConfig): CompleteParserConfig => {
 
 export const createParser = (parserConfig?: ParserConfig): Parser => {
   const config = getMergedConfig(parserConfig);
-  const { commonParserConfig } = config;
-  const commonParser = createCommonParser(commonParserConfig);
+  const { preParserConfig } = config;
+  const preParser = createPreParser(preParserConfig);
   const pluginParseList = config.pluginParsers
     .map((plugin) => getPluginParse(config, plugin))
     .filter((p) => p !== null);
@@ -48,7 +48,7 @@ export const createParser = (parserConfig?: ParserConfig): Parser => {
   return {
     parse: (rawScene) => {
       const { name, url, str } = rawScene;
-      const initialStenceList = commonParser.parse(str);
+      const initialStenceList = preParser.parse(str);
       const initialScene: Scene = {
         name: name,
         url: url,
@@ -71,8 +71,8 @@ export const createParser = (parserConfig?: ParserConfig): Parser => {
       return result;
     },
 
-    commonParse: (str: string) => {
-      return commonParser.parse(str);
+    preParse: (str: string) => {
+      return preParser.parse(str);
     },
 
     plugins: (() => {
@@ -106,23 +106,23 @@ const getPluginParse0 = (inputPlugin: PluginParserLike): PluginParse | null => {
 };
 
 export const createParserFactory = () => {
-  let config: CommonParserConfig = { ...defaultCommonParserConfig };
+  let config: PreParserConfig = { ...defaultPreParserConfig };
   const plugins: Array<PluginParserLike> = [];
   const parserFactory = {
-    setConfig: (userConfig: CommonParserConfig): void => {
+    setConfig: (userConfig: PreParserConfig): void => {
       config = userConfig; // todo
     },
     use: (inputPlugin: PluginParserLike): void => {
       plugins.push(inputPlugin);
     },
     create: (): Parser => {
-      const commonParser = createCommonParser(config);
+      const preParser = createPreParser(config);
       const pluginParseList = plugins.map((plugin) => getPluginParse0(plugin)).filter((p) => p !== null);
       const pluginParse = pipe(...pluginParseList);
       return {
         parse: (rawScene) => {
           const { name, url, str } = rawScene;
-          const initialStenceList = commonParser.parse(str);
+          const initialStenceList = preParser.parse(str);
           const initialScene: Scene = {
             name: name,
             url: url,
@@ -145,8 +145,8 @@ export const createParserFactory = () => {
           return result;
         },
 
-        commonParse: (str: string) => {
-          return commonParser.parse(str);
+        preParse: (str: string) => {
+          return preParser.parse(str);
         },
 
         plugins: {},
