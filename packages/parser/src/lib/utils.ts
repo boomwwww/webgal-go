@@ -45,8 +45,6 @@ export const getPositionByIndex = (str: string, index: number): { line: number; 
 };
 
 /** 函数管道 */
-export const pipe = <T>(
-  ...fns: Array<(arg: T, ...rest: Array<unknown>) => T>
-): ((arg: T, ...rest: Array<unknown>) => T) => {
+export const pipe = <T>(...fns: Array<(arg: T) => T>): ((arg: T) => T) => {
   return (initialValue) => fns.reduce((acc, fn) => fn(acc), initialValue);
 };

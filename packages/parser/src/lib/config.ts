@@ -1,13 +1,13 @@
-/** 场景 */
-export interface Scene {
-  name: string; // 场景名
-  url: string; // 场景url
-  sentenceList: Array<Sentence>; // 语句列表
-  raw: string; // 原始场景字符串
+/** 文章 */
+export interface Article {
+  name: string; // 文章名
+  url: string; // 文章url
+  sectionList: Array<Section>; // 语句列表
+  readonly raw: string; // 原始文章字符串
 }
 
 /** 语句 */
-export interface Sentence {
+export interface Section {
   header: string; // 语句头
   body: string; // 语句体
   attributes: Array<{
@@ -16,23 +16,23 @@ export interface Sentence {
   }>;
   comment: string; // 语句注释
   str: string; // 语句字符串(转义后)
-  raw: string; // 语句原始字符串(转义前)
+  readonly raw: string; // 语句原始字符串(转义前)
   position: { index: number; line: number; column: number }; // 语句起始位置在整个字符串中的索引
 }
 
-/** 普通解析器 */
+/** 预解析器 */
 export interface PreParser {
-  parse: (str: string) => Array<Sentence>;
-  stringify: (input: Array<Sentence> | Sentence, options?: { raw: boolean }) => string;
+  parse: (str: string) => Array<Section>;
+  stringify: (input: Array<Section>, options?: { raw: boolean }) => string;
 }
 
-/** 普通解析器配置 */
+/** 预解析器配置 */
 export interface PreParserConfig {
   separators?: SeparatorConfig; // 分隔符配置
   escapeConfigs?: Array<EscapeConfig>; // 转义规则配置
 }
 
-/** 完整的普通解析器配置 */
+/** 完整的预解析器配置 */
 export interface CompletePreParserConfig {
   separators: Required<SeparatorConfig>;
   escapeConfigs: Array<EscapeConfig>;
@@ -44,7 +44,7 @@ interface SeparatorConfig {
   attributeStart?: Array<string>; // 用于开始新属性的字符（如' -'）
   attributeKeyValue?: Array<string>; // 用于分隔属性键值的字符（如'='）
   commentSeparators?: Array<{ start: string; end: Array<string> }>; // 用于分隔注释的分隔符（如';'）
-  sentenceEnd?: Array<string>; // 用于结束sentence的分隔符（如'\n'）
+  sectionEnd?: Array<string>; // 用于结束section的分隔符（如'\n'）
 }
 
 /**  转义配置 */
@@ -182,14 +182,14 @@ export const defaultEscapeConfigs: Array<EscapeConfig> = [
   },
 ];
 
-// 解析器默认配置
+// 默认解析器配置
 export const defaultPreParserConfig: CompletePreParserConfig = {
   separators: {
     bodyStart: [':'],
     attributeStart: [' -'],
     attributeKeyValue: ['='],
     commentSeparators: [{ start: ';', end: ['\r\n', '\n', '\r'] }],
-    sentenceEnd: [],
+    sectionEnd: [],
   },
   escapeConfigs: defaultEscapeConfigs,
 };
@@ -200,38 +200,9 @@ export const compatiblePreParserConfig: CompletePreParserConfig = {
     attributeStart: [' -'],
     attributeKeyValue: ['='],
     commentSeparators: [{ start: ';', end: ['\r\n', '\n', '\r'] }],
-    sentenceEnd: ['\r\n', '\n', '\r'],
+    sectionEnd: ['\r\n', '\n', '\r'],
   },
   escapeConfigs: defaultEscapeConfigs,
 };
 
-export interface ParserConfig {
-  preParserConfig?: PreParserConfig;
-  plugins?: Array<PluginParser>;
-  pluginParsers?: Array<PluginParserLike>;
-}
-
-export type PluginParserLike = PluginParser | string | PluginParse;
-
-export type CompleteParserConfig = Required<ParserConfig>;
-
-export interface PluginParser {
-  name: string;
-  parse: PluginParse;
-}
-
-export type PluginParse = (input: Scene, ...args: unknown[]) => Scene;
-
-export const defaultParserConfig: CompleteParserConfig = {
-  preParserConfig: {},
-  plugins: [],
-  pluginParsers: [],
-};
-
-export const defineParserConfig = (...args: unknown[]): CompleteParserConfig => {
-  return {
-    preParserConfig: {},
-    plugins: [],
-    pluginParsers: [],
-  };
-};
+export type ParserPlugin = (input: Article) => Article;

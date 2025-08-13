@@ -1,162 +1,55 @@
-import {
-  type PreParserConfig,
-  type ParserConfig,
-  type CompleteParserConfig,
-  type PluginParse,
-  type PluginParserLike,
-  defaultPreParserConfig,
-  defaultParserConfig,
-  type Scene,
-  type Sentence,
-} from './config';
+import type { PreParserConfig, ParserPlugin, Article, Section } from './config';
 import { createPreParser } from './pre';
 import { pipe } from './utils';
 
 export type Parser = {
-  parse: (rawScene: { name: string; url: string; str: string }) => Scene;
-  stringify: (input: Scene | Array<Sentence>, options?: unknown) => string;
-  preParse: (str: string) => Array<Sentence>;
-  plugins: Record<string, PluginParse>;
-};
-
-const getMergedConfig = (userConfig?: ParserConfig): CompleteParserConfig => {
-  const merged = { ...defaultParserConfig };
-  if (!userConfig) return merged;
-  if (userConfig.preParserConfig) {
-    merged.preParserConfig = {
-      ...merged.preParserConfig,
-      ...userConfig.preParserConfig,
-    };
-  }
-  if (userConfig.plugins) {
-    merged.plugins = [...merged.plugins, ...userConfig.plugins];
-  }
-  if (userConfig.pluginParsers) {
-    merged.pluginParsers = [...merged.pluginParsers, ...userConfig.pluginParsers];
-  }
-  return merged;
-};
-
-export const createParser = (parserConfig?: ParserConfig): Parser => {
-  const config = getMergedConfig(parserConfig);
-  const { preParserConfig } = config;
-  const preParser = createPreParser(preParserConfig);
-  const pluginParseList = config.pluginParsers
-    .map((plugin) => getPluginParse(config, plugin))
-    .filter((p) => p !== null);
-  const pluginParse = pipe(...pluginParseList);
-  return {
-    parse: (rawScene) => {
-      const { name, url, str } = rawScene;
-      const initialStenceList = preParser.parse(str);
-      const initialScene: Scene = {
-        name: name,
-        url: url,
-        sentenceList: initialStenceList,
-        raw: str,
-      };
-      return pluginParse(initialScene);
-    },
-
-    stringify: (input: Scene | Array<Sentence>, options?: unknown) => {
-      if (options) return '';
-      let arr = input;
-      let result = '';
-      if (!(input instanceof Array)) {
-        arr = input.sentenceList;
-      }
-      (arr as Array<Sentence>).forEach((sentence) => {
-        result += sentence.str;
-      });
-      return result;
-    },
-
-    preParse: (str: string) => {
-      return preParser.parse(str);
-    },
-
-    plugins: (() => {
-      const result: { [key: string]: PluginParse } = {};
-      config.plugins.forEach((plugin) => {
-        result[plugin.name] = plugin.parse;
-      });
-      return result;
-    })(),
-  };
-};
-
-const getPluginParse = (config: CompleteParserConfig, inputPlugin: PluginParserLike): PluginParse | null => {
-  if (typeof inputPlugin === 'string') {
-    return config.plugins.find((plugin) => plugin.name === inputPlugin)?.parse ?? null;
-  } else if (typeof inputPlugin === 'object' && inputPlugin !== null && 'parse' in inputPlugin) {
-    return inputPlugin.parse;
-  } else if (typeof inputPlugin === 'function') {
-    return inputPlugin;
-  }
-  return null;
-};
-
-const getPluginParse0 = (inputPlugin: PluginParserLike): PluginParse | null => {
-  if (typeof inputPlugin === 'object' && inputPlugin !== null && 'parse' in inputPlugin) {
-    return inputPlugin.parse;
-  } else if (typeof inputPlugin === 'function') {
-    return inputPlugin;
-  }
-  return null;
+  preParse: (str: string) => Array<Section>;
+  parse: (rawArticle: { name: string; url: string; str: string }) => Article;
+  stringify: (input: Article | Array<Section>, options?: { raw: boolean }) => string;
 };
 
 export const createParserFactory = () => {
-  let config: PreParserConfig = { ...defaultPreParserConfig };
-  const plugins: Array<PluginParserLike> = [];
+  let preParserConfig: PreParserConfig | undefined = undefined;
+
+  const plugins: Array<ParserPlugin> = [];
+
   const parserFactory = {
-    setConfig: (userConfig: PreParserConfig): void => {
-      config = userConfig; // todo
+    setConfig: (config: PreParserConfig): void => {
+      preParserConfig = config;
     },
-    use: (inputPlugin: PluginParserLike): void => {
-      plugins.push(inputPlugin);
+
+    use: (plugin: ParserPlugin): void => {
+      plugins.push(plugin);
     },
+
     create: (): Parser => {
-      const preParser = createPreParser(config);
-      const pluginParseList = plugins.map((plugin) => getPluginParse0(plugin)).filter((p) => p !== null);
-      const pluginParse = pipe(...pluginParseList);
+      const preParser = createPreParser(preParserConfig);
+      const pluginParse = pipe(...plugins);
       return {
-        parse: (rawScene) => {
-          const { name, url, str } = rawScene;
-          const initialStenceList = preParser.parse(str);
-          const initialScene: Scene = {
-            name: name,
-            url: url,
-            sentenceList: initialStenceList,
-            raw: str,
-          };
-          return pluginParse(initialScene);
-        },
-
-        stringify: (input: Scene | Array<Sentence>, options?: unknown) => {
-          if (options) return '';
-          let arr = input;
-          let result = '';
-          if (!(input instanceof Array)) {
-            arr = input.sentenceList;
-          }
-          (arr as Array<Sentence>).forEach((sentence) => {
-            result += sentence.str;
-          });
-          return result;
-        },
-
         preParse: (str: string) => {
           return preParser.parse(str);
         },
 
-        plugins: {},
+        parse: (rawArticle) => {
+          const { name, url, str } = rawArticle;
+          const initialSectionList = preParser.parse(str);
+          const initialArticle: Article = {
+            name: name,
+            url: url,
+            sectionList: initialSectionList,
+            raw: str,
+          };
+          return pluginParse(initialArticle);
+        },
+
+        stringify: (input: Article | Array<Section>, options = { raw: false }) => {
+          if (Array.isArray(input)) return preParser.stringify(input, options);
+          if (options.raw) return input.raw;
+          return preParser.stringify(input.sectionList, options);
+        },
       };
     },
   };
+
   return parserFactory;
 };
-
-const pf = createParserFactory();
-pf.setConfig({});
-pf.use('test-plugin');
-const SceneParser = pf.create();
