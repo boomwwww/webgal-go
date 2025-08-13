@@ -1,5 +1,5 @@
-import { commandType, type IScene } from './config';
-import type { Scene } from '@/lib/config';
+import { commandType, type IScene, type ConfigMap, type IAsset, type fileType } from './config';
+import type { Article } from '@/lib/config';
 
 /**
  * Preprocessor for scene text.
@@ -264,13 +264,13 @@ function parseCSS(css: string): [Record<string, string>, string] {
   return [result, specialRules.trim()];
 }
 
-export const getCompatScene = (input: Scene): IScene => ({
+export const getCompatScene = (input: Article): IScene => ({
   sceneName: input.name,
   sceneUrl: input.url,
-  sentenceList: input.sentenceList.map((sentence) => {
+  sentenceList: input.sectionList.map((section) => {
     let commandIndex = 0;
     while (true) {
-      if (commandType[commandIndex] === sentence.header) {
+      if (commandType[commandIndex] === section.header) {
         break;
       }
       if (commandType[commandIndex] === undefined) {
@@ -281,29 +281,23 @@ export const getCompatScene = (input: Scene): IScene => ({
     }
     return {
       command: commandIndex,
-      commandRaw: sentence.header,
-      content: sentence.body,
-      args: sentence.attributes,
+      commandRaw: section.header,
+      content: section.body,
+      args: section.attributes,
       sentenceAssets: [],
       subScene: [],
-      compat: sentence,
+      compatSection: section,
     };
   }),
   assetsList: [],
   subSceneList: [],
 });
 
-const loop = (continueLabel: () => boolean, fn: () => void) => {
-  while (!continueLabel()) {
-    fn();
-  }
+export const createCompatPlugin = (options: {
+  assetsPrefetcher: (assetList: IAsset[]) => void;
+  assetSetter: (fileName: string, assetType: fileType) => string;
+  addNextArgList: commandType[];
+  scriptConfigMap: ConfigMap;
+}) => {
+  return (input: Article) => input;
 };
-
-let i = 0;
-loop(
-  () => i < 10,
-  () => {
-    console.log(i);
-    i++;
-  }
-);

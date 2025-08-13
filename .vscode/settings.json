@@ -9,5 +9,5 @@
     "vite.config.ts": "*config.js,*config.json,*rc,.eslint*,eslint*,.prettier*,prettier*",
     "index.js": "index*"
   },
-  "oxc.enable": false
+  "oxc.enable": true
 }

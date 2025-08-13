@@ -1,22 +1,19 @@
-import { Sentence, Scene, PluginParser } from './config';
+import { Article, Section, ParserPlugin } from './config';
 
-export const trimPlugin: PluginParser = {
-  name: 'trim',
-  parse: (input) => ({
-    ...input,
-    sentenceList: input.sentenceList.map((sentence) => ({
-      ...sentence,
-      header: sentence.header.trim(),
-      body: sentence.body.trim(),
-      attributes: sentence.attributes.map((attribute) => ({
-        key: attribute.key.trim(),
-        value: typeof attribute.value === 'string' ? attribute.value.trim() : attribute.value,
-      })),
+export const trimPlugin: ParserPlugin = (input) => ({
+  ...input,
+  sectionList: input.sectionList.map((section) => ({
+    ...section,
+    header: section.header.trim(),
+    body: section.body.trim(),
+    attributes: section.attributes.map((attribute) => ({
+      key: attribute.key.trim(),
+      value: typeof attribute.value === 'string' ? attribute.value.trim() : attribute.value,
     })),
-  }),
-};
+  })),
+});
 
-export const createDequotationPlugin = (quotations: Array<[string, string]>): PluginParser => {
+export const createDequotationPlugin = (quotations: Array<[string, string]>): ParserPlugin => {
   const removeQuotation = (str: string) => {
     for (const [quotationStart, quotationEnd] of quotations) {
       if (str.startsWith(quotationStart) && str.endsWith(quotationEnd)) {
@@ -25,70 +22,169 @@ export const createDequotationPlugin = (quotations: Array<[string, string]>): Pl
     }
     return str;
   };
-  return {
-    name: 'dequotation',
-    parse: (input) => ({
-      ...input,
-      sentenceList: input.sentenceList.map((sentence) => ({
-        ...sentence,
-        header: removeQuotation(sentence.header),
-        body: removeQuotation(sentence.body),
-        attributes: sentence.attributes.map((attribute) => ({
-          key: removeQuotation(attribute.key),
-          value: typeof attribute.value === 'string' ? removeQuotation(attribute.value) : attribute.value,
-        })),
-      })),
-    }),
-  };
-};
-
-export const attributePlugin: PluginParser = {
-  name: 'attribute',
-  parse: (input) => ({
+  return (input) => ({
     ...input,
-    sentenceList: input.sentenceList.map((sentence) => ({
-      ...sentence,
-      attributes: sentence.attributes.map((attribute) => ({
-        key: attribute.key,
-        value:
-          attribute.value === 'true'
-            ? true
-            : attribute.value === 'false'
-            ? false
-            : attribute.value !== '' && !isNaN(Number(attribute.value))
-            ? Number(attribute.value)
-            : attribute.value,
+    sectionList: input.sectionList.map((section) => ({
+      ...section,
+      header: removeQuotation(section.header),
+      body: removeQuotation(section.body),
+      attributes: section.attributes.map((attribute) => ({
+        key: removeQuotation(attribute.key),
+        value: typeof attribute.value === 'string' ? removeQuotation(attribute.value) : attribute.value,
       })),
     })),
-  }),
+  });
 };
-//assetSetter
-// export const createSetAssetsPlugin = <T>(assetSetter: (fileName: string, assetType: T) => string): PluginParser => ({
-//   name: 'setAssets',
-//   parse: (input) => {
-//     return {
-//       ...input,
-//       sentenceList: input.sentenceList.map((sentence) => ({
-//         ...sentence,
-//       })),
-//     };
-//   },
-// });
 
-// interface SentenceWithAssets extends Sentence {
-//   sentenceAssets: Array<IAsset>;
-// }
+export const attributePlugin: ParserPlugin = (input) => ({
+  ...input,
+  sectionList: input.sectionList.map((section) => ({
+    ...section,
+    attributes: section.attributes.map((attribute) => ({
+      key: attribute.key,
+      value: ['true', 'True', 'TRUE'].includes(attribute.value.toString())
+        ? true
+        : ['false', 'False', 'FALSE'].includes(attribute.value.toString())
+        ? false
+        : attribute.value !== '' && !isNaN(Number(attribute.value))
+        ? Number(attribute.value)
+        : attribute.value,
+    })),
+  })),
+});
 
-interface SceneWithAssets<T> extends Scene {
+interface ArticleWithAssets<T> extends Article {
+  sectionList: Array<SectionWithAssets<T>>;
   assetList?: Array<T>;
 }
 
-export const createAssetsPrefetcherPlugin = <T>(assetsPrefetcher: (assetList: T[]) => void): PluginParser => ({
-  name: 'assetsPrefetcher',
-  parse: (input: SceneWithAssets<T>) => {
+interface SectionWithAssets<T> extends Section {
+  assetList?: Array<T>;
+}
+
+function getChooseContent<T extends { [key: string]: number }>(
+  contentRaw: string,
+  assetSetter: (fileName: string, assetType: T[keyof T]) => string,
+  fileType: T
+): string {
+  const chooseList = contentRaw.split(/(?<!\\)\|/);
+  const chooseKeyList: Array<string> = [];
+  const chooseValueList: Array<string> = [];
+  for (const e of chooseList) {
+    chooseKeyList.push(e.split(/(?<!\\):/)[0] ?? '');
+    chooseValueList.push(e.split(/(?<!\\):/)[1] ?? '');
+  }
+  const parsedChooseList = chooseValueList.map((e) => {
+    if (e.match(/\./)) {
+      return assetSetter(e, fileType.scene as T[keyof T]);
+    } else {
+      return e;
+    }
+  });
+  let ret = '';
+  for (let i = 0; i < chooseKeyList.length; i++) {
+    if (i !== 0) {
+      ret = ret + '|';
+    }
+    ret = ret + `${chooseKeyList[i]}:${parsedChooseList[i]}`;
+  }
+  return ret;
+}
+
+// assetSetter
+export const createAssetSetterPlugin = <T extends { [key: string]: number }>(
+  assetSetter: (fileName: string, assetType: T[keyof T]) => string,
+  fileType: T
+): ParserPlugin => {
+  return (input) => ({
+    ...input,
+    sectionList: input.sectionList.map((section) => {
+      let body = '';
+      switch (section.header) {
+        case 'playEffect': {
+          body = assetSetter(section.body, fileType.vocal as T[keyof T]);
+          break;
+        }
+        case 'changeBg': {
+          body = assetSetter(section.body, fileType.background as T[keyof T]);
+          break;
+        }
+        case 'changeFigure': {
+          body = assetSetter(section.body, fileType.figure as T[keyof T]);
+          break;
+        }
+        case 'bgm': {
+          body = assetSetter(section.body, fileType.bgm as T[keyof T]);
+          break;
+        }
+        case 'callScene': {
+          body = assetSetter(section.body, fileType.scene as T[keyof T]);
+          break;
+        }
+        case 'changeScene': {
+          body = assetSetter(section.body, fileType.scene as T[keyof T]);
+          break;
+        }
+        case 'miniAvatar': {
+          body = assetSetter(section.body, fileType.figure as T[keyof T]);
+          break;
+        }
+        case 'video': {
+          body = assetSetter(section.body, fileType.video as T[keyof T]);
+          break;
+        }
+        case 'choose': {
+          body = getChooseContent<T>(section.body, assetSetter, fileType);
+          break;
+        }
+        case 'unlockBgm': {
+          body = assetSetter(section.body, fileType.bgm as T[keyof T]);
+          break;
+        }
+        case 'unlockCg': {
+          body = assetSetter(section.body, fileType.background as T[keyof T]);
+          break;
+        }
+        default: {
+          body = section.body;
+          break;
+        }
+      }
+      return {
+        ...section,
+        body: body,
+        attributes: section.attributes.map((attribute) => {
+          if (attribute.value === true) {
+            if (attribute.key.toLowerCase().match(/\.(ogg|mp3|wav)$/)) {
+              return {
+                key: 'vocal',
+                value: assetSetter(attribute.key, fileType.vocal as T[keyof T]),
+              };
+            }
+          }
+          switch (attribute.key.toLowerCase()) {
+            case 'vocal': {
+              return {
+                key: 'vocal',
+                value: assetSetter(attribute.value.toString(), fileType.vocal as T[keyof T]),
+              };
+            }
+            default: {
+              break;
+            }
+          }
+          return attribute;
+        }),
+      };
+    }),
+  });
+};
+
+export const createAssetsPrefetcherPlugin = <T>(assetsPrefetcher: (assetList: T[]) => void): ParserPlugin => {
+  return (input: ArticleWithAssets<T>) => {
     if (input.assetList) {
       assetsPrefetcher(input.assetList);
     }
     return input;
-  },
-});
+  };
+};
