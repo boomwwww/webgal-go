@@ -1,3 +1,4 @@
+import { commandType } from '@/compat/config';
 import { Article, Section, ParserPlugin } from './config';
 
 export const trimPlugin: ParserPlugin = (input) => ({
@@ -180,11 +181,50 @@ export const createAssetSetterPlugin = <T extends { [key: string]: number }>(
   });
 };
 
-export const createAssetsPrefetcherPlugin = <T>(assetsPrefetcher: (assetList: T[]) => void): ParserPlugin => {
+export const createAssetsPrefetcherPlugin = <T>(assetsPrefetcher: (assetList: Array<T>) => void): ParserPlugin => {
   return (input: ArticleWithAssets<T>) => {
     if (input.assetList) {
       assetsPrefetcher(input.assetList);
     }
     return input;
   };
+};
+
+// todo
+export const createAddNextArgPlugin = (addNextArgList: Array<commandType>): ParserPlugin => {
+  return (input) => ({
+    ...input,
+    sectionList: input.sectionList.map((section) => {
+      let commandCode = 0;
+      while (true) {
+        if (commandType[commandCode] === section.header) {
+          break;
+        }
+        if (commandType[commandCode] === undefined) {
+          commandCode = 0;
+          break;
+        }
+        commandCode++;
+      }
+      if (addNextArgList.includes(commandCode)) {
+        section.attributes.push({
+          key: 'addNext',
+          value: true,
+        });
+      }
+      return section;
+    }),
+  });
+};
+
+// todo
+export const createScriptPlugin = (
+  scriptConfigMap: Map<string, { scriptString: string; scriptType: commandType }>
+): ParserPlugin => {
+  return (input) => ({
+    ...input,
+    sectionList: input.sectionList.map((section) => {
+      return section;
+    }),
+  });
 };

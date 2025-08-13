@@ -35,3 +35,7 @@ export const createWebgal = (): Webgal => {
   };
   return wg;
 };
+
+// import { parserPlugin } from '@/plugins/parser';
+// const wg = createWebgal();
+// wg.use(parserPlugin);

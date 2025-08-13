@@ -1,5 +1,7 @@
-import { commandType, type IScene, type ConfigMap, type IAsset, type fileType } from './config';
-import type { Article } from '@/lib/config';
+import { commandType, fileType, type IScene, type ConfigMap, type IAsset } from './config';
+import type { Article, ParserPlugin } from '@/lib/config';
+import { plugins } from '@/lib';
+import { pipe } from '@/lib/utils';
 
 /**
  * Preprocessor for scene text.
@@ -268,19 +270,19 @@ export const getCompatScene = (input: Article): IScene => ({
   sceneName: input.name,
   sceneUrl: input.url,
   sentenceList: input.sectionList.map((section) => {
-    let commandIndex = 0;
+    let commandCode = 0;
     while (true) {
-      if (commandType[commandIndex] === section.header) {
+      if (commandType[commandCode] === section.header) {
         break;
       }
-      if (commandType[commandIndex] === undefined) {
-        commandIndex = 0;
+      if (commandType[commandCode] === undefined) {
+        commandCode = 0;
         break;
       }
-      commandIndex++;
+      commandCode++;
     }
     return {
-      command: commandIndex,
+      command: commandCode,
       commandRaw: section.header,
       content: section.body,
       args: section.attributes,
@@ -298,6 +300,20 @@ export const createCompatPlugin = (options: {
   assetSetter: (fileName: string, assetType: fileType) => string;
   addNextArgList: commandType[];
   scriptConfigMap: ConfigMap;
-}) => {
-  return (input: Article) => input;
+}): ParserPlugin => {
+  const compatPluginPipe = pipe(
+    plugins.trimPlugin,
+    plugins.attributePlugin,
+    plugins.createAddNextArgPlugin(options.addNextArgList),
+    // todo
+    plugins.createAssetSetterPlugin(options.assetSetter, fileType as unknown as { [key: string]: number }),
+    plugins.createAssetsPrefetcherPlugin(options.assetsPrefetcher)
+  );
+  return (input) => {
+    return compatPluginPipe(input);
+  };
+};
+
+export const configParse = (configArticle: Article) => {
+  return configArticle;
 };

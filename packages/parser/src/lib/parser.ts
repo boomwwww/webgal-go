@@ -1,4 +1,4 @@
-import type { PreParserConfig, ParserPlugin, Article, Section } from './config';
+import type { Article, Section, PreParserConfig, ParserPlugin } from './config';
 import { createPreParser } from './pre';
 import { pipe } from './utils';
 
@@ -26,10 +26,9 @@ export const createParserFactory = () => {
       const preParser = createPreParser(preParserConfig);
       const pluginParse = pipe(...plugins);
       return {
-        preParse: (str: string) => {
+        preParse: (str) => {
           return preParser.parse(str);
         },
-
         parse: (rawArticle) => {
           const { name, url, str } = rawArticle;
           const initialSectionList = preParser.parse(str);
@@ -41,8 +40,7 @@ export const createParserFactory = () => {
           };
           return pluginParse(initialArticle);
         },
-
-        stringify: (input: Article | Array<Section>, options = { raw: false }) => {
+        stringify: (input, options = { raw: false }) => {
           if (Array.isArray(input)) return preParser.stringify(input, options);
           if (options.raw) return input.raw;
           return preParser.stringify(input.sectionList, options);

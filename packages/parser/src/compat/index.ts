@@ -2,9 +2,10 @@ import { fileType } from './config';
 import type { ConfigMap, ConfigItem, IAsset, WebgalConfig, IWebGALStyleObj } from './config';
 import { scss2cssinjsParser } from './utils';
 import { createParserFactory, type Parser } from '@/lib';
+import { Article, compatiblePreParserConfig, type PreParserConfig } from '@/lib/config';
 
 import { ADD_NEXT_ARG_LIST, SCRIPT_CONFIG } from './config';
-import { sceneTextPreProcess, getCompatScene, createCompatPlugin } from './utils';
+import { sceneTextPreProcess, getCompatScene, createCompatPlugin, configParse } from './utils';
 
 export class SceneParser {
   private readonly assetsPrefetcher: (assetList: IAsset[]) => void;
@@ -17,7 +18,7 @@ export class SceneParser {
     assetSetter: (fileName: string, assetType: fileType) => string,
     ADD_NEXT_ARG_LIST: number[],
     SCRIPT_CONFIG_INPUT: ConfigItem[] | ConfigMap,
-    preParserConfig?: undefined
+    preParserConfig?: PreParserConfig
   ) {
     this.assetsPrefetcher = assetsPrefetcher;
 
@@ -35,7 +36,8 @@ export class SceneParser {
     }
 
     const parserFactory = createParserFactory();
-    parserFactory.setConfig(preParserConfig ?? {}); // todo
+    if (preParserConfig) parserFactory.setConfig(preParserConfig);
+    else parserFactory.setConfig(compatiblePreParserConfig);
     parserFactory.use(
       createCompatPlugin({
         assetsPrefetcher: this.assetsPrefetcher,
@@ -63,19 +65,28 @@ export class SceneParser {
   }
 
   parseConfig(configText: string): WebgalConfig {
-    let config = this.parser.parse({
-      str: configText,
+    // let config = this.parser.preParse({
+    //   str: configText,
+    //   name: '@config',
+    //   url: '@config',
+    // });
+    const configPreParsed = this.parser.preParse(configText);
+
+    const configArticle: Article = {
       name: '@config',
       url: '@config',
-    });
+      sectionList: configPreParsed,
+      raw: configText,
+    };
+    const configParsed = configParse(configArticle);
     // todo
-    return config.sectionList.map((e) => ({
-      command: e.header,
-      args: e.body
+    return configParsed.sectionList.map((section) => ({
+      command: section.header,
+      args: section.body
         .split('|')
-        .map((e) => e.trim())
-        .filter((e) => e !== ''),
-      options: e.attributes,
+        .map((arg) => arg.trim())
+        .filter((arg) => arg !== ''),
+      options: section.attributes,
     }));
   }
 
