@@ -84,7 +84,7 @@ export enum commandType {
   wait,
 }
 
-export type CommandList = Array<commandType>;
+export type CommandCodeList = Array<commandType>;
 
 export type ConfigItem = { scriptString: string; scriptType: commandType };
 
@@ -126,7 +126,7 @@ export const SCRIPT_CONFIG: Array<ConfigItem> = [
 ];
 
 /** 添加下一条语句的参数列表 */
-export const ADD_NEXT_ARG_LIST: CommandList = [
+export const ADD_NEXT_ARG_LIST: CommandCodeList = [
   commandType.bgm,
   commandType.pixi,
   commandType.pixiInit,
@@ -169,3 +169,17 @@ export const compatParserConfig: CompleteParserConfig = {
   },
   escapeConfigs: defaultEscapeConfigs,
 };
+
+import type { Article, Section } from '@/lib/config';
+
+export interface CompatArticle extends Article {
+  sections: Array<CompatSection>;
+  assets?: Array<IAsset>;
+  sub?: Array<string>;
+}
+
+export interface CompatSection extends Section {
+  commandCode?: number;
+  assets?: Array<IAsset>;
+  sub?: Array<string>;
+}

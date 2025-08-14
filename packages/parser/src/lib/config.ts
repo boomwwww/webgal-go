@@ -17,16 +17,7 @@ export interface Section {
   comment: string | undefined; // 语句注释
   str: string; // 语句字符串(转义后)
   readonly raw: string; // 语句原始字符串(转义前)
-  position: { index: number; line: number; column: number }; // 语句起始位置在整个字符串中的索引
-}
-
-export interface ArticleWithAssets<T> extends Article {
-  sections: Array<SectionWithAssets<T>>;
-  assets?: Array<T>;
-}
-
-export interface SectionWithAssets<T> extends Section {
-  assets?: Array<T>;
+  readonly position: { index: number; line: number; column: number }; // 语句起始位置在整个字符串中的索引
 }
 
 /** 解析器配置 */

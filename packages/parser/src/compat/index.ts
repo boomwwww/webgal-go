@@ -2,7 +2,7 @@ import { type ParserConfig } from '@/lib/config';
 import { type Parser, createParserFactory } from '@/lib/parser';
 
 import type { AssetsPrefetcher, AssetSetter } from './config';
-import type { CommandList, ConfigItem, ConfigMap } from './config';
+import type { CommandCodeList, ConfigItem, ConfigMap } from './config';
 import type { WebgalConfig } from './config';
 import type { IWebGALStyleObj } from './config';
 
@@ -18,13 +18,14 @@ import { sceneTextPreProcess } from './utils';
 export class SceneParser {
   private readonly assetsPrefetcher: AssetsPrefetcher;
   private readonly assetSetter: AssetSetter;
-  private readonly ADD_NEXT_ARG_LIST: CommandList;
+  private readonly ADD_NEXT_ARG_LIST: CommandCodeList;
   private readonly SCRIPT_CONFIG_MAP: ConfigMap;
   private readonly parser: Parser;
+
   constructor(
     assetsPrefetcher: AssetsPrefetcher,
     assetSetter: AssetSetter,
-    ADD_NEXT_ARG_LIST: CommandList,
+    ADD_NEXT_ARG_LIST: CommandCodeList,
     SCRIPT_CONFIG_INPUT: ConfigItem[] | ConfigMap,
     parserConfig?: ParserConfig
   ) {
@@ -46,7 +47,6 @@ export class SceneParser {
     const parserFactory = createParserFactory(parserConfig ?? compatParserConfig);
     parserFactory.use(
       createCompatPlugin({
-        preParser: parserFactory.preParser,
         assetsPrefetcher: this.assetsPrefetcher,
         assetSetter: this.assetSetter,
         addNextArgList: this.ADD_NEXT_ARG_LIST,
@@ -55,6 +55,7 @@ export class SceneParser {
     );
     this.parser = parserFactory.create();
   }
+
   /**
    * 解析场景
    * @param rawScene 原始场景

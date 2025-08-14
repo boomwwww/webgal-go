@@ -1,8 +1,6 @@
 import type { Parser } from '@/lib/parser';
 import { concat } from '@/lib/utils';
-import type { IScene } from './config';
-import { commandType } from './config';
-import { CompatArticle } from './plugins';
+import type { IScene, CompatArticle } from './config';
 
 /**
  * Preprocessor for scene text.
@@ -270,36 +268,19 @@ function parseCSS(css: string): [Record<string, string>, string] {
 export const getCompatScene = (input: CompatArticle): IScene => ({
   sceneName: input.name,
   sceneUrl: input.url,
-  sentenceList: input.sections.map((section) => {
-    let commandCode = 0;
-    while (true) {
-      if (commandType[commandCode] === section.header) {
-        break;
-      }
-      if (commandType[commandCode] === undefined) {
-        commandCode = 0;
-        break;
-      }
-      commandCode++;
-    }
-    if (section.commandCode !== undefined) {
-      commandCode = section.commandCode;
-    }
-    return {
-      command: commandCode,
-      commandRaw: concat(section.header),
-      content: concat(section.body),
-      args: section.attributes.map((attribute) => ({
-        key: concat(attribute.key),
-        value: attribute.value !== undefined ? attribute.value : concat(attribute.value),
-      })),
-      sentenceAssets: [],
-      subScene: [],
-      compatSection: section,
-    };
-  }),
-  assetsList: [],
-  subSceneList: [],
+  sentenceList: input.sections.map((section) => ({
+    command: section.commandCode!,
+    commandRaw: section.header!,
+    content: section.body!,
+    args: section.attributes.map((attribute) => ({
+      key: attribute.key!,
+      value: attribute.value!,
+    })),
+    sentenceAssets: section.assets!,
+    subScene: section.sub!,
+  })),
+  assetsList: input.assets!,
+  subSceneList: input.sub!,
 });
 
 export const configParse = (configArticle: CompatArticle) => {
@@ -335,3 +316,5 @@ export const parseTheConfig = (configText: string, parser: Parser) => {
     })),
   }));
 };
+
+export const unique = (arr: Array<any>) => [...new Set(arr)];

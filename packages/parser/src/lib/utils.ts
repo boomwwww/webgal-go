@@ -3,7 +3,7 @@ export const pipe = <T>(...fns: Array<(arg: T) => T>): ((arg: T) => T) => {
   return (initialValue) => fns.reduce((acc, fn) => fn(acc), initialValue);
 };
 
-/** 辅助函数：拼接字符串 */
+/** 拼接字符串 */
 export const concat = (...args: Array<string | undefined>) => {
   return args.filter((arg) => arg !== undefined).join('');
 };
@@ -32,19 +32,15 @@ export const getPositionByIndex = (str: string, index: number): { line: number; 
 
   while (p < index) {
     if (p !== 0 && str[p - 1] === '\r' && str[p] === '\n') {
-      // 处理 \r\n 换行符组合
-      line++;
+      line++; // 处理 \r\n 换行符组合
       column = 1;
     } else if (str[p] === '\r' && str[p + 1] === '\n') {
-      // 处理 \r\n 换行符组合
-      column++;
+      column++; // 处理 \r\n 换行符组合
     } else if (str[p] === '\n' || str[p] === '\r') {
-      // 处理其他换行符（\n 或 \r）
-      line++;
+      line++; // 处理其他换行符（\n 或 \r）
       column = 1;
     } else {
-      // 普通字符
-      column++;
+      column++; // 普通字符
     }
     p++;
   }
