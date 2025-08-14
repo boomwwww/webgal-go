@@ -317,4 +317,36 @@ export const parseTheConfig = (configText: string, parser: Parser) => {
   }));
 };
 
-export const unique = (arr: Array<any>) => [...new Set(arr)];
+export const isPrimitive = (value: any) => {
+  return value === null || (typeof value !== 'object' && typeof value !== 'function');
+};
+
+export const equal = (value1: any, value2: any) => {
+  if (isPrimitive(value1) || isPrimitive(value2)) {
+    return Object.is(value1, value2);
+  }
+  const entries1 = Object.entries(value1);
+  const entries2 = Object.entries(value2);
+  if (entries1.length !== entries2.length) {
+    return false;
+  }
+  for (const [key, value] of entries1) {
+    if (!equal(value, value2[key])) {
+      return false;
+    }
+  }
+  return true;
+};
+
+export const unique = <T>(arr: Array<T>): Array<T> => {
+  const _result: Array<T> = [];
+  outer: for (const item of arr) {
+    for (const _r of _result) {
+      if (equal(_r, item)) {
+        continue outer;
+      }
+    }
+    _result.push(item);
+  }
+  return _result;
+};

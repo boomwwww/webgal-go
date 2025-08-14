@@ -278,7 +278,7 @@ export const subSceneScannerPlugin: ParserPlugin = (input: CompatArticle): Compa
   return {
     ...input,
     sections: _sections,
-    sub: [...new Set(_sections.map((section) => section.sub).flat())],
+    sub: unique(_sections.map((section) => section.sub).flat()),
   };
 };
 
