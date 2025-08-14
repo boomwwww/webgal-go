@@ -44,6 +44,10 @@ export enum fileType {
   video,
 }
 
+export type AssetsPrefetcher = (assetList: IAsset[]) => void;
+
+export type AssetSetter = (fileName: string, assetType: fileType) => string;
+
 /** 语句类型枚举 */
 export enum commandType {
   say, // 对话
@@ -82,8 +86,12 @@ export enum commandType {
   wait,
 }
 
+export type ConfigItem = { scriptString: string; scriptType: commandType };
+
+export type ConfigMap = Map<string, ConfigItem>;
+
 /** 脚本配置 */
-export const SCRIPT_CONFIG = [
+export const SCRIPT_CONFIG: Array<ConfigItem> = [
   { scriptString: 'intro', scriptType: commandType.intro },
   { scriptString: 'changeBg', scriptType: commandType.changeBg },
   { scriptString: 'changeFigure', scriptType: commandType.changeFigure },
@@ -117,8 +125,10 @@ export const SCRIPT_CONFIG = [
   { scriptString: 'wait', scriptType: commandType.wait },
 ];
 
+export type CommandList = Array<commandType>;
+
 /** 添加下一条语句的参数列表 */
-export const ADD_NEXT_ARG_LIST = [
+export const ADD_NEXT_ARG_LIST: CommandList = [
   commandType.bgm,
   commandType.pixi,
   commandType.pixiInit,
@@ -131,9 +141,6 @@ export const ADD_NEXT_ARG_LIST = [
   commandType.filmMode,
   commandType.playEffect,
 ];
-
-export type ConfigItem = { scriptString: string; scriptType: commandType };
-export type ConfigMap = Map<string, ConfigItem>;
 
 interface IOptionItem {
   key: string;

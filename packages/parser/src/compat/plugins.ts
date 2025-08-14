@@ -1,145 +1,39 @@
 import type { Article, Section } from '@/lib/config';
+import { pipe } from '@/lib/utils';
 import type { ParserPlugin } from '@/lib/parser';
-import { commandType } from './config';
+import type { ArticleWithAssets } from '@/lib/plugins';
+import * as plugins from '@/lib/plugins';
+import {
+  type IAsset,
+  fileType,
+  type AssetsPrefetcher,
+  type AssetSetter,
+  type ConfigMap,
+  commandType,
+  CommandList,
+} from './config';
 
-interface ArticleWithAssets<T> extends Article {
-  sections: Array<SectionWithAssets<T>>;
-  assets?: Array<T>;
+interface ArticleWithCommandCode extends Article {
+  sections: Array<SectionWithCommandCode>;
 }
 
-interface SectionWithAssets<T> extends Section {
-  assets?: Array<T>;
+interface SectionWithCommandCode extends Section {
+  commandCode?: number;
 }
 
-function getChooseContent<T extends { [key: string]: number }>(
-  contentRaw: string,
-  assetSetter: (fileName: string, assetType: T[keyof T]) => string,
-  fileType: T
-): string {
-  const chooseList = contentRaw.split(/(?<!\\)\|/);
-  const chooseKeyList: Array<string> = [];
-  const chooseValueList: Array<string> = [];
-  for (const e of chooseList) {
-    chooseKeyList.push(e.split(/(?<!\\):/)[0] ?? '');
-    chooseValueList.push(e.split(/(?<!\\):/)[1] ?? '');
-  }
-  const parsedChooseList = chooseValueList.map((e) => {
-    if (e.match(/\./)) {
-      return assetSetter(e, fileType.scene as T[keyof T]);
-    } else {
-      return e;
-    }
-  });
-  let ret = '';
-  for (let i = 0; i < chooseKeyList.length; i++) {
-    if (i !== 0) {
-      ret = ret + '|';
-    }
-    ret = ret + `${chooseKeyList[i]}:${parsedChooseList[i]}`;
-  }
-  return ret;
-}
-
-// assetSetter
-export const createAssetSetterPlugin = <T extends { [key: string]: number }>(
-  assetSetter: (fileName: string, assetType: T[keyof T]) => string,
-  fileType: T
-): ParserPlugin => {
-  return (input) => ({
+// todo
+export const createScriptPlugin = (scriptConfigMap: ConfigMap): ParserPlugin => {
+  const _scriptConfigMap = scriptConfigMap;
+  return (input): ArticleWithCommandCode => ({
     ...input,
     sections: input.sections.map((section) => {
-      let body = '';
-      switch (section.header) {
-        case 'playEffect': {
-          body = assetSetter(section.body, fileType.vocal as T[keyof T]);
-          break;
-        }
-        case 'changeBg': {
-          body = assetSetter(section.body, fileType.background as T[keyof T]);
-          break;
-        }
-        case 'changeFigure': {
-          body = assetSetter(section.body, fileType.figure as T[keyof T]);
-          break;
-        }
-        case 'bgm': {
-          body = assetSetter(section.body, fileType.bgm as T[keyof T]);
-          break;
-        }
-        case 'callScene': {
-          body = assetSetter(section.body, fileType.scene as T[keyof T]);
-          break;
-        }
-        case 'changeScene': {
-          body = assetSetter(section.body, fileType.scene as T[keyof T]);
-          break;
-        }
-        case 'miniAvatar': {
-          body = assetSetter(section.body, fileType.figure as T[keyof T]);
-          break;
-        }
-        case 'video': {
-          body = assetSetter(section.body, fileType.video as T[keyof T]);
-          break;
-        }
-        case 'choose': {
-          body = getChooseContent<T>(section.body, assetSetter, fileType);
-          break;
-        }
-        case 'unlockBgm': {
-          body = assetSetter(section.body, fileType.bgm as T[keyof T]);
-          break;
-        }
-        case 'unlockCg': {
-          body = assetSetter(section.body, fileType.background as T[keyof T]);
-          break;
-        }
-        default: {
-          body = section.body;
-          break;
-        }
-      }
-      return {
-        ...section,
-        body: body,
-        attributes: section.attributes.map((attribute) => {
-          if (attribute.value === true) {
-            if (attribute.key.toLowerCase().match(/\.(ogg|mp3|wav)$/)) {
-              return {
-                key: 'vocal',
-                value: assetSetter(attribute.key, fileType.vocal as T[keyof T]),
-              };
-            }
-          }
-          switch (attribute.key.toLowerCase()) {
-            case 'vocal': {
-              return {
-                key: 'vocal',
-                value: assetSetter(attribute.value.toString(), fileType.vocal as T[keyof T]),
-              };
-            }
-            default: {
-              break;
-            }
-          }
-          return attribute;
-        }),
-      };
+      return section;
     }),
   });
 };
 
-export const createAssetsPrefetcherPlugin = <T>(assetsPrefetcher: (assets: Array<T>) => void): ParserPlugin => {
-  return (input: ArticleWithAssets<T>) => {
-    if (input.assets) {
-      assetsPrefetcher(input.assets);
-    }
-    return input;
-  };
-};
-
 // todo
-export const createAddNextArgPlugin = (addNextArgList: Array<commandType>): ParserPlugin => {
+export const createAddNextArgPlugin = (addNextArgList: CommandList): ParserPlugin => {
   return (input) => ({
     ...input,
     sections: input.sections.map((section) => {
@@ -165,14 +59,143 @@ export const createAddNextArgPlugin = (addNextArgList: Array<commandType>): Pars
   });
 };
 
-// todo
-// export const createScriptPlugin = (
-//   scriptConfigMap: Map<string, { scriptString: string; scriptType: commandType }>
-// ): ParserPlugin => {
-//   return (input) => ({
-//     ...input,
-//     sections: input.sections.map((section) => {
-//       return section;
-//     }),
-//   });
-// };
+function getChooseContent(contentRaw: string, assetSetter: (fileName: string, assetType: fileType) => string): string {
+  const chooseList = contentRaw.split(/(?<!\\)\|/);
+  const chooseKeyList: Array<string> = [];
+  const chooseValueList: Array<string> = [];
+  for (const e of chooseList) {
+    chooseKeyList.push(e.split(/(?<!\\):/)[0] ?? '');
+    chooseValueList.push(e.split(/(?<!\\):/)[1] ?? '');
+  }
+  const parsedChooseList = chooseValueList.map((e) => {
+    if (e.match(/\./)) {
+      return assetSetter(e, fileType.scene);
+    } else {
+      return e;
+    }
+  });
+  let ret = '';
+  for (let i = 0; i < chooseKeyList.length; i++) {
+    if (i !== 0) {
+      ret = ret + '|';
+    }
+    ret = ret + `${chooseKeyList[i]}:${parsedChooseList[i]}`;
+  }
+  return ret;
+}
+
+export const createAssetsPrefetcherPlugin = (assetsPrefetcher: AssetsPrefetcher): ParserPlugin => {
+  const _assetsPrefetcher = assetsPrefetcher;
+  return (input: ArticleWithCommandCode & ArticleWithAssets<IAsset>) => {
+    if (input.assets) {
+      _assetsPrefetcher(input.assets);
+    }
+    return input;
+  };
+};
+
+export const createAssetSetterPlugin = (assetSetter: AssetSetter): ParserPlugin => {
+  const _assetSetter = assetSetter;
+  return (input: ArticleWithCommandCode & ArticleWithAssets<IAsset>) => ({
+    ...input,
+    sections: input.sections.map((section) => {
+      let body = '';
+      switch (section.header) {
+        case 'playEffect': {
+          body = _assetSetter(section.body, fileType.vocal);
+          break;
+        }
+        case 'changeBg': {
+          body = _assetSetter(section.body, fileType.background);
+          break;
+        }
+        case 'changeFigure': {
+          body = _assetSetter(section.body, fileType.figure);
+          break;
+        }
+        case 'bgm': {
+          body = _assetSetter(section.body, fileType.bgm);
+          break;
+        }
+        case 'callScene': {
+          body = _assetSetter(section.body, fileType.scene);
+          break;
+        }
+        case 'changeScene': {
+          body = _assetSetter(section.body, fileType.scene);
+          break;
+        }
+        case 'miniAvatar': {
+          body = _assetSetter(section.body, fileType.figure);
+          break;
+        }
+        case 'video': {
+          body = _assetSetter(section.body, fileType.video);
+          break;
+        }
+        case 'choose': {
+          body = getChooseContent(section.body, _assetSetter);
+          break;
+        }
+        case 'unlockBgm': {
+          body = _assetSetter(section.body, fileType.bgm);
+          break;
+        }
+        case 'unlockCg': {
+          body = _assetSetter(section.body, fileType.background);
+          break;
+        }
+        default: {
+          body = section.body;
+          break;
+        }
+      }
+      return {
+        ...section,
+        body: body,
+        attributes: section.attributes.map((attribute) => {
+          if (attribute.value === true) {
+            if (attribute.key.toLowerCase().match(/\.(ogg|mp3|wav)$/)) {
+              return {
+                key: 'vocal',
+                value: _assetSetter(attribute.key, fileType.vocal),
+              };
+            }
+          }
+          switch (attribute.key.toLowerCase()) {
+            case 'vocal': {
+              return {
+                key: 'vocal',
+                value: _assetSetter(attribute.value.toString(), fileType.vocal),
+              };
+            }
+            default: {
+              break;
+            }
+          }
+          return attribute;
+        }),
+      };
+    }),
+  });
+};
+
+export const createCompatPlugin = (options: {
+  assetsPrefetcher: AssetsPrefetcher;
+  assetSetter: AssetSetter;
+  addNextArgList: CommandList;
+  scriptConfigMap: ConfigMap;
+}): ParserPlugin => {
+  const _compatPluginPipe = pipe(
+    plugins.trimPlugin,
+    plugins.attributePlugin,
+    createScriptPlugin(options.scriptConfigMap),
+    createAddNextArgPlugin(options.addNextArgList),
+    // todo
+    createAssetSetterPlugin(options.assetSetter),
+    createAssetsPrefetcherPlugin(options.assetsPrefetcher)
+  );
+  return (input) => {
+    return _compatPluginPipe(input);
+  };
+};

@@ -15,7 +15,7 @@ export const trimPlugin: ParserPlugin = (input) => ({
 });
 
 export const createDequotationPlugin = (quotations: Array<[string, string]>): ParserPlugin => {
-  const removeQuotation = (str: string) => {
+  const _removeQuotation = (str: string) => {
     for (const [quotationStart, quotationEnd] of quotations) {
       if (str.startsWith(quotationStart) && str.endsWith(quotationEnd)) {
         return str.slice(quotationStart.length, -quotationEnd.length);
@@ -27,11 +27,11 @@ export const createDequotationPlugin = (quotations: Array<[string, string]>): Pa
     ...input,
     sections: input.sections.map((section) => ({
       ...section,
-      header: removeQuotation(section.header),
-      body: removeQuotation(section.body),
+      header: _removeQuotation(section.header),
+      body: _removeQuotation(section.body),
       attributes: section.attributes.map((attribute) => ({
-        key: removeQuotation(attribute.key),
-        value: typeof attribute.value === 'string' ? removeQuotation(attribute.value) : attribute.value,
+        key: _removeQuotation(attribute.key),
+        value: typeof attribute.value === 'string' ? _removeQuotation(attribute.value) : attribute.value,
       })),
     })),
   });
@@ -55,11 +55,10 @@ export const attributePlugin: ParserPlugin = (input) => ({
 });
 
 export interface ArticleWithAssets<T> extends Article {
-  // todo
   sections: Array<SectionWithAssets<T>>;
   assets?: Array<T>;
 }
 
-interface SectionWithAssets<T> extends Section {
+export interface SectionWithAssets<T> extends Section {
   assets?: Array<T>;
 }

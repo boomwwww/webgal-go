@@ -1,24 +1,32 @@
-import { fileType } from './config';
-import type { ConfigMap, ConfigItem, IAsset, WebgalConfig, IWebGALStyleObj } from './config';
-import { scss2cssinjsParser } from './utils';
-import { createParserFactory, type Parser } from '@/lib';
-import { Article, type ParserConfig } from '@/lib/config';
+import { type ParserConfig } from '@/lib/config';
+import { type Parser, createParserFactory } from '@/lib/parser';
 
-import { ADD_NEXT_ARG_LIST, SCRIPT_CONFIG, compatParserConfig } from './config';
-import { sceneTextPreProcess, getCompatScene, createCompatPlugin, configParse } from './utils';
+import type { AssetsPrefetcher, AssetSetter } from './config';
+import type { CommandList, ConfigItem, ConfigMap } from './config';
+import type { WebgalConfig } from './config';
+import type { IWebGALStyleObj } from './config';
+
+import { scss2cssinjsParser } from './utils';
+
+import { compatParserConfig } from './config';
+import { getCompatScene, parseTheConfig } from './utils';
+import { createCompatPlugin } from './plugins';
+
+import { ADD_NEXT_ARG_LIST, SCRIPT_CONFIG } from './config';
+import { sceneTextPreProcess } from './utils';
 
 export class SceneParser {
-  private readonly assetsPrefetcher: (assetList: IAsset[]) => void;
-  private readonly assetSetter: (fileName: string, assetType: fileType) => string;
-  private readonly ADD_NEXT_ARG_LIST: number[];
+  private readonly assetsPrefetcher: AssetsPrefetcher;
+  private readonly assetSetter: AssetSetter;
+  private readonly ADD_NEXT_ARG_LIST: CommandList;
   private readonly SCRIPT_CONFIG_MAP: ConfigMap;
   private readonly parser: Parser;
   constructor(
-    assetsPrefetcher: (assetList: IAsset[]) => void,
-    assetSetter: (fileName: string, assetType: fileType) => string,
-    ADD_NEXT_ARG_LIST: number[],
+    assetsPrefetcher: AssetsPrefetcher,
+    assetSetter: AssetSetter,
+    ADD_NEXT_ARG_LIST: CommandList,
     SCRIPT_CONFIG_INPUT: ConfigItem[] | ConfigMap,
-    preParserConfig?: ParserConfig
+    parserConfig?: ParserConfig
   ) {
     this.assetsPrefetcher = assetsPrefetcher;
 
@@ -35,9 +43,7 @@ export class SceneParser {
       this.SCRIPT_CONFIG_MAP = SCRIPT_CONFIG_INPUT;
     }
 
-    const parserFactory = createParserFactory();
-    if (preParserConfig) parserFactory.setConfig(preParserConfig);
-    else parserFactory.setConfig(compatParserConfig);
+    const parserFactory = createParserFactory(parserConfig ?? compatParserConfig);
     parserFactory.use(
       createCompatPlugin({
         assetsPrefetcher: this.assetsPrefetcher,
@@ -65,29 +71,8 @@ export class SceneParser {
   }
 
   parseConfig(configText: string): WebgalConfig {
-    // let config = this.parser.preParse({
-    //   str: configText,
-    //   name: '@config',
-    //   url: '@config',
-    // });
-    const configPreParsed = this.parser.preParse(configText);
-
-    const configArticle: Article = {
-      name: '@config',
-      url: '@config',
-      sections: configPreParsed,
-      raw: configText,
-    };
-    const configParsed = configParse(configArticle);
     // todo
-    return configParsed.sections.map((section) => ({
-      command: section.header,
-      args: section.body
-        .split('|')
-        .map((arg) => arg.trim())
-        .filter((arg) => arg !== ''),
-      options: section.attributes,
-    }));
+    return parseTheConfig(configText, this.parser);
   }
 
   stringifyConfig(config: WebgalConfig) {

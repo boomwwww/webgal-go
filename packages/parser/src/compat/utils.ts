@@ -1,8 +1,7 @@
-import { commandType, fileType, type IScene, type ConfigMap, type IAsset } from './config';
 import type { Article } from '@/lib/config';
-import { plugins } from '@/lib';
-import type { ParserPlugin } from '@/lib/parser';
-import { pipe } from '@/lib/utils';
+import type { Parser } from '@/lib/parser';
+import type { IScene } from './config';
+import { commandType } from './config';
 
 /**
  * Preprocessor for scene text.
@@ -296,25 +295,32 @@ export const getCompatScene = (input: Article): IScene => ({
   subSceneList: [],
 });
 
-export const createCompatPlugin = (options: {
-  assetsPrefetcher: (assetList: IAsset[]) => void;
-  assetSetter: (fileName: string, assetType: fileType) => string;
-  addNextArgList: commandType[];
-  scriptConfigMap: ConfigMap;
-}): ParserPlugin => {
-  const compatPluginPipe = pipe(
-    plugins.trimPlugin,
-    plugins.attributePlugin,
-    plugins.createAddNextArgPlugin(options.addNextArgList),
-    // todo
-    plugins.createAssetSetterPlugin(options.assetSetter, fileType as unknown as { [key: string]: number }),
-    plugins.createAssetsPrefetcherPlugin(options.assetsPrefetcher)
-  );
-  return (input) => {
-    return compatPluginPipe(input);
-  };
-};
-
 export const configParse = (configArticle: Article) => {
   return configArticle;
+};
+
+export const parseTheConfig = (configText: string, parser: Parser) => {
+  // let config = this.parser.preParse({
+  //   str: configText,
+  //   name: '@config',
+  //   url: '@config',
+  // });
+  const configPreParsed = parser.preParse(configText);
+
+  const configArticle: Article = {
+    name: '@config',
+    url: '@config',
+    sections: configPreParsed,
+    raw: configText,
+  };
+  const configParsed = configParse(configArticle);
+  // todo
+  return configParsed.sections.map((section) => ({
+    command: section.header,
+    args: section.body
+      .split('|')
+      .map((arg) => arg.trim())
+      .filter((arg) => arg !== ''),
+    options: section.attributes,
+  }));
 };
