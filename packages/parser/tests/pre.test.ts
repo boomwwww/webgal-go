@@ -1,8 +1,8 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { createPreParser } from '../src/lib/pre';
-import { compatiblePreParserConfig } from '../src/lib/config';
-import type { PreParserConfig } from '../src/lib/config';
+import { compatibleParserConfig } from '../src/lib/config';
+import type { ParserConfig } from '../src/lib/config';
 
 describe('PreParser', () => {
   const test1Txt = fs.readFileSync(path.join(__dirname, './scene/test1.txt'), 'utf-8');
@@ -73,7 +73,7 @@ describe('PreParser', () => {
   });
 
   it('should handle multi-character separators', () => {
-    const config: PreParserConfig = {
+    const config: ParserConfig = {
       separators: {
         bodyStart: ['==>'],
         attributeStart: ['|>>'],
@@ -99,7 +99,7 @@ describe('PreParser', () => {
   });
 
   it('should handle custom escape configs', () => {
-    const config: PreParserConfig = {
+    const config: ParserConfig = {
       escapeConfigs: [
         {
           key: '&lt;',
@@ -246,8 +246,8 @@ describe('PreParser', () => {
     ]);
   });
 
-  it('test compatiblePreParserConfig', () => {
-    const compatParser = createPreParser(compatiblePreParserConfig);
+  it('test compatibleParserConfig', () => {
+    const compatParser = createPreParser(compatibleParserConfig);
     const input = 'WebGAL: 你好！\n你好';
     expect(compatParser.parse(input)).toEqual([
       {

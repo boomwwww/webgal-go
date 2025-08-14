@@ -1,9 +1,10 @@
 import { commandType } from '@/compat/config';
-import { Article, Section, ParserPlugin } from './config';
+import type { Article, Section } from './config';
+import type { ParserPlugin } from './parser';
 
 export const trimPlugin: ParserPlugin = (input) => ({
   ...input,
-  sectionList: input.sectionList.map((section) => ({
+  sections: input.sections.map((section) => ({
     ...section,
     header: section.header.trim(),
     body: section.body.trim(),
@@ -25,7 +26,7 @@ export const createDequotationPlugin = (quotations: Array<[string, string]>): Pa
   };
   return (input) => ({
     ...input,
-    sectionList: input.sectionList.map((section) => ({
+    sections: input.sections.map((section) => ({
       ...section,
       header: removeQuotation(section.header),
       body: removeQuotation(section.body),
@@ -39,7 +40,7 @@ export const createDequotationPlugin = (quotations: Array<[string, string]>): Pa
 
 export const attributePlugin: ParserPlugin = (input) => ({
   ...input,
-  sectionList: input.sectionList.map((section) => ({
+  sections: input.sections.map((section) => ({
     ...section,
     attributes: section.attributes.map((attribute) => ({
       key: attribute.key,
@@ -55,12 +56,12 @@ export const attributePlugin: ParserPlugin = (input) => ({
 });
 
 interface ArticleWithAssets<T> extends Article {
-  sectionList: Array<SectionWithAssets<T>>;
-  assetList?: Array<T>;
+  sections: Array<SectionWithAssets<T>>;
+  assets?: Array<T>;
 }
 
 interface SectionWithAssets<T> extends Section {
-  assetList?: Array<T>;
+  assets?: Array<T>;
 }
 
 function getChooseContent<T extends { [key: string]: number }>(
@@ -99,7 +100,7 @@ export const createAssetSetterPlugin = <T extends { [key: string]: number }>(
 ): ParserPlugin => {
   return (input) => ({
     ...input,
-    sectionList: input.sectionList.map((section) => {
+    sections: input.sections.map((section) => {
       let body = '';
       switch (section.header) {
         case 'playEffect': {
@@ -181,10 +182,10 @@ export const createAssetSetterPlugin = <T extends { [key: string]: number }>(
   });
 };
 
-export const createAssetsPrefetcherPlugin = <T>(assetsPrefetcher: (assetList: Array<T>) => void): ParserPlugin => {
+export const createAssetsPrefetcherPlugin = <T>(assetsPrefetcher: (assets: Array<T>) => void): ParserPlugin => {
   return (input: ArticleWithAssets<T>) => {
-    if (input.assetList) {
-      assetsPrefetcher(input.assetList);
+    if (input.assets) {
+      assetsPrefetcher(input.assets);
     }
     return input;
   };
@@ -194,7 +195,7 @@ export const createAssetsPrefetcherPlugin = <T>(assetsPrefetcher: (assetList: Ar
 export const createAddNextArgPlugin = (addNextArgList: Array<commandType>): ParserPlugin => {
   return (input) => ({
     ...input,
-    sectionList: input.sectionList.map((section) => {
+    sections: input.sections.map((section) => {
       let commandCode = 0;
       while (true) {
         if (commandType[commandCode] === section.header) {
@@ -223,7 +224,7 @@ export const createScriptPlugin = (
 ): ParserPlugin => {
   return (input) => ({
     ...input,
-    sectionList: input.sectionList.map((section) => {
+    sections: input.sections.map((section) => {
       return section;
     }),
   });

@@ -1,6 +1,22 @@
-import type { PreParser, PreParserConfig, CompletePreParserConfig, Section } from './config';
-import { defaultPreParserConfig } from './config';
+import type { Section, ParserConfig, CompleteParserConfig } from './config';
+import { getCompleteConfig } from './config';
 import { getPositionByIndex } from './utils';
+
+/** 预解析器 */
+export type PreParser = {
+  parse: (str: string) => Array<Section>;
+  stringify: (input: Array<Section>, options?: { raw: boolean }) => string;
+};
+
+/** 解析上下文 */
+type Context = {
+  raw: string; // 原始字符串
+  state: State; // 当前状态
+  p: number; // 当前指针位置
+  sections: Array<Section>; // 结果数组
+  current: Current; // 当前语句的临时数据
+  config: CompleteParserConfig; // 配置
+};
 
 /** 状态 */
 type State = 'header' | 'body' | 'attributeKey' | 'attributeValue' | 'comment';
@@ -14,26 +30,15 @@ type Current = Record<State, string> & {
   startIndex: number; // 语句起始索引
 };
 
-/** 解析上下文 */
-type Context = {
-  raw: string; // 原始字符串
-  state: State; // 当前状态
-  p: number; // 当前指针位置
-  rest: string; // 剩余字符串
-  sections: Array<Section>; // 结果数组
-  current: Current; // 当前语句的临时数据
-  config: CompletePreParserConfig; // 配置
-};
-
 /** Create a pre parser */
-export const createPreParser = (preParserConfig?: PreParserConfig): PreParser => {
-  const config = getMergedConfig(preParserConfig);
+export const createPreParser = (parserConfig?: ParserConfig): PreParser => {
+  const _parserConfig = getCompleteConfig(parserConfig);
+
   return {
     parse: (str) => {
-      const ctx = createContext(str, config); // 初始化上下文
+      const ctx = createContext(str, _parserConfig); // 初始化上下文
       while (ctx.p < ctx.raw.length) {
         stateHandlers[ctx.state](ctx); // 主循环：根据当前状态调用对应处理函数，直到指针结束
-        ctx.rest = ctx.raw.slice(ctx.p);
       }
       if (ctx.current.str !== '') {
         ctx.current.attributeKey !== '' && pushCurrentAttribute(ctx);
@@ -41,33 +46,18 @@ export const createPreParser = (preParserConfig?: PreParserConfig): PreParser =>
       }
       return ctx.sections;
     },
-    stringify: (input, options = { raw: false }): string => {
-      if (options.raw) return input.map((section) => section.raw).join('');
-      return input.map((section) => section.str).join('');
+
+    stringify: (sections, options = { raw: false }): string => {
+      return sections.map((section) => section[options.raw ? 'raw' : 'str']).join('');
     },
   };
 };
 
-/** 合并用户配置与默认配置 */
-const getMergedConfig = (userConfig?: PreParserConfig): CompletePreParserConfig => ({
-  separators: {
-    ...defaultPreParserConfig.separators,
-    ...userConfig?.separators,
-  },
-  escapeConfigs: [
-    ...(userConfig?.escapeConfigs || []),
-    ...defaultPreParserConfig.escapeConfigs.filter(
-      (defCfg) => !userConfig?.escapeConfigs?.some((usrCfg) => usrCfg.key === defCfg.key)
-    ),
-  ],
-});
-
-/** 新建上下文对象 */
-const createContext = (str: string, config: CompletePreParserConfig): Context => ({
+/** 辅助函数：新建上下文对象 */
+const createContext = (str: string, parserConfig: CompleteParserConfig): Context => ({
   raw: str,
   state: 'header',
   p: 0,
-  rest: str,
   sections: [],
   current: {
     header: '',
@@ -81,7 +71,7 @@ const createContext = (str: string, config: CompletePreParserConfig): Context =>
     raw: '',
     startIndex: 0,
   },
-  config: config,
+  config: parserConfig,
 });
 
 /** 辅助函数：添加值到当前语句 */
@@ -141,7 +131,7 @@ const pushCurrentSection = (ctx: Context): void => {
 /** 辅助函数，尝试处理转义 */
 const unescape = (ctx: Context): boolean => {
   const { escapeConfigs } = ctx.config;
-  const matchedEscapeConfig = escapeConfigs.find((cfg) => ctx.rest.startsWith(cfg.key));
+  const matchedEscapeConfig = escapeConfigs.find((cfg) => ctx.raw.startsWith(cfg.key, ctx.p));
   if (!matchedEscapeConfig) return false;
   const { value, rawValue } = matchedEscapeConfig.handle(ctx.raw, ctx.p);
   pushValue(ctx, value, rawValue);
@@ -151,7 +141,7 @@ const unescape = (ctx: Context): boolean => {
 /** 辅助函数：尝试进入body状态 */
 const enterBody = (ctx: Context): boolean => {
   const { bodyStart } = ctx.config.separators;
-  const matchedBodyStart = bodyStart.find((sep) => ctx.rest.startsWith(sep));
+  const matchedBodyStart = bodyStart.find((sep) => ctx.raw.startsWith(sep, ctx.p));
   if (!matchedBodyStart) return false;
   pushSeparator(ctx, matchedBodyStart);
   ctx.state = 'body';
@@ -161,7 +151,7 @@ const enterBody = (ctx: Context): boolean => {
 /** 辅助函数：尝试进入attributeKey状态 */
 const enterAttributeKey = (ctx: Context): boolean => {
   const { attributeStart } = ctx.config.separators;
-  const matchedAttributeStart = attributeStart.find((sep) => ctx.rest.startsWith(sep));
+  const matchedAttributeStart = attributeStart.find((sep) => ctx.raw.startsWith(sep, ctx.p));
   if (!matchedAttributeStart) return false;
   (ctx.state === 'attributeKey' || ctx.state === 'attributeValue') && pushCurrentAttribute(ctx);
   pushSeparator(ctx, matchedAttributeStart);
@@ -172,7 +162,7 @@ const enterAttributeKey = (ctx: Context): boolean => {
 /** 辅助函数：尝试进入attributeValue状态 */
 const enterAttributeValue = (ctx: Context): boolean => {
   const { attributeKeyValue } = ctx.config.separators;
-  const matchedAttributeKeyValue = attributeKeyValue.find((sep) => ctx.rest.startsWith(sep));
+  const matchedAttributeKeyValue = attributeKeyValue.find((sep) => ctx.raw.startsWith(sep, ctx.p));
   if (!matchedAttributeKeyValue) return false;
   pushSeparator(ctx, matchedAttributeKeyValue);
   ctx.state = 'attributeValue';
@@ -182,7 +172,7 @@ const enterAttributeValue = (ctx: Context): boolean => {
 /** 辅助函数，尝试进入comment状态 */
 const enterComment = (ctx: Context): boolean => {
   const { commentSeparators } = ctx.config.separators;
-  const matchedCommentStart = commentSeparators.find((sep) => ctx.rest.startsWith(sep.start))?.start;
+  const matchedCommentStart = commentSeparators.find((sep) => ctx.raw.startsWith(sep.start, ctx.p))?.start;
   if (!matchedCommentStart) return false;
   ctx.current.commentStart = matchedCommentStart;
   (ctx.state === 'attributeKey' || ctx.state === 'attributeValue') && pushCurrentAttribute(ctx);
@@ -195,7 +185,7 @@ const enterComment = (ctx: Context): boolean => {
 const exitComment = (ctx: Context): boolean => {
   const { commentSeparators } = ctx.config.separators;
   const commentEndSeparators = commentSeparators.find((sep) => sep.start === ctx.current.commentStart);
-  const matchedCommentEnd = commentEndSeparators?.end.find((sep) => ctx.rest.startsWith(sep));
+  const matchedCommentEnd = commentEndSeparators?.end.find((sep) => ctx.raw.startsWith(sep, ctx.p));
   if (!matchedCommentEnd) return false;
   ctx.current.commentStart = '';
   pushSeparator(ctx, matchedCommentEnd);
@@ -207,7 +197,7 @@ const exitComment = (ctx: Context): boolean => {
 /** 辅助函数：尝试退出当前语句 */
 const exitSection = (ctx: Context): boolean => {
   const { sectionEnd } = ctx.config.separators;
-  const matchedSectionEnd = sectionEnd.find((sep) => ctx.rest.startsWith(sep));
+  const matchedSectionEnd = sectionEnd.find((sep) => ctx.raw.startsWith(sep, ctx.p));
   if (!matchedSectionEnd) return false;
   (ctx.state === 'attributeKey' || ctx.state === 'attributeValue') && pushCurrentAttribute(ctx);
   pushSeparator(ctx, matchedSectionEnd);
@@ -218,7 +208,7 @@ const exitSection = (ctx: Context): boolean => {
 
 /** 辅助函数：添加单个字符到当前语句 */
 const pushChar = (ctx: Context): boolean => {
-  pushValue(ctx, ctx.rest[0]);
+  pushValue(ctx, ctx.raw[ctx.p]);
   return true;
 };
 

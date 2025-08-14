@@ -2,7 +2,7 @@
 export interface Article {
   name: string; // 文章名
   url: string; // 文章url
-  sectionList: Array<Section>; // 语句列表
+  sections: Array<Section>; // 语句列表
   readonly raw: string; // 原始文章字符串
 }
 
@@ -20,38 +20,32 @@ export interface Section {
   position: { index: number; line: number; column: number }; // 语句起始位置在整个字符串中的索引
 }
 
-/** 预解析器 */
-export interface PreParser {
-  parse: (str: string) => Array<Section>;
-  stringify: (input: Array<Section>, options?: { raw: boolean }) => string;
-}
-
-/** 预解析器配置 */
-export interface PreParserConfig {
+/** 解析器配置 */
+export type ParserConfig = {
   separators?: SeparatorConfig; // 分隔符配置
   escapeConfigs?: Array<EscapeConfig>; // 转义规则配置
-}
+};
 
-/** 完整的预解析器配置 */
-export interface CompletePreParserConfig {
+/** 完整的解析器配置 */
+export type CompleteParserConfig = {
   separators: Required<SeparatorConfig>;
   escapeConfigs: Array<EscapeConfig>;
-}
+};
 
 /** 分隔符配置 */
-interface SeparatorConfig {
+type SeparatorConfig = {
   bodyStart?: Array<string>; // 用于分隔header和body的字符（如':'）
   attributeStart?: Array<string>; // 用于开始新属性的字符（如' -'）
   attributeKeyValue?: Array<string>; // 用于分隔属性键值的字符（如'='）
   commentSeparators?: Array<{ start: string; end: Array<string> }>; // 用于分隔注释的分隔符（如';'）
   sectionEnd?: Array<string>; // 用于结束section的分隔符（如'\n'）
-}
+};
 
 /**  转义配置 */
-interface EscapeConfig {
+type EscapeConfig = {
   key: string; // 字符如果匹配，则让handler处理
   handle: (str: string, index: number) => { value: string; rawValue: string };
-}
+};
 
 const handleEscapeU = (str: string, index: number) => {
   // 验证索引有效性
@@ -183,7 +177,7 @@ export const defaultEscapeConfigs: Array<EscapeConfig> = [
 ];
 
 // 默认解析器配置
-export const defaultPreParserConfig: CompletePreParserConfig = {
+export const defaultParserConfig: CompleteParserConfig = {
   separators: {
     bodyStart: [':'],
     attributeStart: [' -'],
@@ -194,7 +188,7 @@ export const defaultPreParserConfig: CompletePreParserConfig = {
   escapeConfigs: defaultEscapeConfigs,
 };
 
-export const compatiblePreParserConfig: CompletePreParserConfig = {
+export const compatibleParserConfig: CompleteParserConfig = {
   separators: {
     bodyStart: [':'],
     attributeStart: [' -'],
@@ -205,4 +199,16 @@ export const compatiblePreParserConfig: CompletePreParserConfig = {
   escapeConfigs: defaultEscapeConfigs,
 };
 
-export type ParserPlugin = (input: Article) => Article;
+/** 合并用户配置与默认配置 */
+export const getCompleteConfig = (parserConfig?: ParserConfig): CompleteParserConfig => ({
+  separators: {
+    ...defaultParserConfig.separators,
+    ...parserConfig?.separators,
+  },
+  escapeConfigs: [
+    ...(parserConfig?.escapeConfigs || []),
+    ...defaultParserConfig.escapeConfigs.filter(
+      (defCfg) => !parserConfig?.escapeConfigs?.some((cfg) => cfg.key === defCfg.key)
+    ),
+  ],
+});
