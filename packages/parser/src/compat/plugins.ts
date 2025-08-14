@@ -1,12 +1,29 @@
-import type { Article, Section } from '@/lib/config';
+import type { ArticleWithAssets, SectionWithAssets } from '@/lib/config';
 import { concat, pipe } from '@/lib/utils';
 import type { PreParser } from '@/lib/pre';
 import type { ParserPlugin } from '@/lib/parser';
-import type { ArticleWithAssets, SectionWithAssets } from '@/lib/plugins';
 import * as plugins from '@/lib/plugins';
 import { type IAsset, fileType, type AssetsPrefetcher, type AssetSetter } from './config';
 import type { CommandList, ConfigMap } from './config';
 import { commandType } from './config';
+
+export const commentPlugin: ParserPlugin = (input) => ({
+  ...input,
+  sections: input.sections.map((section) => {
+    if (section.header === '' && section.body !== undefined) return section;
+    return {
+      ...section,
+      header: 'comment',
+      body: section.comment,
+      attributes: [
+        {
+          key: 'next',
+          value: true,
+        },
+      ],
+    };
+  }),
+});
 
 export const undefinedPlugin: ParserPlugin = (input) => ({
   ...input,
@@ -16,54 +33,41 @@ export const undefinedPlugin: ParserPlugin = (input) => ({
     body: concat(section.body),
     attributes: section.attributes.map((attribute) => ({
       key: concat(attribute.key),
-      value: attribute.value === undefined ? '' : attribute.value,
+      value: attribute.value === undefined ? true : attribute.value,
     })),
     comment: concat(section.comment),
   })),
 });
 
-interface ArticleWithCommandCode extends Article {
-  sections: Array<SectionWithCommandCode>;
+export interface CompatArticle extends ArticleWithAssets<IAsset> {
+  sections: Array<CompatSection>;
 }
 
-interface SectionWithCommandCode extends Section {
+export interface CompatSection extends SectionWithAssets<IAsset> {
   commandCode?: number;
 }
 
-export type CompatArticle = ArticleWithCommandCode & ArticleWithAssets<IAsset>;
-
-export type CompatSection = SectionWithCommandCode & SectionWithAssets<IAsset>;
-
 // todo
-export const createScriptPlugin = (scriptConfigMap: ConfigMap): ParserPlugin => {
+export const createCommandCodePlugin = (scriptConfigMap: ConfigMap): ParserPlugin => {
   const _scriptConfigMap = scriptConfigMap;
-  return (input): ArticleWithCommandCode => ({
+  return (input): CompatArticle => ({
     ...input,
     sections: input.sections.map((section) => {
-      return section;
+      return {
+        ...section,
+        commandCode: _scriptConfigMap.get(concat(section.header))?.scriptType ?? commandType.say,
+      };
     }),
   });
 };
 
-// todo
 export const createAddNextArgPlugin = (addNextArgList: CommandList): ParserPlugin => {
-  return (input) => ({
+  return (input: CompatArticle) => ({
     ...input,
     sections: input.sections.map((section) => {
-      let commandCode = 0;
-      while (true) {
-        if (commandType[commandCode] === section.header) {
-          break;
-        }
-        if (commandType[commandCode] === undefined) {
-          commandCode = 0;
-          break;
-        }
-        commandCode++;
-      }
-      if (addNextArgList.includes(commandCode)) {
+      if (addNextArgList.includes(section.commandCode!)) {
         section.attributes.push({
-          key: 'addNext',
+          key: 'next',
           value: true,
         });
       }
@@ -72,7 +76,7 @@ export const createAddNextArgPlugin = (addNextArgList: CommandList): ParserPlugi
   });
 };
 
-function getChooseContent(contentRaw: string, assetSetter: AssetSetter): string {
+const getChooseContent = (contentRaw: string, assetSetter: AssetSetter): string => {
   const chooseList = contentRaw.split(/(?<!\\)\|/);
   const chooseKeyList: Array<string> = [];
   const chooseValueList: Array<string> = [];
@@ -95,71 +99,67 @@ function getChooseContent(contentRaw: string, assetSetter: AssetSetter): string 
     ret = ret + `${chooseKeyList[i]}:${parsedChooseList[i]}`;
   }
   return ret;
-}
+};
 
 export const createAssetsPrefetcherPlugin = (assetsPrefetcher: AssetsPrefetcher): ParserPlugin => {
-  const _assetsPrefetcher = assetsPrefetcher;
   return (input: CompatArticle) => {
-    if (input.assets) {
-      _assetsPrefetcher(input.assets);
-    }
+    if (input.assets) assetsPrefetcher(input.assets);
     return input;
   };
 };
 
 export const createAssetSetterPlugin = (assetSetter: AssetSetter): ParserPlugin => {
-  const _assetSetter = assetSetter;
   return (input: CompatArticle) => ({
     ...input,
     sections: input.sections.map((section) => {
       let body = '';
-      switch (section.header) {
-        case 'playEffect': {
-          body = _assetSetter(String(section.body), fileType.vocal); // todo fix String
+      switch (section.commandCode) {
+        case commandType.playEffect: {
+          body = assetSetter(section.body!, fileType.vocal);
           break;
         }
-        case 'changeBg': {
-          body = _assetSetter(String(section.body), fileType.background);
+        case commandType.changeBg: {
+          body = assetSetter(section.body!, fileType.background);
           break;
         }
-        case 'changeFigure': {
-          body = _assetSetter(String(section.body), fileType.figure);
+        case commandType.changeFigure: {
+          body = assetSetter(section.body!, fileType.figure);
           break;
         }
-        case 'bgm': {
-          body = _assetSetter(String(section.body), fileType.bgm);
+        case commandType.bgm: {
+          body = assetSetter(section.body!, fileType.bgm);
           break;
         }
-        case 'callScene': {
-          body = _assetSetter(String(section.body), fileType.scene);
+        case commandType.callScene: {
+          body = assetSetter(section.body!, fileType.scene);
           break;
         }
-        case 'changeScene': {
-          body = _assetSetter(String(section.body), fileType.scene);
+        case commandType.changeScene: {
+          body = assetSetter(section.body!, fileType.scene);
           break;
         }
-        case 'miniAvatar': {
-          body = _assetSetter(String(section.body), fileType.figure);
+        case commandType.miniAvatar: {
+          body = assetSetter(section.body!, fileType.figure);
           break;
         }
-        case 'video': {
-          body = _assetSetter(String(section.body), fileType.video);
+        case commandType.video: {
+          body = assetSetter(section.body!, fileType.video);
           break;
         }
-        case 'choose': {
-          body = getChooseContent(String(section.body), _assetSetter);
+        case commandType.choose: {
+          body = getChooseContent(section.body!, assetSetter);
           break;
         }
-        case 'unlockBgm': {
-          body = _assetSetter(String(section.body), fileType.bgm);
+        case commandType.unlockBgm: {
+          body = assetSetter(section.body!, fileType.bgm);
           break;
         }
-        case 'unlockCg': {
-          body = _assetSetter(String(section.body), fileType.background);
+        case commandType.unlockCg: {
+          body = assetSetter(section.body!, fileType.background);
           break;
         }
         default: {
-          body = String(section.body);
+          body = section.body!;
           break;
         }
       }
@@ -168,27 +168,11 @@ export const createAssetSetterPlugin = (assetSetter: AssetSetter): ParserPlugin 
         body: body,
         attributes: section.attributes.map((attribute) => {
           if (attribute.value === true) {
-            // todo fix String
-            if (
-              String(attribute.key)
-                .toLowerCase()
-                .match(/\.(ogg|mp3|wav)$/)
-            ) {
+            if (attribute.key!.toLowerCase().match(/\.(ogg|mp3|wav)$/)) {
               return {
                 key: 'vocal',
-                value: _assetSetter(String(attribute.key), fileType.vocal),
+                value: assetSetter(attribute.key!, fileType.vocal),
               };
-            }
-          }
-          switch (String(attribute.key).toLowerCase()) {
-            case 'vocal': {
-              return {
-                key: 'vocal',
-                value: _assetSetter(String(attribute.value).toString(), fileType.vocal),
-              };
-            }
-            default: {
-              break;
             }
           }
           return attribute;
@@ -208,15 +192,13 @@ export const createCompatPlugin = (options: {
   const _compatPluginPipe = pipe(
     plugins.trimPlugin,
     plugins.attributePlugin,
-    plugins.commentPlugin,
+    commentPlugin,
     undefinedPlugin,
-    createScriptPlugin(options.scriptConfigMap),
+    createCommandCodePlugin(options.scriptConfigMap),
     createAddNextArgPlugin(options.addNextArgList),
     // todo
     createAssetSetterPlugin(options.assetSetter),
     createAssetsPrefetcherPlugin(options.assetsPrefetcher)
   );
-  return (input) => {
-    return _compatPluginPipe(input);
-  };
+  return (input) => _compatPluginPipe(input);
 };

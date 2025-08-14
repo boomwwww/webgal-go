@@ -20,6 +20,15 @@ export interface Section {
   position: { index: number; line: number; column: number }; // 语句起始位置在整个字符串中的索引
 }
 
+export interface ArticleWithAssets<T> extends Article {
+  sections: Array<SectionWithAssets<T>>;
+  assets?: Array<T>;
+}
+
+export interface SectionWithAssets<T> extends Section {
+  assets?: Array<T>;
+}
+
 /** 解析器配置 */
 export type ParserConfig = {
   separators?: SeparatorConfig; // 分隔符配置

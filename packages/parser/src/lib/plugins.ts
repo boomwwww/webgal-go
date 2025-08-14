@@ -1,4 +1,3 @@
-import type { Article, Section } from './config';
 import type { ParserPlugin } from './parser';
 
 export const trimPlugin: ParserPlugin = (input) => ({
@@ -57,24 +56,3 @@ export const attributePlugin: ParserPlugin = (input) => ({
     }),
   })),
 });
-
-export const commentPlugin: ParserPlugin = (input) => ({
-  ...input,
-  sections: input.sections.map((section) => {
-    if (section.body !== undefined) return section;
-    return {
-      ...section,
-      header: 'comment',
-      body: section.comment,
-    };
-  }),
-});
-
-export interface ArticleWithAssets<T> extends Article {
-  sections: Array<SectionWithAssets<T>>;
-  assets?: Array<T>;
-}
-
-export interface SectionWithAssets<T> extends Section {
-  assets?: Array<T>;
-}

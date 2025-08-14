@@ -1,8 +1,8 @@
-import type { Article } from '@/lib/config';
 import type { Parser } from '@/lib/parser';
 import { concat } from '@/lib/utils';
 import type { IScene } from './config';
 import { commandType } from './config';
+import { CompatArticle } from './plugins';
 
 /**
  * Preprocessor for scene text.
@@ -267,7 +267,7 @@ function parseCSS(css: string): [Record<string, string>, string] {
   return [result, specialRules.trim()];
 }
 
-export const getCompatScene = (input: Article): IScene => ({
+export const getCompatScene = (input: CompatArticle): IScene => ({
   sceneName: input.name,
   sceneUrl: input.url,
   sentenceList: input.sections.map((section) => {
@@ -281,6 +281,9 @@ export const getCompatScene = (input: Article): IScene => ({
         break;
       }
       commandCode++;
+    }
+    if (section.commandCode !== undefined) {
+      commandCode = section.commandCode;
     }
     return {
       command: commandCode,
@@ -299,7 +302,8 @@ export const getCompatScene = (input: Article): IScene => ({
   subSceneList: [],
 });
 
-export const configParse = (configArticle: Article) => {
+export const configParse = (configArticle: CompatArticle) => {
+  // todo
   return configArticle;
 };
 
@@ -311,7 +315,7 @@ export const parseTheConfig = (configText: string, parser: Parser) => {
   // });
   const configPreParsed = parser.preParse(configText);
 
-  const configArticle: Article = {
+  const configArticle: CompatArticle = {
     name: '@config',
     url: '@config',
     sections: configPreParsed,
