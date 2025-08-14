@@ -1,6 +1,7 @@
 import { commandType, fileType, type IScene, type ConfigMap, type IAsset } from './config';
-import type { Article, ParserPlugin } from '@/lib/config';
+import type { Article } from '@/lib/config';
 import { plugins } from '@/lib';
+import type { ParserPlugin } from '@/lib/parser';
 import { pipe } from '@/lib/utils';
 
 /**
@@ -269,7 +270,7 @@ function parseCSS(css: string): [Record<string, string>, string] {
 export const getCompatScene = (input: Article): IScene => ({
   sceneName: input.name,
   sceneUrl: input.url,
-  sentenceList: input.sectionList.map((section) => {
+  sentenceList: input.sections.map((section) => {
     let commandCode = 0;
     while (true) {
       if (commandType[commandCode] === section.header) {

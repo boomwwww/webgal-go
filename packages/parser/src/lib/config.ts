@@ -33,7 +33,7 @@ export type CompleteParserConfig = {
 };
 
 /** 分隔符配置 */
-type SeparatorConfig = {
+export type SeparatorConfig = {
   bodyStart?: Array<string>; // 用于分隔header和body的字符（如':'）
   attributeStart?: Array<string>; // 用于开始新属性的字符（如' -'）
   attributeKeyValue?: Array<string>; // 用于分隔属性键值的字符（如'='）
@@ -42,7 +42,7 @@ type SeparatorConfig = {
 };
 
 /**  转义配置 */
-type EscapeConfig = {
+export type EscapeConfig = {
   key: string; // 字符如果匹配，则让handler处理
   handle: (str: string, index: number) => { value: string; rawValue: string };
 };
@@ -176,7 +176,7 @@ export const defaultEscapeConfigs: Array<EscapeConfig> = [
   },
 ];
 
-// 默认解析器配置
+/** 默认解析器配置 */
 export const defaultParserConfig: CompleteParserConfig = {
   separators: {
     bodyStart: [':'],
@@ -184,17 +184,6 @@ export const defaultParserConfig: CompleteParserConfig = {
     attributeKeyValue: ['='],
     commentSeparators: [{ start: ';', end: ['\r\n', '\n', '\r'] }],
     sectionEnd: [],
-  },
-  escapeConfigs: defaultEscapeConfigs,
-};
-
-export const compatibleParserConfig: CompleteParserConfig = {
-  separators: {
-    bodyStart: [':'],
-    attributeStart: [' -'],
-    attributeKeyValue: ['='],
-    commentSeparators: [{ start: ';', end: ['\r\n', '\n', '\r'] }],
-    sectionEnd: ['\r\n', '\n', '\r'],
   },
   escapeConfigs: defaultEscapeConfigs,
 };

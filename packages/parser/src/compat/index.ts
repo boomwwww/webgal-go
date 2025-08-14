@@ -2,9 +2,9 @@ import { fileType } from './config';
 import type { ConfigMap, ConfigItem, IAsset, WebgalConfig, IWebGALStyleObj } from './config';
 import { scss2cssinjsParser } from './utils';
 import { createParserFactory, type Parser } from '@/lib';
-import { Article, compatiblePreParserConfig, type PreParserConfig } from '@/lib/config';
+import { Article, type ParserConfig } from '@/lib/config';
 
-import { ADD_NEXT_ARG_LIST, SCRIPT_CONFIG } from './config';
+import { ADD_NEXT_ARG_LIST, SCRIPT_CONFIG, compatParserConfig } from './config';
 import { sceneTextPreProcess, getCompatScene, createCompatPlugin, configParse } from './utils';
 
 export class SceneParser {
@@ -18,7 +18,7 @@ export class SceneParser {
     assetSetter: (fileName: string, assetType: fileType) => string,
     ADD_NEXT_ARG_LIST: number[],
     SCRIPT_CONFIG_INPUT: ConfigItem[] | ConfigMap,
-    preParserConfig?: PreParserConfig
+    preParserConfig?: ParserConfig
   ) {
     this.assetsPrefetcher = assetsPrefetcher;
 
@@ -37,7 +37,7 @@ export class SceneParser {
 
     const parserFactory = createParserFactory();
     if (preParserConfig) parserFactory.setConfig(preParserConfig);
-    else parserFactory.setConfig(compatiblePreParserConfig);
+    else parserFactory.setConfig(compatParserConfig);
     parserFactory.use(
       createCompatPlugin({
         assetsPrefetcher: this.assetsPrefetcher,
@@ -75,12 +75,12 @@ export class SceneParser {
     const configArticle: Article = {
       name: '@config',
       url: '@config',
-      sectionList: configPreParsed,
+      sections: configPreParsed,
       raw: configText,
     };
     const configParsed = configParse(configArticle);
     // todo
-    return configParsed.sectionList.map((section) => ({
+    return configParsed.sections.map((section) => ({
       command: section.header,
       args: section.body
         .split('|')

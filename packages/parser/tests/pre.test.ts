@@ -1,8 +1,8 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { createPreParser } from '../src/lib/pre';
-import { compatibleParserConfig } from '../src/lib/config';
-import type { ParserConfig } from '../src/lib/config';
+import { type ParserConfig } from '@/lib/config';
+import { createPreParser } from '@/lib/pre';
+import { compatParserConfig } from '@/compat/config';
 
 describe('PreParser', () => {
   const test1Txt = fs.readFileSync(path.join(__dirname, './scene/test1.txt'), 'utf-8');
@@ -247,7 +247,7 @@ describe('PreParser', () => {
   });
 
   it('test compatibleParserConfig', () => {
-    const compatParser = createPreParser(compatibleParserConfig);
+    const compatParser = createPreParser(compatParserConfig);
     const input = 'WebGAL: 你好！\n你好';
     expect(compatParser.parse(input)).toEqual([
       {

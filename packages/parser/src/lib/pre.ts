@@ -37,19 +37,21 @@ export const createPreParser = (parserConfig?: ParserConfig): PreParser => {
   return {
     parse: (str) => {
       const ctx = createContext(str, _parserConfig); // 初始化上下文
+
       while (ctx.p < ctx.raw.length) {
         stateHandlers[ctx.state](ctx); // 主循环：根据当前状态调用对应处理函数，直到指针结束
       }
+
       if (ctx.current.str !== '') {
         ctx.current.attributeKey !== '' && pushCurrentAttribute(ctx);
         pushCurrentSection(ctx); // 处理可能遗漏的最后一条语句
       }
+
       return ctx.sections;
     },
 
-    stringify: (sections, options = { raw: false }): string => {
-      return sections.map((section) => section[options.raw ? 'raw' : 'str']).join('');
-    },
+    stringify: (sections, options = { raw: false }): string =>
+      sections.map((section) => section[options.raw ? 'raw' : 'str']).join(''),
   };
 };
 

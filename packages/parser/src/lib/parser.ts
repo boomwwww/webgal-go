@@ -15,7 +15,7 @@ export const createParserFactory = (parserConfig?: ParserConfig) => {
 
   const _plugins: Array<ParserPlugin> = [];
 
-  const parserFactory = {
+  return {
     setConfig: (config?: ParserConfig): void => {
       _parserConfig = config;
     },
@@ -25,36 +25,34 @@ export const createParserFactory = (parserConfig?: ParserConfig) => {
     },
 
     create: (): Parser => {
-      const preParser = createPreParser(_parserConfig);
-      const pluginParse = pipe(..._plugins);
+      const _preParser = createPreParser(_parserConfig);
+
+      const _pluginParse = pipe(..._plugins);
+
       return {
         preParse: (str) => {
-          return preParser.parse(str);
+          return _preParser.parse(str);
         },
 
         parse: (rawArticle) => {
           const { name, url, str } = rawArticle;
-          const initialSections = preParser.parse(str);
+          const initialSections = _preParser.parse(str);
           const initialArticle: Article = {
             name: name,
             url: url,
             sections: initialSections,
             raw: str,
           };
-          return pluginParse(initialArticle);
+          return _pluginParse(initialArticle);
         },
 
-        stringify: (input, options = { raw: false }) => {
-          if (Array.isArray(input)) {
-            return preParser.stringify(input, options);
-          } else {
-            if (options.raw) return input.raw;
-            return preParser.stringify(input.sections, options);
-          }
-        },
+        stringify: (input, options = { raw: false }) =>
+          Array.isArray(input)
+            ? _preParser.stringify(input, options)
+            : options.raw
+            ? input.raw
+            : _preParser.stringify(input.sections, { raw: false }),
       };
     },
   };
-
-  return parserFactory;
 };

@@ -1,3 +1,50 @@
+import { type CompleteParserConfig, defaultEscapeConfigs } from '@/lib/config';
+
+/** 场景接口 */
+export interface IScene {
+  sceneName: string; // 场景名称
+  sceneUrl: string; // 场景url
+  sentenceList: Array<ISentence>; // 语句列表
+  assetsList: Array<IAsset>; // 资源列表
+  subSceneList: Array<string>; // 子场景的url列表
+}
+
+/** 单条语句接口 */
+export interface ISentence {
+  command: commandType; // 语句类型
+  commandRaw: string; // 命令的原始内容，方便调试
+  content: string; // 语句内容
+  args: Array<arg>; // 参数列表
+  sentenceAssets: Array<IAsset>; // 语句携带的资源列表
+  subScene: Array<string>; // 语句包含子场景列表
+}
+
+/** 单个参数接口 */
+export interface arg {
+  key: string; // 参数键
+  value: string | boolean | number; // 参数值
+}
+
+/** 资源接口 */
+export interface IAsset {
+  name: string; // 资源名称
+  type: fileType; // 资源类型
+  url: string; // 资源url
+  lineNumber: number; // 触发资源语句的行号
+}
+
+/** 内置资源类型的枚举 */
+export enum fileType {
+  background,
+  bgm,
+  figure,
+  scene,
+  tex,
+  vocal,
+  video,
+}
+
+/** 语句类型枚举 */
 export enum commandType {
   say, // 对话
   changeBg, // 更改背景
@@ -35,19 +82,7 @@ export enum commandType {
   wait,
 }
 
-/**
- * 内置资源类型的枚举
- */
-export enum fileType {
-  background,
-  bgm,
-  figure,
-  scene,
-  tex,
-  vocal,
-  video,
-}
-
+/** 脚本配置 */
 export const SCRIPT_CONFIG = [
   { scriptString: 'intro', scriptType: commandType.intro },
   { scriptString: 'changeBg', scriptType: commandType.changeBg },
@@ -82,6 +117,7 @@ export const SCRIPT_CONFIG = [
   { scriptString: 'wait', scriptType: commandType.wait },
 ];
 
+/** 添加下一条语句的参数列表 */
 export const ADD_NEXT_ARG_LIST = [
   commandType.bgm,
   commandType.pixi,
@@ -98,17 +134,6 @@ export const ADD_NEXT_ARG_LIST = [
 
 export type ConfigItem = { scriptString: string; scriptType: commandType };
 export type ConfigMap = Map<string, ConfigItem>;
-
-/**
- * 资源接口
- * @interface IAsset
- */
-export interface IAsset {
-  name: string; // 资源名称
-  type: fileType; // 资源类型
-  url: string; // 资源url
-  lineNumber: number; // 触发资源语句的行号
-}
 
 interface IOptionItem {
   key: string;
@@ -127,36 +152,13 @@ export interface IWebGALStyleObj {
   others: string;
 }
 
-/**
- * 单个参数接口
- * @interface arg
- */
-export interface arg {
-  key: string; // 参数键
-  value: string | boolean | number; // 参数值
-}
-
-/**
- * 单条语句接口
- * @interface ISentence
- */
-export interface ISentence {
-  command: commandType; // 语句类型
-  commandRaw: string; // 命令的原始内容，方便调试
-  content: string; // 语句内容
-  args: Array<arg>; // 参数列表
-  sentenceAssets: Array<IAsset>; // 语句携带的资源列表
-  subScene: Array<string>; // 语句包含子场景列表
-}
-
-/**
- * 场景接口
- * @interface IScene
- */
-export interface IScene {
-  sceneName: string; // 场景名称
-  sceneUrl: string; // 场景url
-  sentenceList: Array<ISentence>; // 语句列表
-  assetsList: Array<IAsset>; // 资源列表
-  subSceneList: Array<string>; // 子场景的url列表
-}
+export const compatParserConfig: CompleteParserConfig = {
+  separators: {
+    bodyStart: [':'],
+    attributeStart: [' -'],
+    attributeKeyValue: ['='],
+    commentSeparators: [{ start: ';', end: ['\r\n', '\n', '\r'] }],
+    sectionEnd: ['\r\n', '\n', '\r'],
+  },
+  escapeConfigs: defaultEscapeConfigs,
+};
