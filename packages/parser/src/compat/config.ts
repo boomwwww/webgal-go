@@ -7,7 +7,7 @@ export interface IScene {
   subSceneList: Array<string>; // 子场景的url列表
 }
 
-/** 单条语句接口 */
+/** 语句接口 */
 export interface ISentence {
   command: commandType; // 语句类型
   commandRaw: string; // 命令的原始内容，方便调试
@@ -17,7 +17,7 @@ export interface ISentence {
   subScene: Array<string>; // 语句包含子场景列表
 }
 
-/** 单个参数接口 */
+/** 参数 */
 export interface arg {
   key: string; // 参数键
   value: string | boolean | number; // 参数值
@@ -42,11 +42,13 @@ export enum fileType {
   video,
 }
 
-export type AssetsPrefetcher = (assetList: IAsset[]) => void;
+/** 资源预加载 */
+export type AssetsPrefetcher = (assetList: Array<IAsset>) => void;
 
+/** 资源路径设置 */
 export type AssetSetter = (fileName: string, assetType: fileType) => string;
 
-/** 语句类型枚举 */
+/** 命令类型枚举 */
 export enum commandType {
   say, // 对话
   changeBg, // 更改背景
@@ -55,7 +57,7 @@ export enum commandType {
   video, // 播放视频
   pixi, // pixi演出
   pixiInit, // pixi初始化
-  intro, // 黑屏文字演示
+  intro, // 全屏文字演示
   miniAvatar, // 小头像
   changeScene, // 切换场景
   choose, // 分支选择
@@ -68,26 +70,44 @@ export enum commandType {
   setVar, // 设置变量
   if, // 条件跳转
   callScene, // 调用场景
-  showVars,
-  unlockCg,
-  unlockBgm,
-  filmMode,
-  setTextbox,
-  setAnimation,
-  playEffect,
-  setTempAnimation,
-  comment,
-  setTransform,
-  setTransition,
-  getUserInput,
-  applyStyle,
-  wait,
+  showVars, // 显示变量
+  unlockCg, // 解锁CG
+  unlockBgm, // 解锁BGM
+  filmMode, // 电影模式
+  setTextbox, // 设置文本框
+  setAnimation, // 设置动画
+  playEffect, // 播放特效
+  setTempAnimation, // 临时动画
+  comment, // 注释
+  setTransform, // 设置变换
+  setTransition, // 设置过渡
+  getUserInput, // 获取用户输入
+  applyStyle, // 应用样式
+  wait, // 等待
 }
 
+/** 命令代码列表 */
 export type CommandCodeList = Array<commandType>;
 
+/** 添加 next 参数的命令代码列表 */
+export const ADD_NEXT_ARG_LIST: CommandCodeList = [
+  commandType.bgm,
+  commandType.pixi,
+  commandType.pixiInit,
+  commandType.label,
+  commandType.if,
+  commandType.miniAvatar,
+  commandType.setVar,
+  commandType.unlockBgm,
+  commandType.unlockCg,
+  commandType.filmMode,
+  commandType.playEffect,
+];
+
+/** 配置项 */
 export type ConfigItem = { scriptString: string; scriptType: commandType };
 
+/** 配置项Map */
 export type ConfigMap = Map<string, ConfigItem>;
 
 /** 脚本配置 */
@@ -125,33 +145,23 @@ export const SCRIPT_CONFIG: Array<ConfigItem> = [
   { scriptString: 'wait', scriptType: commandType.wait },
 ];
 
-/** 添加下一条语句的参数列表 */
-export const ADD_NEXT_ARG_LIST: CommandCodeList = [
-  commandType.bgm,
-  commandType.pixi,
-  commandType.pixiInit,
-  commandType.label,
-  commandType.if,
-  commandType.miniAvatar,
-  commandType.setVar,
-  commandType.unlockBgm,
-  commandType.unlockCg,
-  commandType.filmMode,
-  commandType.playEffect,
-];
-
-interface IOptionItem {
+/** WebGAL 配置选项接口 */
+export interface IOptionItem {
   key: string;
   value: string | number | boolean;
 }
-interface IConfigItem {
+
+/** WebGAL 配置项接口 */
+export interface IConfigItem {
   command: string;
-  args: string[];
-  options: IOptionItem[];
+  args: Array<string>;
+  options: Array<IOptionItem>;
 }
 
-export type WebgalConfig = IConfigItem[];
+/** WebGAL 配置 */
+export type WebgalConfig = Array<IConfigItem>;
 
+/** WebGAL 样式对象接口 */
 export interface IWebGALStyleObj {
   classNameStyles: Record<string, string>;
   others: string;
@@ -159,6 +169,7 @@ export interface IWebGALStyleObj {
 
 import { type CompleteParserConfig, defaultEscapeConfigs } from '@/lib/config';
 
+/** 兼容的解析器配置 */
 export const compatParserConfig: CompleteParserConfig = {
   separators: {
     bodyStart: [':'],
@@ -172,12 +183,14 @@ export const compatParserConfig: CompleteParserConfig = {
 
 import type { Article, Section } from '@/lib/config';
 
+/** 兼容的文章 */
 export interface CompatArticle extends Article {
   sections: Array<CompatSection>;
   assets?: Array<IAsset>;
   sub?: Array<string>;
 }
 
+/** 兼容的段落 */
 export interface CompatSection extends Section {
   commandCode?: number;
   assets?: Array<IAsset>;

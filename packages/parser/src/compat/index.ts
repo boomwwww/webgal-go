@@ -1,19 +1,16 @@
-import { type ParserConfig } from '@/lib/config';
-import { type Parser, createParserFactory } from '@/lib/parser';
+import type { Parser, ParserConfig, ParserPlugin } from '@/lib/config';
+import { createParserFactory } from '@/lib/parser';
 
 import type { AssetsPrefetcher, AssetSetter } from './config';
 import type { CommandCodeList, ConfigItem, ConfigMap } from './config';
 import type { WebgalConfig } from './config';
 import type { IWebGALStyleObj } from './config';
 
-import { scss2cssinjsParser } from './utils';
-
 import { compatParserConfig } from './config';
-import { getCompatScene, parseTheConfig } from './utils';
 import { createCompatPlugin } from './plugins';
+import { getCompatScene } from './utils';
 
-import { ADD_NEXT_ARG_LIST, SCRIPT_CONFIG } from './config';
-import { sceneTextPreProcess } from './utils';
+import { parseTheConfig, scss2cssinjsParser } from './utils';
 
 export class SceneParser {
   private readonly assetsPrefetcher: AssetsPrefetcher;
@@ -26,8 +23,8 @@ export class SceneParser {
     assetsPrefetcher: AssetsPrefetcher,
     assetSetter: AssetSetter,
     ADD_NEXT_ARG_LIST: CommandCodeList,
-    SCRIPT_CONFIG_INPUT: ConfigItem[] | ConfigMap,
-    parserConfig?: ParserConfig
+    SCRIPT_CONFIG_INPUT: Array<ConfigItem> | ConfigMap,
+    options?: { config?: ParserConfig; plugins?: Array<ParserPlugin> }
   ) {
     this.assetsPrefetcher = assetsPrefetcher;
 
@@ -44,15 +41,21 @@ export class SceneParser {
       this.SCRIPT_CONFIG_MAP = SCRIPT_CONFIG_INPUT;
     }
 
-    const parserFactory = createParserFactory(parserConfig ?? compatParserConfig);
-    parserFactory.use(
-      createCompatPlugin({
-        assetsPrefetcher: this.assetsPrefetcher,
-        assetSetter: this.assetSetter,
-        addNextArgList: this.ADD_NEXT_ARG_LIST,
-        scriptConfigMap: this.SCRIPT_CONFIG_MAP,
-      })
-    );
+    const parserFactory = createParserFactory(options?.config ?? compatParserConfig);
+    if (options?.plugins !== undefined) {
+      for (const plugin of options.plugins) {
+        parserFactory.use(plugin);
+      }
+    } else {
+      parserFactory.use(
+        createCompatPlugin({
+          assetsPrefetcher: this.assetsPrefetcher,
+          assetSetter: this.assetSetter,
+          addNextArgList: this.ADD_NEXT_ARG_LIST,
+          scriptConfigMap: this.SCRIPT_CONFIG_MAP,
+        })
+      );
+    }
     this.parser = parserFactory.create();
   }
 
@@ -94,5 +97,16 @@ export class SceneParser {
   }
 }
 
-export { ADD_NEXT_ARG_LIST, SCRIPT_CONFIG };
-export { sceneTextPreProcess };
+export { ADD_NEXT_ARG_LIST, SCRIPT_CONFIG } from './config';
+export { sceneTextPreProcess } from './utils';
+
+export type { CompatArticle, CompatSection } from './config';
+export type { IScene, ISentence, arg } from './config';
+export { type IAsset, fileType } from './config';
+export type { AssetsPrefetcher, AssetSetter } from './config';
+export { commandType, type CommandCodeList } from './config';
+export type { ConfigItem, ConfigMap } from './config';
+export type { IOptionItem, IConfigItem, WebgalConfig } from './config';
+export type { IWebGALStyleObj } from './config';
+export { compatParserConfig } from './config';
+export * as compatPlugins from './plugins';

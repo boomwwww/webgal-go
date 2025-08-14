@@ -1,4 +1,4 @@
-import type { Parser } from '@/lib/parser';
+import type { Parser } from '@/lib/config';
 import { concat } from '@/lib/utils';
 import type { IScene, CompatArticle } from './config';
 
@@ -104,7 +104,7 @@ function sceneTextPreProcessPassTwo(lines: string[]): string[] {
   let currentMultilineContent = '';
   let placeHolderLines: string[] = [];
 
-  function concat(line: string) {
+  function _concat(line: string) {
     let trimmed = line.trim();
     if (trimmed.startsWith('-')) {
       trimmed = ' ' + trimmed;
@@ -123,14 +123,14 @@ function sceneTextPreProcessPassTwo(lines: string[]): string[] {
         currentMultilineContent = trueLine;
       } else {
         // middle line
-        concat(trueLine);
+        _concat(trueLine);
       }
       continue;
     }
 
     if (currentMultilineContent !== '') {
       // end line
-      concat(line);
+      _concat(line);
       processedLines.push(currentMultilineContent);
       processedLines.push(...placeHolderLines);
 
@@ -288,6 +288,7 @@ export const configParse = (configArticle: CompatArticle) => {
   return configArticle;
 };
 
+// todo
 export const parseTheConfig = (configText: string, parser: Parser) => {
   // let config = this.parser.preParse({
   //   str: configText,
@@ -315,38 +316,4 @@ export const parseTheConfig = (configText: string, parser: Parser) => {
       value: attribute.value !== undefined ? attribute.value : concat(attribute.value),
     })),
   }));
-};
-
-export const isPrimitive = (value: any) => {
-  return value === null || (typeof value !== 'object' && typeof value !== 'function');
-};
-
-export const equal = (value1: any, value2: any) => {
-  if (isPrimitive(value1) || isPrimitive(value2)) {
-    return Object.is(value1, value2);
-  }
-  const entries1 = Object.entries(value1);
-  const entries2 = Object.entries(value2);
-  if (entries1.length !== entries2.length) {
-    return false;
-  }
-  for (const [key, value] of entries1) {
-    if (!equal(value, value2[key])) {
-      return false;
-    }
-  }
-  return true;
-};
-
-export const unique = <T>(arr: Array<T>): Array<T> => {
-  const _result: Array<T> = [];
-  outer: for (const item of arr) {
-    for (const _r of _result) {
-      if (equal(_r, item)) {
-        continue outer;
-      }
-    }
-    _result.push(item);
-  }
-  return _result;
 };

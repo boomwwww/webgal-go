@@ -2,23 +2,38 @@
 export interface Article {
   name: string; // 文章名
   url: string; // 文章url
-  sections: Array<Section>; // 语句列表
+  sections: Array<Section>; // 段落列表
   readonly raw: string; // 原始文章字符串
 }
 
-/** 语句 */
+/** 段落 */
 export interface Section {
-  header: string | undefined; // 语句头
-  body: string | undefined; // 语句体
+  header: string | undefined; // 段落头
+  body: string | undefined; // 段落体
   attributes: Array<{
     key: string | undefined; // 属性键
     value: string | boolean | number | undefined; // 属性值
   }>;
-  comment: string | undefined; // 语句注释
-  str: string; // 语句字符串(转义后)
-  readonly raw: string; // 语句原始字符串(转义前)
-  readonly position: { index: number; line: number; column: number }; // 语句起始位置在整个字符串中的索引
+  comment: string | undefined; // 段落注释
+  str: string; // 段落字符串(转义后)
+  readonly raw: string; // 段落原始字符串(转义前)
+  readonly position: { index: number; line: number; column: number }; // 段落起始位置在整个字符串中的索引
 }
+
+/** 预解析器 */
+export type PreParser = {
+  parse: (str: string) => Array<Section>;
+  stringify: (input: Array<Section>, options?: { raw: boolean }) => string;
+  config: CompleteParserConfig;
+};
+
+/** 解析器 */
+export type Parser = {
+  preParse: (str: string) => Array<Section>;
+  parse: (rawArticle: { name: string; url: string; str: string }) => Article;
+  stringify: (input: Article | Array<Section>, options?: { raw: boolean }) => string;
+  config: CompleteParserConfig;
+};
 
 /** 解析器配置 */
 export type ParserConfig = {
@@ -31,6 +46,9 @@ export type CompleteParserConfig = {
   separators: Required<SeparatorConfig>;
   escapeConfigs: Array<EscapeConfig>;
 };
+
+/** 解析器插件 */
+export type ParserPlugin = (input: Article) => Article;
 
 /** 分隔符配置 */
 export type SeparatorConfig = {

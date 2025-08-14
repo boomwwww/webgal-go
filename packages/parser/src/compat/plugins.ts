@@ -1,11 +1,9 @@
-import type { CompatArticle } from './config';
-import { concat, pipe } from '@/lib/utils';
-import type { ParserPlugin } from '@/lib/parser';
+import { type ParserPlugin } from '@/lib/config';
+import { concat, pipe, unique } from '@/lib/utils';
 import * as plugins from '@/lib/plugins';
+import { type CompatArticle } from './config';
 import { type IAsset, fileType, type AssetsPrefetcher, type AssetSetter } from './config';
-import type { CommandCodeList, ConfigMap } from './config';
-import { commandType } from './config';
-import { unique } from './utils';
+import { commandType, type CommandCodeList, type ConfigMap } from './config';
 
 export const commentPlugin: ParserPlugin = (input) => ({
   ...input,
@@ -45,7 +43,7 @@ export const createCommandCodePlugin = (scriptConfigMap: ConfigMap): ParserPlugi
     sections: input.sections.map((section) => {
       return {
         ...section,
-        commandCode: scriptConfigMap.get(concat(section.header))?.scriptType ?? commandType.say,
+        commandCode: scriptConfigMap.get(section.header!)?.scriptType ?? commandType.say,
       };
     }),
   });

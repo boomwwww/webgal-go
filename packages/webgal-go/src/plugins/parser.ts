@@ -1,4 +1,4 @@
-import { createParserFactory } from '@webgal-go/parser';
+import { commandType, createParserFactory } from '@webgal-go/parser';
 
 const parserFactory = createParserFactory();
 
@@ -9,4 +9,5 @@ export const parserPlugin = {
     wg.parser = parser;
   },
 };
+export let a: number = commandType.applyStyle;
 parserFactory.use((i) => i);

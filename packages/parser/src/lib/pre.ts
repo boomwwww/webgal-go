@@ -1,35 +1,6 @@
-import type { Section, ParserConfig, CompleteParserConfig } from './config';
+import type { Section, PreParser, ParserConfig, CompleteParserConfig } from './config';
 import { getCompleteConfig } from './config';
 import { concat, getPositionByIndex } from './utils';
-
-/** 预解析器 */
-export type PreParser = {
-  parse: (str: string) => Array<Section>;
-  stringify: (input: Array<Section>, options?: { raw: boolean }) => string;
-  config: CompleteParserConfig;
-};
-
-/** 解析上下文 */
-type Context = {
-  raw: string; // 原始字符串
-  state: State; // 当前状态
-  p: number; // 当前指针位置
-  sections: Array<Section>; // 结果数组
-  current: Current; // 当前语句的临时数据
-  config: CompleteParserConfig; // 配置
-};
-
-/** 状态 */
-type State = 'header' | 'body' | 'attributeKey' | 'attributeValue' | 'comment';
-
-/** 当前语句的临时数据 */
-type Current = Record<State, string | undefined> & {
-  attributes: Array<{ key: string | undefined; value: string | true | undefined }>;
-  commentStart: string;
-  str: string; // 语句字符串(转义后)
-  raw: string; // 语句原始字符串(转义前)
-  startIndex: number; // 语句起始索引
-};
 
 /** Create a pre parser */
 export const createPreParser = (parserConfig?: ParserConfig): PreParser => {
@@ -38,7 +9,7 @@ export const createPreParser = (parserConfig?: ParserConfig): PreParser => {
   return {
     parse: (str) => {
       const ctx = createContext(str, _parserConfig); // 初始化上下文
-      ctx.current.header = ''; // 语句头初始化为字符串
+      ctx.current.header = ''; // 段落头初始化为字符串
 
       while (ctx.p < ctx.raw.length) {
         stateHandlers[ctx.state](ctx); // 主循环：根据当前状态调用对应处理函数，直到指针结束
@@ -46,7 +17,7 @@ export const createPreParser = (parserConfig?: ParserConfig): PreParser => {
 
       if (ctx.current.str !== '') {
         ctx.current.attributeKey && pushCurrentAttribute(ctx);
-        pushCurrentSection(ctx); // 处理可能遗漏的最后一条语句
+        pushCurrentSection(ctx); // 处理可能遗漏的最后一个段落
       }
 
       return ctx.sections;
@@ -58,6 +29,28 @@ export const createPreParser = (parserConfig?: ParserConfig): PreParser => {
 
     config: _parserConfig,
   };
+};
+
+/** 解析上下文 */
+type Context = {
+  raw: string; // 原始字符串
+  state: State; // 当前状态
+  p: number; // 当前指针位置
+  sections: Array<Section>; // 结果数组
+  current: Current; // 当前段落的临时数据
+  config: CompleteParserConfig; // 配置
+};
+
+/** 状态 */
+type State = 'header' | 'body' | 'attributeKey' | 'attributeValue' | 'comment';
+
+/** 当前段落的临时数据 */
+type Current = Record<State, string | undefined> & {
+  attributes: Array<{ key: string | undefined; value: string | true | undefined }>;
+  commentStart: string;
+  str: string; // 段落字符串(转义后)
+  raw: string; // 段落原始字符串(转义前)
+  startIndex: number; // 段落起始索引
 };
 
 /** 辅助函数：新建上下文对象 */
@@ -81,7 +74,7 @@ const createContext = (str: string, parserConfig: CompleteParserConfig): Context
   config: parserConfig,
 });
 
-/** 辅助函数：添加值到当前语句 */
+/** 辅助函数：添加值到当前段落 */
 const pushValue = (ctx: Context, value: string, rawValue?: string): void => {
   const _rawValue = rawValue ?? value;
   ctx.current[ctx.state] = concat(ctx.current[ctx.state], value);
@@ -90,7 +83,7 @@ const pushValue = (ctx: Context, value: string, rawValue?: string): void => {
   ctx.p += _rawValue.length;
 };
 
-/** 辅助函数：添加分隔符到当前语句 */
+/** 辅助函数：添加分隔符到当前段落 */
 const pushSeparator = (ctx: Context, separator: string): void => {
   ctx.current.str = concat(ctx.current.str, separator);
   ctx.current.raw = concat(ctx.current.raw, separator);
@@ -107,7 +100,7 @@ const pushCurrentAttribute = (ctx: Context): void => {
   ctx.current.attributeValue = undefined;
 };
 
-/** 辅助函数：将当前语句推入结果数组并重置当前语句 */
+/** 辅助函数：将当前段落推入结果数组并重置当前段落 */
 const pushCurrentSection = (ctx: Context): void => {
   ctx.sections.push({
     header: ctx.current.header,
@@ -205,7 +198,7 @@ const exitComment = (ctx: Context): boolean => {
   return true;
 };
 
-/** 辅助函数：尝试退出当前语句 */
+/** 辅助函数：尝试退出当前段落 */
 const exitSection = (ctx: Context): boolean => {
   const { sectionEnd } = ctx.config.separators;
   const matchedSectionEnd = sectionEnd.find((sep) => ctx.raw.startsWith(sep, ctx.p));
@@ -218,7 +211,7 @@ const exitSection = (ctx: Context): boolean => {
   return true;
 };
 
-/** 辅助函数：添加单个字符到当前语句 */
+/** 辅助函数：添加单个字符到当前段落 */
 const pushChar = (ctx: Context): boolean => {
   pushValue(ctx, ctx.raw[ctx.p]);
   return true;
