@@ -23,6 +23,22 @@ export interface arg {
   value: string | boolean | number; // 参数值
 }
 
+import type { Article, Section } from '@/lib/config';
+
+/** 兼容的文章 */
+export interface CompatArticle extends Article {
+  sections: Array<CompatSection>;
+  assets?: Array<IAsset>;
+  sub?: Array<string>;
+}
+
+/** 兼容的段落 */
+export interface CompatSection extends Section {
+  commandCode?: number;
+  assets?: Array<IAsset>;
+  sub?: Array<string>;
+}
+
 /** 资源接口 */
 export interface IAsset {
   name: string; // 资源名称
@@ -145,28 +161,6 @@ export const SCRIPT_CONFIG: Array<ConfigItem> = [
   { scriptString: 'wait', scriptType: commandType.wait },
 ];
 
-/** WebGAL 配置选项接口 */
-export interface IOptionItem {
-  key: string;
-  value: string | number | boolean;
-}
-
-/** WebGAL 配置项接口 */
-export interface IConfigItem {
-  command: string;
-  args: Array<string>;
-  options: Array<IOptionItem>;
-}
-
-/** WebGAL 配置 */
-export type WebgalConfig = Array<IConfigItem>;
-
-/** WebGAL 样式对象接口 */
-export interface IWebGALStyleObj {
-  classNameStyles: Record<string, string>;
-  others: string;
-}
-
 import { type CompleteParserConfig, defaultEscapeConfigs } from '@/lib/config';
 
 /** 兼容的解析器配置 */
@@ -180,19 +174,3 @@ export const compatParserConfig: CompleteParserConfig = {
   },
   escapeConfigs: defaultEscapeConfigs,
 };
-
-import type { Article, Section } from '@/lib/config';
-
-/** 兼容的文章 */
-export interface CompatArticle extends Article {
-  sections: Array<CompatSection>;
-  assets?: Array<IAsset>;
-  sub?: Array<string>;
-}
-
-/** 兼容的段落 */
-export interface CompatSection extends Section {
-  commandCode?: number;
-  assets?: Array<IAsset>;
-  sub?: Array<string>;
-}

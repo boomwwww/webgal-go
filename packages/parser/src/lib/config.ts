@@ -10,14 +10,17 @@ export interface Article {
 export interface Section {
   header: string | undefined; // 段落头
   body: string | undefined; // 段落体
-  attributes: Array<{
-    key: string | undefined; // 属性键
-    value: string | boolean | number | undefined; // 属性值
-  }>;
+  attributes: Array<Attribute>;
   comment: string | undefined; // 段落注释
   str: string; // 段落字符串(转义后)
   readonly raw: string; // 段落原始字符串(转义前)
   readonly position: { index: number; line: number; column: number }; // 段落起始位置在整个字符串中的索引
+}
+
+/** 属性 */
+export interface Attribute {
+  key: string | undefined; // 属性键
+  value: string | boolean | number | undefined; // 属性值
 }
 
 /** 预解析器 */

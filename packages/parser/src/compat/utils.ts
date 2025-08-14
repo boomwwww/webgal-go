@@ -1,4 +1,3 @@
-import type { Parser } from '@/lib/config';
 import { concat } from '@/lib/utils';
 import type { IScene, CompatArticle } from './config';
 
@@ -225,10 +224,102 @@ function placeholderLine(content = '') {
 //   return processedLines.join('\n');
 // }
 
+export const getCompatScene = (input: CompatArticle): IScene => ({
+  sceneName: input.name,
+  sceneUrl: input.url,
+  sentenceList: input.sections.map((section) => ({
+    command: section.commandCode!,
+    commandRaw: section.header!,
+    content: section.body!,
+    args: section.attributes.map((attribute) => ({
+      key: attribute.key!,
+      value: attribute.value!,
+    })),
+    sentenceAssets: section.assets!,
+    subScene: section.sub!,
+  })),
+  assetsList: input.assets!,
+  subSceneList: input.sub!,
+});
+
+/** WebGAL 配置选项接口 */
+export interface IOptionItem {
+  key: string;
+  value: string | number | boolean;
+}
+
+/** WebGAL 配置项接口 */
+export interface IConfigItem {
+  command: string;
+  args: Array<string>;
+  options: Array<IOptionItem>;
+}
+
+/** WebGAL 配置 */
+export type WebgalConfig = Array<IConfigItem>;
+
+// todo
+export const configParser = {
+  parse: (configText: string) => {
+    return parseTheConfig(configText);
+  },
+  stringify: (input: WebgalConfig) => {
+    return input.reduce(
+      (previousValue, curr) =>
+        previousValue +
+        (curr.command + ':') +
+        curr.args.join('|') +
+        curr.options.reduce((p, c) => `${p} -${c.key}=${c.value}`, '') +
+        ';\n',
+      ''
+    );
+  },
+};
+
+export const configParse = (configArticle: CompatArticle) => {
+  return configArticle;
+};
+
+export const parseTheConfig = (configText: string) => {
+  // let config = this.parser.preParse({
+  //   str: configText,
+  //   name: '@config',
+  //   url: '@config',
+  // });
+  // const configPreParsed = parser.preParse(configText);
+
+  const configArticle: CompatArticle = {
+    name: '@config',
+    url: '@config',
+    sections: [],
+    raw: configText,
+  };
+  const configParsed = configParse(configArticle);
+
+  return configParsed.sections.map((section) => ({
+    command: concat(section.header),
+    args: concat(section.body)
+      .split('|')
+      .map((arg) => arg.trim())
+      .filter((arg) => arg !== ''),
+    options: section.attributes.map((attribute) => ({
+      key: concat(attribute.key),
+      value: attribute.value !== undefined ? attribute.value : concat(attribute.value),
+    })),
+  }));
+};
+
 export interface IWebGALStyleObj {
   classNameStyles: Record<string, string>;
   others: string;
 }
+
+// todo
+export const scssParser = {
+  parse: (scssText: string): IWebGALStyleObj => {
+    return scss2cssinjsParser(scssText);
+  },
+};
 
 export function scss2cssinjsParser(scssString: string): IWebGALStyleObj {
   const [classNameStyles, others] = parseCSS(scssString);
@@ -264,56 +355,3 @@ function parseCSS(css: string): [Record<string, string>, string] {
 
   return [result, specialRules.trim()];
 }
-
-export const getCompatScene = (input: CompatArticle): IScene => ({
-  sceneName: input.name,
-  sceneUrl: input.url,
-  sentenceList: input.sections.map((section) => ({
-    command: section.commandCode!,
-    commandRaw: section.header!,
-    content: section.body!,
-    args: section.attributes.map((attribute) => ({
-      key: attribute.key!,
-      value: attribute.value!,
-    })),
-    sentenceAssets: section.assets!,
-    subScene: section.sub!,
-  })),
-  assetsList: input.assets!,
-  subSceneList: input.sub!,
-});
-
-export const configParse = (configArticle: CompatArticle) => {
-  // todo
-  return configArticle;
-};
-
-// todo
-export const parseTheConfig = (configText: string, parser: Parser) => {
-  // let config = this.parser.preParse({
-  //   str: configText,
-  //   name: '@config',
-  //   url: '@config',
-  // });
-  const configPreParsed = parser.preParse(configText);
-
-  const configArticle: CompatArticle = {
-    name: '@config',
-    url: '@config',
-    sections: configPreParsed,
-    raw: configText,
-  };
-  const configParsed = configParse(configArticle);
-  // todo
-  return configParsed.sections.map((section) => ({
-    command: concat(section.header),
-    args: concat(section.body)
-      .split('|')
-      .map((arg) => arg.trim())
-      .filter((arg) => arg !== ''),
-    options: section.attributes.map((attribute) => ({
-      key: concat(attribute.key),
-      value: attribute.value !== undefined ? attribute.value : concat(attribute.value),
-    })),
-  }));
-};

@@ -187,8 +187,7 @@ export const assetsScannerPlugin: ParserPlugin = (input: CompatArticle): CompatA
           _assets.push({
             name: attribute.value as string,
             url: attribute.value as string,
-            lineNumber: 0, // ?? TODO: 获取语句行号
-            // lineNumber: section.position.line,
+            lineNumber: section.position.line,
             type: fileType.vocal,
           });
         }
@@ -202,7 +201,7 @@ export const assetsScannerPlugin: ParserPlugin = (input: CompatArticle): CompatA
         _assets.push({
           name: section.body,
           url: section.body,
-          lineNumber: 0,
+          lineNumber: section.position.line,
           type: fileType.background,
         });
         break;
@@ -211,7 +210,7 @@ export const assetsScannerPlugin: ParserPlugin = (input: CompatArticle): CompatA
         _assets.push({
           name: section.body,
           url: section.body,
-          lineNumber: 0,
+          lineNumber: section.position.line,
           type: fileType.figure,
         });
         break;
@@ -220,7 +219,7 @@ export const assetsScannerPlugin: ParserPlugin = (input: CompatArticle): CompatA
         _assets.push({
           name: section.body,
           url: section.body,
-          lineNumber: 0,
+          lineNumber: section.position.line,
           type: fileType.figure,
         });
         break;
@@ -229,7 +228,7 @@ export const assetsScannerPlugin: ParserPlugin = (input: CompatArticle): CompatA
         _assets.push({
           name: section.body,
           url: section.body,
-          lineNumber: 0,
+          lineNumber: section.position.line,
           type: fileType.video,
         });
         break;
@@ -238,7 +237,7 @@ export const assetsScannerPlugin: ParserPlugin = (input: CompatArticle): CompatA
         _assets.push({
           name: section.body,
           url: section.body,
-          lineNumber: 0,
+          lineNumber: section.position.line,
           type: fileType.bgm,
         });
         break;
@@ -292,19 +291,28 @@ export const createCompatPlugin = (options: {
   assetSetter: AssetSetter;
   addNextArgList: CommandCodeList;
   scriptConfigMap: ConfigMap;
+  prePlugin?: Array<ParserPlugin>;
+  soltPlugin?: Array<ParserPlugin>;
+  postPlugin?: Array<ParserPlugin>;
 }): ParserPlugin => {
+  const _prePluginComposer = pipe(...(options.prePlugin ?? []));
+  const _soltPluginComposer = pipe(...(options.soltPlugin ?? []));
+  const _postPluginComposer = pipe(...(options.postPlugin ?? []));
   const _compatPluginComposer = pipe(
+    _prePluginComposer,
     plugins.trimPlugin,
     plugins.attributePlugin,
     commentPlugin,
     undefinedPlugin,
     createCommandCodePlugin(options.scriptConfigMap),
+    _soltPluginComposer,
     sayPlugin,
     createAddNextArgPlugin(options.addNextArgList),
     createAssetSetterPlugin(options.assetSetter),
     assetsScannerPlugin,
     subSceneScannerPlugin,
-    createAssetsPrefetcherPlugin(options.assetsPrefetcher)
+    createAssetsPrefetcherPlugin(options.assetsPrefetcher),
+    _postPluginComposer
   );
   return (input) => _compatPluginComposer(input);
 };

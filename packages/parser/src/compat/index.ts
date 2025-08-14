@@ -1,16 +1,16 @@
 import type { Parser, ParserConfig, ParserPlugin } from '@/lib/config';
 import { createParserFactory } from '@/lib/parser';
 
+import type { IScene } from './config';
 import type { AssetsPrefetcher, AssetSetter } from './config';
 import type { CommandCodeList, ConfigItem, ConfigMap } from './config';
-import type { WebgalConfig } from './config';
-import type { IWebGALStyleObj } from './config';
+
+import { type WebgalConfig, configParser } from './utils';
+import { type IWebGALStyleObj, scssParser } from './utils';
 
 import { compatParserConfig } from './config';
 import { createCompatPlugin } from './plugins';
 import { getCompatScene } from './utils';
-
-import { parseTheConfig, scss2cssinjsParser } from './utils';
 
 export class SceneParser {
   private readonly assetsPrefetcher: AssetsPrefetcher;
@@ -66,7 +66,7 @@ export class SceneParser {
    * @param sceneUrl 场景url
    * @return 解析后的场景
    */
-  parse(rawScene: string, sceneName: string, sceneUrl: string) {
+  parse(rawScene: string, sceneName: string, sceneUrl: string): IScene {
     const parsed = this.parser.parse({
       str: rawScene,
       name: sceneName,
@@ -76,37 +76,28 @@ export class SceneParser {
   }
 
   parseConfig(configText: string): WebgalConfig {
-    // todo
-    return parseTheConfig(configText, this.parser);
+    return configParser.parse(configText);
   }
 
-  stringifyConfig(config: WebgalConfig) {
-    return config.reduce(
-      (previousValue, curr) =>
-        previousValue +
-        (curr.command + ':') +
-        curr.args.join('|') +
-        curr.options.reduce((p, c) => `${p} -${c.key}=${c.value}`, '') +
-        ';\n',
-      ''
-    );
+  stringifyConfig(config: WebgalConfig): string {
+    return configParser.stringify(config);
   }
 
   parseScssToWebgalStyleObj(scssString: string): IWebGALStyleObj {
-    return scss2cssinjsParser(scssString);
+    return scssParser.parse(scssString);
   }
 }
 
 export { ADD_NEXT_ARG_LIST, SCRIPT_CONFIG } from './config';
 export { sceneTextPreProcess } from './utils';
 
-export type { CompatArticle, CompatSection } from './config';
 export type { IScene, ISentence, arg } from './config';
+export type { CompatArticle, CompatSection } from './config';
 export { type IAsset, fileType } from './config';
 export type { AssetsPrefetcher, AssetSetter } from './config';
 export { commandType, type CommandCodeList } from './config';
 export type { ConfigItem, ConfigMap } from './config';
-export type { IOptionItem, IConfigItem, WebgalConfig } from './config';
-export type { IWebGALStyleObj } from './config';
 export { compatParserConfig } from './config';
+export type { IOptionItem, IConfigItem, WebgalConfig } from './utils';
+export type { IWebGALStyleObj } from './utils';
 export * as compatPlugins from './plugins';
