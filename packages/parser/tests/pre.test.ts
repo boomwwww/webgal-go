@@ -1,13 +1,13 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { createCommonParser } from '../src/lib/pre';
-import { compatibleCommonParserConfig } from '../src/lib/config';
-import type { CommonParserConfig } from '../src/lib/config';
+import { createPreParser } from '../src/lib/pre';
+import { compatiblePreParserConfig } from '../src/lib/config';
+import type { PreParserConfig } from '../src/lib/config';
 
-describe('CommonParser', () => {
+describe('PreParser', () => {
   const test1Txt = fs.readFileSync(path.join(__dirname, './scene/test1.txt'), 'utf-8');
 
-  const parser = createCommonParser();
+  const parser = createPreParser();
 
   it('should parse basic header, body and comment', () => {
     const input = 'webgal:hello;say hello\n';
@@ -73,13 +73,13 @@ describe('CommonParser', () => {
   });
 
   it('should handle multi-character separators', () => {
-    const config: CommonParserConfig = {
+    const config: PreParserConfig = {
       separators: {
         bodyStart: ['==>'],
         attributeStart: ['|>>'],
       },
     };
-    const customParser = createCommonParser(config);
+    const customParser = createPreParser(config);
     const input = 'test==>body|>>key=val|>>boo;comment\n';
     const result = customParser.parse(input);
     expect(result[0].header).toBe('test');
@@ -99,7 +99,7 @@ describe('CommonParser', () => {
   });
 
   it('should handle custom escape configs', () => {
-    const config: CommonParserConfig = {
+    const config: PreParserConfig = {
       escapeConfigs: [
         {
           key: '&lt;',
@@ -117,7 +117,7 @@ describe('CommonParser', () => {
         },
       ],
     };
-    const customParser = createCommonParser(config);
+    const customParser = createPreParser(config);
     const input = 'header:&lt;body&gt; -key=&lt;value&gt;;\n';
     const result = customParser.parse(input);
     expect(result[0].body).toBe('<body>');
@@ -246,8 +246,8 @@ describe('CommonParser', () => {
     ]);
   });
 
-  it('test compatibleCommonParserConfig', () => {
-    const compatParser = createCommonParser(compatibleCommonParserConfig);
+  it('test compatiblePreParserConfig', () => {
+    const compatParser = createPreParser(compatiblePreParserConfig);
     const input = 'WebGAL: 你好！\n你好';
     expect(compatParser.parse(input)).toEqual([
       {

@@ -9,9 +9,9 @@
     "parser:build": "cd ./packages/parser && pnpm run build",
     "parser:test": "cd ./packages/parser && pnpm run test",
     "parser:lint": "cd ./packages/parser && pnpm run lint",
-    "playground:vanilla": "cd ./playgrounds/vanilla-demo && pnpm run dev",
-    "playground:vue": "cd ./playgrounds/vue-demo && pnpm run dev",
-    "playground:react": "cd ./playgrounds/react-demo && pnpm run dev",
-    "playground:htmx": "cd ./playgrounds/htmx-demo && pnpm run dev"
+    "play:vanilla": "cd ./playgrounds/vanilla-demo && pnpm run dev",
+    "play:vue": "cd ./playgrounds/vue-demo && pnpm run dev",
+    "play:react": "cd ./playgrounds/react-demo && pnpm run dev",
+    "play:htmx": "cd ./playgrounds/htmx-demo && pnpm run dev"
   }
 }
