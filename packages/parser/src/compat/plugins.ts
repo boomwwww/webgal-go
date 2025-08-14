@@ -292,11 +292,11 @@ export const createCompatPlugin = (options: {
   addNextArgList: CommandCodeList;
   scriptConfigMap: ConfigMap;
   prePlugin?: Array<ParserPlugin>;
-  soltPlugin?: Array<ParserPlugin>;
+  middlePlugin?: Array<ParserPlugin>;
   postPlugin?: Array<ParserPlugin>;
 }): ParserPlugin => {
   const _prePluginComposer = pipe(...(options.prePlugin ?? []));
-  const _soltPluginComposer = pipe(...(options.soltPlugin ?? []));
+  const _middlePluginComposer = pipe(...(options.middlePlugin ?? []));
   const _postPluginComposer = pipe(...(options.postPlugin ?? []));
   const _compatPluginComposer = pipe(
     _prePluginComposer,
@@ -305,7 +305,7 @@ export const createCompatPlugin = (options: {
     commentPlugin,
     undefinedPlugin,
     createCommandCodePlugin(options.scriptConfigMap),
-    _soltPluginComposer,
+    _middlePluginComposer,
     sayPlugin,
     createAddNextArgPlugin(options.addNextArgList),
     createAssetSetterPlugin(options.assetSetter),

@@ -58,10 +58,10 @@ export enum fileType {
   video,
 }
 
-/** 资源预加载 */
+/** 资源预加载器 */
 export type AssetsPrefetcher = (assetList: Array<IAsset>) => void;
 
-/** 资源路径设置 */
+/** 资源路径设置器 */
 export type AssetSetter = (fileName: string, assetType: fileType) => string;
 
 /** 命令类型枚举 */
