@@ -8,13 +8,13 @@ export interface Article {
 
 /** 语句 */
 export interface Section {
-  header: string; // 语句头
-  body: string; // 语句体
+  header: string | undefined; // 语句头
+  body: string | undefined; // 语句体
   attributes: Array<{
-    key: string; // 属性键
-    value: string | boolean | number; // 属性值
+    key: string | undefined; // 属性键
+    value: string | boolean | number | undefined; // 属性值
   }>;
-  comment: string; // 语句注释
+  comment: string | undefined; // 语句注释
   str: string; // 语句字符串(转义后)
   readonly raw: string; // 语句原始字符串(转义前)
   position: { index: number; line: number; column: number }; // 语句起始位置在整个字符串中的索引

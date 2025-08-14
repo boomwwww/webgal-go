@@ -1,3 +1,13 @@
+/** 函数管道 */
+export const pipe = <T>(...fns: Array<(arg: T) => T>): ((arg: T) => T) => {
+  return (initialValue) => fns.reduce((acc, fn) => fn(acc), initialValue);
+};
+
+/** 辅助函数：拼接字符串 */
+export const concat = (...args: Array<string | undefined>) => {
+  return args.filter((arg) => arg !== undefined).join('');
+};
+
 /**  根据索引获取行和列 */
 export const getPositionByIndex = (str: string, index: number): { line: number; column: number } => {
   if (!str) {
@@ -42,9 +52,4 @@ export const getPositionByIndex = (str: string, index: number): { line: number; 
   if (index === str.length) column = 0; // 字符串末尾空行列数设为0
 
   return { line, column };
-};
-
-/** 函数管道 */
-export const pipe = <T>(...fns: Array<(arg: T) => T>): ((arg: T) => T) => {
-  return (initialValue) => fns.reduce((acc, fn) => fn(acc), initialValue);
 };

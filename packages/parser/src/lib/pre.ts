@@ -1,11 +1,12 @@
 import type { Section, ParserConfig, CompleteParserConfig } from './config';
 import { getCompleteConfig } from './config';
-import { getPositionByIndex } from './utils';
+import { concat, getPositionByIndex } from './utils';
 
 /** 预解析器 */
 export type PreParser = {
   parse: (str: string) => Array<Section>;
   stringify: (input: Array<Section>, options?: { raw: boolean }) => string;
+  config: CompleteParserConfig;
 };
 
 /** 解析上下文 */
@@ -22,8 +23,8 @@ type Context = {
 type State = 'header' | 'body' | 'attributeKey' | 'attributeValue' | 'comment';
 
 /** 当前语句的临时数据 */
-type Current = Record<State, string> & {
-  attributes: Array<{ key: string; value: string | true }>;
+type Current = Record<State, string | undefined> & {
+  attributes: Array<{ key: string | undefined; value: string | true | undefined }>;
   commentStart: string;
   str: string; // 语句字符串(转义后)
   raw: string; // 语句原始字符串(转义前)
@@ -37,21 +38,25 @@ export const createPreParser = (parserConfig?: ParserConfig): PreParser => {
   return {
     parse: (str) => {
       const ctx = createContext(str, _parserConfig); // 初始化上下文
+      ctx.current.header = '';
 
       while (ctx.p < ctx.raw.length) {
         stateHandlers[ctx.state](ctx); // 主循环：根据当前状态调用对应处理函数，直到指针结束
       }
 
       if (ctx.current.str !== '') {
-        ctx.current.attributeKey !== '' && pushCurrentAttribute(ctx);
+        ctx.current.attributeKey && pushCurrentAttribute(ctx);
         pushCurrentSection(ctx); // 处理可能遗漏的最后一条语句
       }
 
       return ctx.sections;
     },
 
-    stringify: (sections, options = { raw: false }): string =>
-      sections.map((section) => section[options.raw ? 'raw' : 'str']).join(''),
+    stringify: (sections, options = { raw: false }): string => {
+      return sections.map((section) => section[options.raw ? 'raw' : 'str']).join('');
+    },
+
+    config: _parserConfig,
   };
 };
 
@@ -62,11 +67,11 @@ const createContext = (str: string, parserConfig: CompleteParserConfig): Context
   p: 0,
   sections: [],
   current: {
-    header: '',
-    body: '',
-    attributeKey: '',
-    attributeValue: '',
-    comment: '',
+    header: undefined,
+    body: undefined,
+    attributeKey: undefined,
+    attributeValue: undefined,
+    comment: undefined,
     attributes: [],
     commentStart: '',
     str: '',
@@ -79,16 +84,16 @@ const createContext = (str: string, parserConfig: CompleteParserConfig): Context
 /** 辅助函数：添加值到当前语句 */
 const pushValue = (ctx: Context, value: string, rawValue?: string): void => {
   const _rawValue = rawValue ?? value;
-  ctx.current[ctx.state] += value;
-  ctx.current.str += value;
-  ctx.current.raw += _rawValue;
+  ctx.current[ctx.state] = concat(ctx.current[ctx.state], value);
+  ctx.current.str = concat(ctx.current.str, value);
+  ctx.current.raw = concat(ctx.current.raw, _rawValue);
   ctx.p += _rawValue.length;
 };
 
 /** 辅助函数：添加分隔符到当前语句 */
 const pushSeparator = (ctx: Context, separator: string): void => {
-  ctx.current.str += separator;
-  ctx.current.raw += separator;
+  ctx.current.str = concat(ctx.current.str, separator);
+  ctx.current.raw = concat(ctx.current.raw, separator);
   ctx.p += separator.length;
 };
 
@@ -96,10 +101,10 @@ const pushSeparator = (ctx: Context, separator: string): void => {
 const pushCurrentAttribute = (ctx: Context): void => {
   ctx.current.attributes.push({
     key: ctx.current.attributeKey,
-    value: ctx.current.attributeValue === '' ? true : ctx.current.attributeValue,
+    value: ctx.current.attributeValue ?? true,
   });
-  ctx.current.attributeKey = '';
-  ctx.current.attributeValue = '';
+  ctx.current.attributeKey = undefined;
+  ctx.current.attributeValue = undefined;
 };
 
 /** 辅助函数：将当前语句推入结果数组并重置当前语句 */
@@ -117,11 +122,11 @@ const pushCurrentSection = (ctx: Context): void => {
     },
   });
   ctx.current = {
-    header: '',
-    body: '',
-    attributeKey: '',
-    attributeValue: '',
-    comment: '',
+    header: undefined,
+    body: undefined,
+    attributeKey: undefined,
+    attributeValue: undefined,
+    comment: undefined,
     attributes: [],
     commentStart: '',
     str: '',
@@ -147,6 +152,7 @@ const enterBody = (ctx: Context): boolean => {
   if (!matchedBodyStart) return false;
   pushSeparator(ctx, matchedBodyStart);
   ctx.state = 'body';
+  ctx.current.body = '';
   return true;
 };
 
@@ -158,6 +164,7 @@ const enterAttributeKey = (ctx: Context): boolean => {
   (ctx.state === 'attributeKey' || ctx.state === 'attributeValue') && pushCurrentAttribute(ctx);
   pushSeparator(ctx, matchedAttributeStart);
   ctx.state = 'attributeKey';
+  ctx.current.attributeKey = '';
   return true;
 };
 
@@ -168,6 +175,7 @@ const enterAttributeValue = (ctx: Context): boolean => {
   if (!matchedAttributeKeyValue) return false;
   pushSeparator(ctx, matchedAttributeKeyValue);
   ctx.state = 'attributeValue';
+  ctx.current.attributeValue = '';
   return true;
 };
 
@@ -180,6 +188,7 @@ const enterComment = (ctx: Context): boolean => {
   (ctx.state === 'attributeKey' || ctx.state === 'attributeValue') && pushCurrentAttribute(ctx);
   pushSeparator(ctx, matchedCommentStart);
   ctx.state = 'comment';
+  ctx.current.comment = '';
   return true;
 };
 
@@ -205,6 +214,7 @@ const exitSection = (ctx: Context): boolean => {
   pushSeparator(ctx, matchedSectionEnd);
   pushCurrentSection(ctx);
   ctx.state = 'header';
+  ctx.current.header = '';
   return true;
 };
 
@@ -215,10 +225,10 @@ const pushChar = (ctx: Context): boolean => {
 };
 
 /** 创建状态处理函数的工厂函数 */
-const handle = (checks: Array<(ctx: Context) => boolean>): ((ctx: Context) => void) => {
+const handle = (fns: Array<(ctx: Context) => boolean>): ((ctx: Context) => void) => {
   return (ctx) => {
-    for (const check of checks) {
-      if (check(ctx)) return;
+    for (const fn of fns) {
+      if (fn(ctx)) return;
     }
   };
 };

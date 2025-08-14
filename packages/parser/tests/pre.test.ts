@@ -232,7 +232,7 @@ describe('PreParser', () => {
       },
       {
         attributes: [],
-        body: '',
+        body: undefined,
         comment: '',
         header: 'WebGAL：“你好！” -next',
         position: {
@@ -254,7 +254,7 @@ describe('PreParser', () => {
         header: 'WebGAL',
         body: ' 你好！',
         attributes: [],
-        comment: '',
+        comment: undefined,
         raw: 'WebGAL: 你好！\n',
         str: 'WebGAL: 你好！\n',
         position: {
@@ -265,9 +265,9 @@ describe('PreParser', () => {
       },
       {
         header: '你好',
-        body: '',
+        body: undefined,
         attributes: [],
-        comment: '',
+        comment: undefined,
         raw: '你好',
         str: '你好',
         position: {

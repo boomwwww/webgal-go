@@ -1,5 +1,6 @@
 import type { Article } from '@/lib/config';
 import type { Parser } from '@/lib/parser';
+import { concat } from '@/lib/utils';
 import type { IScene } from './config';
 import { commandType } from './config';
 
@@ -283,9 +284,12 @@ export const getCompatScene = (input: Article): IScene => ({
     }
     return {
       command: commandCode,
-      commandRaw: section.header,
-      content: section.body,
-      args: section.attributes,
+      commandRaw: concat(section.header),
+      content: concat(section.body),
+      args: section.attributes.map((attribute) => ({
+        key: concat(attribute.key),
+        value: attribute.value !== undefined ? attribute.value : concat(attribute.value),
+      })),
       sentenceAssets: [],
       subScene: [],
       compatSection: section,
@@ -316,11 +320,14 @@ export const parseTheConfig = (configText: string, parser: Parser) => {
   const configParsed = configParse(configArticle);
   // todo
   return configParsed.sections.map((section) => ({
-    command: section.header,
-    args: section.body
+    command: concat(section.header),
+    args: concat(section.body)
       .split('|')
       .map((arg) => arg.trim())
       .filter((arg) => arg !== ''),
-    options: section.attributes,
+    options: section.attributes.map((attribute) => ({
+      key: concat(attribute.key),
+      value: attribute.value !== undefined ? attribute.value : concat(attribute.value),
+    })),
   }));
 };

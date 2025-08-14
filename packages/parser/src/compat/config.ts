@@ -1,5 +1,3 @@
-import { type CompleteParserConfig, defaultEscapeConfigs } from '@/lib/config';
-
 /** 场景接口 */
 export interface IScene {
   sceneName: string; // 场景名称
@@ -86,6 +84,8 @@ export enum commandType {
   wait,
 }
 
+export type CommandList = Array<commandType>;
+
 export type ConfigItem = { scriptString: string; scriptType: commandType };
 
 export type ConfigMap = Map<string, ConfigItem>;
@@ -125,8 +125,6 @@ export const SCRIPT_CONFIG: Array<ConfigItem> = [
   { scriptString: 'wait', scriptType: commandType.wait },
 ];
 
-export type CommandList = Array<commandType>;
-
 /** 添加下一条语句的参数列表 */
 export const ADD_NEXT_ARG_LIST: CommandList = [
   commandType.bgm,
@@ -158,6 +156,8 @@ export interface IWebGALStyleObj {
   classNameStyles: Record<string, string>;
   others: string;
 }
+
+import { type CompleteParserConfig, defaultEscapeConfigs } from '@/lib/config';
 
 export const compatParserConfig: CompleteParserConfig = {
   separators: {

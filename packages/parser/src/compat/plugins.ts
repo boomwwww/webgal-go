@@ -1,17 +1,12 @@
 import type { Article, Section } from '@/lib/config';
 import { pipe } from '@/lib/utils';
+import type { PreParser } from '@/lib/pre';
 import type { ParserPlugin } from '@/lib/parser';
-import type { ArticleWithAssets } from '@/lib/plugins';
+import type { ArticleWithAssets, SectionWithAssets } from '@/lib/plugins';
 import * as plugins from '@/lib/plugins';
-import {
-  type IAsset,
-  fileType,
-  type AssetsPrefetcher,
-  type AssetSetter,
-  type ConfigMap,
-  commandType,
-  CommandList,
-} from './config';
+import { type IAsset, fileType, type AssetsPrefetcher, type AssetSetter } from './config';
+import type { CommandList, ConfigMap } from './config';
+import { commandType } from './config';
 
 interface ArticleWithCommandCode extends Article {
   sections: Array<SectionWithCommandCode>;
@@ -20,6 +15,10 @@ interface ArticleWithCommandCode extends Article {
 interface SectionWithCommandCode extends Section {
   commandCode?: number;
 }
+
+export type CompatArticle = ArticleWithCommandCode & ArticleWithAssets<IAsset>;
+
+export type CompatSection = SectionWithCommandCode & SectionWithAssets<IAsset>;
 
 // todo
 export const createScriptPlugin = (scriptConfigMap: ConfigMap): ParserPlugin => {
@@ -59,7 +58,7 @@ export const createAddNextArgPlugin = (addNextArgList: CommandList): ParserPlugi
   });
 };
 
-function getChooseContent(contentRaw: string, assetSetter: (fileName: string, assetType: fileType) => string): string {
+function getChooseContent(contentRaw: string, assetSetter: AssetSetter): string {
   const chooseList = contentRaw.split(/(?<!\\)\|/);
   const chooseKeyList: Array<string> = [];
   const chooseValueList: Array<string> = [];
@@ -86,7 +85,7 @@ function getChooseContent(contentRaw: string, assetSetter: (fileName: string, as
 
 export const createAssetsPrefetcherPlugin = (assetsPrefetcher: AssetsPrefetcher): ParserPlugin => {
   const _assetsPrefetcher = assetsPrefetcher;
-  return (input: ArticleWithCommandCode & ArticleWithAssets<IAsset>) => {
+  return (input: CompatArticle) => {
     if (input.assets) {
       _assetsPrefetcher(input.assets);
     }
@@ -96,57 +95,57 @@ export const createAssetsPrefetcherPlugin = (assetsPrefetcher: AssetsPrefetcher)
 
 export const createAssetSetterPlugin = (assetSetter: AssetSetter): ParserPlugin => {
   const _assetSetter = assetSetter;
-  return (input: ArticleWithCommandCode & ArticleWithAssets<IAsset>) => ({
+  return (input: CompatArticle) => ({
     ...input,
     sections: input.sections.map((section) => {
       let body = '';
       switch (section.header) {
         case 'playEffect': {
-          body = _assetSetter(section.body, fileType.vocal);
+          body = _assetSetter(String(section.body), fileType.vocal); // todo fix String
           break;
         }
         case 'changeBg': {
-          body = _assetSetter(section.body, fileType.background);
+          body = _assetSetter(String(section.body), fileType.background);
           break;
         }
         case 'changeFigure': {
-          body = _assetSetter(section.body, fileType.figure);
+          body = _assetSetter(String(section.body), fileType.figure);
           break;
         }
         case 'bgm': {
-          body = _assetSetter(section.body, fileType.bgm);
+          body = _assetSetter(String(section.body), fileType.bgm);
           break;
         }
         case 'callScene': {
-          body = _assetSetter(section.body, fileType.scene);
+          body = _assetSetter(String(section.body), fileType.scene);
           break;
         }
         case 'changeScene': {
-          body = _assetSetter(section.body, fileType.scene);
+          body = _assetSetter(String(section.body), fileType.scene);
           break;
         }
         case 'miniAvatar': {
-          body = _assetSetter(section.body, fileType.figure);
+          body = _assetSetter(String(section.body), fileType.figure);
           break;
         }
         case 'video': {
-          body = _assetSetter(section.body, fileType.video);
+          body = _assetSetter(String(section.body), fileType.video);
           break;
         }
         case 'choose': {
-          body = getChooseContent(section.body, _assetSetter);
+          body = getChooseContent(String(section.body), _assetSetter);
           break;
         }
         case 'unlockBgm': {
-          body = _assetSetter(section.body, fileType.bgm);
+          body = _assetSetter(String(section.body), fileType.bgm);
           break;
         }
         case 'unlockCg': {
-          body = _assetSetter(section.body, fileType.background);
+          body = _assetSetter(String(section.body), fileType.background);
           break;
         }
         default: {
-          body = section.body;
+          body = String(section.body);
           break;
         }
       }
@@ -155,18 +154,23 @@ export const createAssetSetterPlugin = (assetSetter: AssetSetter): ParserPlugin 
         body: body,
         attributes: section.attributes.map((attribute) => {
           if (attribute.value === true) {
-            if (attribute.key.toLowerCase().match(/\.(ogg|mp3|wav)$/)) {
+            // todo fix String
+            if (
+              String(attribute.key)
+                .toLowerCase()
+                .match(/\.(ogg|mp3|wav)$/)
+            ) {
               return {
                 key: 'vocal',
-                value: _assetSetter(attribute.key, fileType.vocal),
+                value: _assetSetter(String(attribute.key), fileType.vocal),
               };
             }
           }
-          switch (attribute.key.toLowerCase()) {
+          switch (String(attribute.key).toLowerCase()) {
             case 'vocal': {
               return {
                 key: 'vocal',
-                value: _assetSetter(attribute.value.toString(), fileType.vocal),
+                value: _assetSetter(String(attribute.value).toString(), fileType.vocal),
               };
             }
             default: {
@@ -181,6 +185,7 @@ export const createAssetSetterPlugin = (assetSetter: AssetSetter): ParserPlugin 
 };
 
 export const createCompatPlugin = (options: {
+  preParser: PreParser;
   assetsPrefetcher: AssetsPrefetcher;
   assetSetter: AssetSetter;
   addNextArgList: CommandList;

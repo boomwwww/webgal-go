@@ -46,6 +46,7 @@ export class SceneParser {
     const parserFactory = createParserFactory(parserConfig ?? compatParserConfig);
     parserFactory.use(
       createCompatPlugin({
+        preParser: parserFactory.preParser,
         assetsPrefetcher: this.assetsPrefetcher,
         assetSetter: this.assetSetter,
         addNextArgList: this.ADD_NEXT_ARG_LIST,
