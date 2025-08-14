@@ -38,7 +38,7 @@ export const createPreParser = (parserConfig?: ParserConfig): PreParser => {
   return {
     parse: (str) => {
       const ctx = createContext(str, _parserConfig); // 初始化上下文
-      ctx.current.header = '';
+      ctx.current.header = ''; // 语句头初始化为字符串
 
       while (ctx.p < ctx.raw.length) {
         stateHandlers[ctx.state](ctx); // 主循环：根据当前状态调用对应处理函数，直到指针结束

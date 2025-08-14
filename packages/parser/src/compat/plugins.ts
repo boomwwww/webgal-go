@@ -1,5 +1,5 @@
 import type { Article, Section } from '@/lib/config';
-import { pipe } from '@/lib/utils';
+import { concat, pipe } from '@/lib/utils';
 import type { PreParser } from '@/lib/pre';
 import type { ParserPlugin } from '@/lib/parser';
 import type { ArticleWithAssets, SectionWithAssets } from '@/lib/plugins';
@@ -7,6 +7,20 @@ import * as plugins from '@/lib/plugins';
 import { type IAsset, fileType, type AssetsPrefetcher, type AssetSetter } from './config';
 import type { CommandList, ConfigMap } from './config';
 import { commandType } from './config';
+
+export const undefinedPlugin: ParserPlugin = (input) => ({
+  ...input,
+  sections: input.sections.map((section) => ({
+    ...section,
+    header: concat(section.header),
+    body: concat(section.body),
+    attributes: section.attributes.map((attribute) => ({
+      key: concat(attribute.key),
+      value: attribute.value === undefined ? '' : attribute.value,
+    })),
+    comment: concat(section.comment),
+  })),
+});
 
 interface ArticleWithCommandCode extends Article {
   sections: Array<SectionWithCommandCode>;
@@ -194,6 +208,8 @@ export const createCompatPlugin = (options: {
   const _compatPluginPipe = pipe(
     plugins.trimPlugin,
     plugins.attributePlugin,
+    plugins.commentPlugin,
+    undefinedPlugin,
     createScriptPlugin(options.scriptConfigMap),
     createAddNextArgPlugin(options.addNextArgList),
     // todo

@@ -1,5 +1,4 @@
 import type { Article, Section } from './config';
-import type { PreParser } from './pre';
 import type { ParserPlugin } from './parser';
 
 export const trimPlugin: ParserPlugin = (input) => ({
@@ -59,15 +58,17 @@ export const attributePlugin: ParserPlugin = (input) => ({
   })),
 });
 
-export const createCommentPlugin = (preParser: PreParser): ParserPlugin => {
-  const _preParser = preParser;
-  return (input) => ({
-    ...input,
-    sections: input.sections.map((section) => {
-      return section;
-    }),
-  });
-};
+export const commentPlugin: ParserPlugin = (input) => ({
+  ...input,
+  sections: input.sections.map((section) => {
+    if (section.body !== undefined) return section;
+    return {
+      ...section,
+      header: 'comment',
+      body: section.comment,
+    };
+  }),
+});
 
 export interface ArticleWithAssets<T> extends Article {
   sections: Array<SectionWithAssets<T>>;
