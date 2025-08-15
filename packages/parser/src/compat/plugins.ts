@@ -41,6 +41,19 @@ export const createCommandCodePlugin = (scriptConfigMap: CommandCodeMap): Parser
   return (input): CompatArticle => ({
     ...input,
     sections: input.sections.map((section) => {
+      if (section.header === '' && section.body === undefined) {
+        return {
+          ...section,
+          commandCode: CommandCode.comment,
+          body: section.comment,
+          attributes: [
+            {
+              key: 'next',
+              value: true,
+            },
+          ],
+        };
+      }
       return {
         ...section,
         commandCode: scriptConfigMap.get(section.header!)?.scriptType ?? CommandCode.say,
