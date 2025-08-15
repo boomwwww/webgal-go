@@ -54,9 +54,17 @@ export const sayPlugin: ParserPlugin = (input: CompatArticle) => ({
   sections: input.sections.map((section) => {
     if (section.commandCode !== CommandCode.say) return section;
     if (section.header === '' && section.body !== undefined) return section;
+    const _attributes = section.attributes;
+    let _flag = _attributes.find((attr) => attr.key === 'speaker');
+    if (!_flag) {
+      _attributes.unshift({
+        key: 'speaker',
+        value: section.header,
+      });
+    }
     return {
       ...section,
-      attributes: [...section.attributes, { key: 'speaker', value: section.header }],
+      attributes: _attributes,
     };
   }),
 });

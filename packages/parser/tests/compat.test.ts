@@ -12,6 +12,7 @@ describe('SceneParser', () => {
   );
   it('should work', () => {
     expect(sceneParser).toBeDefined();
-    console.log(JSON.stringify(sceneParser.parse(test2Txt, '', ''), undefined, 2));
+    expect(sceneParser.parse(test2Txt, '', '')).toBeDefined();
+    // console.log(JSON.stringify(sceneParser.parse(test2Txt, '', ''), undefined, 2));
   });
 });
