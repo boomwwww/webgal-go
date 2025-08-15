@@ -6,6 +6,8 @@
   "license": "MPL-2.0",
   "private": true,
   "scripts": {
+    "b": "pnpm run parser:build",
+    "t": "pnpm run parser:test",
     "parser:build": "cd ./packages/parser && pnpm run build",
     "parser:test": "cd ./packages/parser && pnpm run test",
     "parser:lint": "cd ./packages/parser && pnpm run lint",
