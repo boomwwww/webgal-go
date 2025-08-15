@@ -1,7 +1,7 @@
 import { createParserFactory } from '@/lib/parser';
 import * as plugins from '@/lib/plugins';
 import { type CompatArticle, type Scene, compatParserConfig } from './config';
-import { commentPlugin, undefinedPlugin } from './plugins';
+import { undefinedPlugin } from './plugins';
 
 /**
  * Preprocessor for scene text.
@@ -267,7 +267,6 @@ export type WebgalConfig = Array<WebgalConfigItem>;
 const _configPreParser = createParserFactory(compatParserConfig)
   .use(plugins.trimPlugin)
   .use(plugins.attributePlugin)
-  .use(commentPlugin)
   .use(undefinedPlugin)
   .create();
 

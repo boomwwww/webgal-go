@@ -5,38 +5,6 @@ import { type CompatArticle } from './config';
 import { type Asset, FileCode, type AssetsPrefetcher, type AssetSetter } from './config';
 import { CommandCode, type CommandCodeList, type CommandCodeMap } from './config';
 
-export const commentPlugin: ParserPlugin = (input) => ({
-  ...input,
-  sections: input.sections.map((section) => {
-    if (section.header !== '' || section.body !== undefined) return section;
-    return {
-      ...section,
-      header: 'comment',
-      body: section.comment,
-      attributes: [
-        {
-          key: 'next',
-          value: true,
-        },
-      ],
-    };
-  }),
-});
-
-export const undefinedPlugin: ParserPlugin = (input) => ({
-  ...input,
-  sections: input.sections.map((section) => ({
-    ...section,
-    header: concat(section.header),
-    body: concat(section.body),
-    attributes: section.attributes.map((attribute) => ({
-      key: concat(attribute.key),
-      value: attribute.value === undefined ? true : attribute.value,
-    })),
-    comment: concat(section.comment),
-  })),
-});
-
 export const createCommandCodePlugin = (scriptConfigMap: CommandCodeMap): ParserPlugin => {
   return (input): CompatArticle => ({
     ...input,
@@ -86,6 +54,20 @@ export const sayPlugin: ParserPlugin = (input: CompatArticle) => ({
       attributes: _attributes,
     };
   }),
+});
+
+export const undefinedPlugin: ParserPlugin = (input) => ({
+  ...input,
+  sections: input.sections.map((section) => ({
+    ...section,
+    header: concat(section.header),
+    body: concat(section.body),
+    attributes: section.attributes.map((attribute) => ({
+      key: concat(attribute.key),
+      value: attribute.value === undefined ? true : attribute.value,
+    })),
+    comment: concat(section.comment),
+  })),
 });
 
 export const createAddNextArgPlugin = (addNextArgList: CommandCodeList): ParserPlugin => {
@@ -329,7 +311,6 @@ export const createCompatPlugin = (options: {
     _prePluginComposer,
     plugins.trimPlugin,
     plugins.attributePlugin,
-    commentPlugin,
     createCommandCodePlugin(options.scriptConfigMap),
     _middlePluginComposer,
     sayPlugin,
