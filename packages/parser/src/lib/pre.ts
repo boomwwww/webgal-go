@@ -228,7 +228,7 @@ const handle = (fns: Array<(ctx: Context) => boolean>): ((ctx: Context) => void)
 
 /* 状态处理映射表(每个状态对应独立处理函数) */
 const stateHandlers: Record<State, (ctx: Context) => void> = {
-  header: handle([unescape, exitSection, enterComment, enterBody, pushChar]),
+  header: handle([unescape, exitSection, enterComment, enterBody, enterAttributeKey, pushChar]),
   body: handle([unescape, exitSection, enterComment, enterAttributeKey, pushChar]),
   attributeKey: handle([unescape, exitSection, enterComment, enterAttributeKey, enterAttributeValue, pushChar]),
   attributeValue: handle([unescape, exitSection, enterComment, enterAttributeKey, pushChar]),

@@ -231,10 +231,15 @@ describe('PreParser', () => {
         str: 'WebGAL: 你好！\n - next;\n',
       },
       {
-        attributes: [],
+        attributes: [
+          {
+            key: 'next',
+            value: true,
+          },
+        ],
         body: undefined,
         comment: '',
-        header: 'WebGAL：“你好！” -next',
+        header: 'WebGAL：“你好！”',
         position: {
           column: 1,
           index: 115,
