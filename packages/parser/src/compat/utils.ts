@@ -1,5 +1,7 @@
-import { concat } from '@/lib/utils';
-import { type CompatArticle, type IScene } from './config';
+import { createParserFactory } from '@/lib/parser';
+import * as plugins from '@/lib/plugins';
+import { type Arg, type CompatArticle, type Scene, compatParserConfig } from './config';
+import { commentPlugin, undefinedPlugin } from './plugins';
 
 /**
  * Preprocessor for scene text.
@@ -224,7 +226,7 @@ function placeholderLine(content = '') {
 //   return processedLines.join('\n');
 // }
 
-export const getCompatScene = (input: CompatArticle): IScene => ({
+export const getCompatScene = (input: CompatArticle): Scene => ({
   sceneName: input.name,
   sceneUrl: input.url,
   sentenceList: input.sections.map((section) => ({
@@ -243,25 +245,37 @@ export const getCompatScene = (input: CompatArticle): IScene => ({
 });
 
 /** WebGAL 配置选项接口 */
-export interface IOptionItem {
+export interface WebgalConfigItemOption {
   key: string;
   value: string | number | boolean;
 }
 
+export type { WebgalConfigItemOption as IOptionItem };
+
 /** WebGAL 配置项接口 */
-export interface IConfigItem {
+export interface WebgalConfigItem {
   command: string;
   args: Array<string>;
-  options: Array<IOptionItem>;
+  options: Array<WebgalConfigItemOption>;
 }
 
+export type { WebgalConfigItem as IConfigItem };
+
 /** WebGAL 配置 */
-export type WebgalConfig = Array<IConfigItem>;
+export type WebgalConfig = Array<WebgalConfigItem>;
+
+const configParserFactory = createParserFactory(compatParserConfig)
+  .use(plugins.trimPlugin)
+  .use(plugins.attributePlugin)
+  .use(commentPlugin)
+  .use(undefinedPlugin);
+configParserFactory;
 
 // todo
 export const configParser = {
   parse: (configText: string) => {
-    return parseTheConfig(configText);
+    const configLines = configText.replaceAll(`\r`, '').split('\n');
+    return configLines.map((e) => configLineParser(e)).filter((e) => e.command !== '');
   },
   stringify: (input: WebgalConfig) => {
     return input.reduce(
@@ -276,52 +290,114 @@ export const configParser = {
   },
 };
 
-export const configParse = (configArticle: CompatArticle) => {
-  return configArticle;
-};
+function configLineParser(inputLine: string): WebgalConfigItem {
+  const options: Array<WebgalConfigItemOption> = [];
+  let command: string;
 
-export const parseTheConfig = (configText: string) => {
-  // let config = this.parser.preParse({
-  //   str: configText,
-  //   name: '@config',
-  //   url: '@config',
-  // });
-  // const configPreParsed = parser.preParse(configText);
+  let newSentenceRaw = inputLine.split(';')[0];
+  if (newSentenceRaw === '') {
+    // 注释提前返回
+    return {
+      command: '',
+      args: [],
+      options: [],
+    };
+  }
+  // 截取命令
+  const getCommandResult = /\s*:\s*/.exec(newSentenceRaw);
 
-  const configArticle: CompatArticle = {
-    name: '@config',
-    url: '@config',
-    sections: [],
-    raw: configText,
-  };
-  const configParsed = configParse(configArticle);
-
-  return configParsed.sections.map((section) => ({
-    command: concat(section.header),
-    args: concat(section.body)
+  // 没有command
+  if (getCommandResult === null) {
+    command = '';
+  } else {
+    command = newSentenceRaw.substring(0, getCommandResult.index);
+    // 划分命令区域和content区域
+    newSentenceRaw = newSentenceRaw.substring(getCommandResult.index + 1, newSentenceRaw.length);
+  }
+  // 截取 Options 区域
+  const getOptionsResult = / -/.exec(newSentenceRaw);
+  // 获取到参数
+  if (getOptionsResult) {
+    const optionsRaw = newSentenceRaw.substring(getOptionsResult.index, newSentenceRaw.length);
+    newSentenceRaw = newSentenceRaw.substring(0, getOptionsResult.index);
+    const args = argsParser(optionsRaw);
+    for (const arg of args) {
+      options.push(arg);
+    }
+  }
+  return {
+    command,
+    args: newSentenceRaw
       .split('|')
-      .map((arg) => arg.trim())
-      .filter((arg) => arg !== ''),
-    options: section.attributes.map((attribute) => ({
-      key: concat(attribute.key),
-      value: attribute.value !== undefined ? attribute.value : concat(attribute.value),
-    })),
-  }));
-};
+      .map((e) => e.trim())
+      .filter((e) => e !== ''),
+    options,
+  };
+}
 
-export interface IWebGALStyleObj {
+export function argsParser(argsRaw: string): Array<Arg> {
+  const returnArrayList: Array<Arg> = [];
+  const rawArgList: Array<string> = argsRaw.split(' -');
+  const filteredArgList = rawArgList.filter((e) => e !== '');
+  filteredArgList.forEach((arg) => {
+    const equalSignIndex = arg.indexOf('=');
+    let argName = arg.slice(0, equalSignIndex);
+    let argValue: string | undefined = arg.slice(equalSignIndex + 1);
+    if (equalSignIndex < 0) {
+      argName = arg;
+      argValue = undefined;
+    }
+    if (argName.toLowerCase().match(/\.(ogg|mp3|wav|flac)$/)) {
+      returnArrayList.push({
+        key: 'vocal',
+        value: arg,
+      });
+    } else {
+      if (argValue === undefined) {
+        returnArrayList.push({
+          key: argName,
+          value: true,
+        });
+      } else {
+        if (argValue === 'true' || argValue === 'false') {
+          returnArrayList.push({
+            key: argName,
+            value: argValue === 'true',
+          });
+        } else {
+          if (!isNaN(Number(argValue))) {
+            returnArrayList.push({
+              key: argName,
+              value: Number(argValue),
+            });
+          } else {
+            returnArrayList.push({
+              key: argName,
+              value: argValue,
+            });
+          }
+        }
+      }
+    }
+  });
+  return returnArrayList;
+}
+
+export interface WebGALStyle {
   classNameStyles: Record<string, string>;
   others: string;
 }
 
+export type { WebGALStyle as IWebGALStyleObj };
+
 // todo
-export const scssParser = {
-  parse: (scssText: string): IWebGALStyleObj => {
+export const styleParser = {
+  parse: (scssText: string): WebGALStyle => {
     return scss2cssinjsParser(scssText);
   },
 };
 
-export function scss2cssinjsParser(scssString: string): IWebGALStyleObj {
+export function scss2cssinjsParser(scssString: string): WebGALStyle {
   const [classNameStyles, others] = parseCSS(scssString);
   return {
     classNameStyles,

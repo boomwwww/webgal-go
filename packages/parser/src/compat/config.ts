@@ -1,19 +1,28 @@
 import { type Article, type Section } from '@/lib/config';
+import { type ParserConfig, type ParserPlugin } from '@/lib/config';
 import { type CompleteParserConfig, defaultEscapeConfigs } from '@/lib/config';
 
 /** 兼容的文章 */
 export interface CompatArticle extends Article {
   sections: Array<CompatSection>;
-  assets?: Array<IAsset>;
+  assets?: Array<Asset>;
   sub?: Array<string>;
 }
 
 /** 兼容的段落 */
 export interface CompatSection extends Section {
   commandCode?: number;
-  assets?: Array<IAsset>;
+  assets?: Array<Asset>;
   sub?: Array<string>;
 }
+
+/** 场景解析器选项 */
+export type SceneParserOptions = {
+  config?: ParserConfig;
+  plugins?:
+    | Array<ParserPlugin>
+    | { pre?: Array<ParserPlugin>; middle?: Array<ParserPlugin>; post?: Array<ParserPlugin> };
+};
 
 /** 兼容的解析器配置 */
 export const compatParserConfig: CompleteParserConfig = {
@@ -27,41 +36,49 @@ export const compatParserConfig: CompleteParserConfig = {
   escapeConfigs: defaultEscapeConfigs,
 };
 
-/** 场景接口 */
-export interface IScene {
+/** 场景 */
+export interface Scene {
   sceneName: string; // 场景名称
   sceneUrl: string; // 场景url
-  sentenceList: Array<ISentence>; // 语句列表
-  assetsList: Array<IAsset>; // 资源列表
+  sentenceList: Array<Sentence>; // 语句列表
+  assetsList: Array<Asset>; // 资源列表
   subSceneList: Array<string>; // 子场景的url列表
 }
 
-/** 语句接口 */
-export interface ISentence {
-  command: commandType; // 语句类型
+export type { Scene as IScene };
+
+/** 语句 */
+export interface Sentence {
+  command: CommandCode; // 语句类型
   commandRaw: string; // 命令的原始内容，方便调试
   content: string; // 语句内容
-  args: Array<arg>; // 参数列表
-  sentenceAssets: Array<IAsset>; // 语句携带的资源列表
+  args: Array<Arg>; // 参数列表
+  sentenceAssets: Array<Asset>; // 语句携带的资源列表
   subScene: Array<string>; // 语句包含子场景列表
 }
 
+export type { Sentence as ISentence };
+
 /** 参数 */
-export interface arg {
+export interface Arg {
   key: string; // 参数键
   value: string | boolean | number; // 参数值
 }
 
-/** 资源接口 */
-export interface IAsset {
+export type { Arg as arg };
+
+/** 资源 */
+export interface Asset {
   name: string; // 资源名称
-  type: fileType; // 资源类型
+  type: FileCode; // 资源类型
   url: string; // 资源url
   lineNumber: number; // 触发资源语句的行号
 }
 
+export type { Asset as IAsset };
+
 /** 内置资源类型的枚举 */
-export enum fileType {
+export enum FileCode {
   background,
   bgm,
   figure,
@@ -71,14 +88,16 @@ export enum fileType {
   video,
 }
 
+export { FileCode as fileType };
+
 /** 资源预加载器 */
-export type AssetsPrefetcher = (assetList: Array<IAsset>) => void;
+export type AssetsPrefetcher = (assetList: Array<Asset>) => void;
 
 /** 资源路径设置器 */
-export type AssetSetter = (fileName: string, assetType: fileType) => string;
+export type AssetSetter = (fileName: string, assetType: FileCode) => string;
 
 /** 命令类型枚举 */
-export enum commandType {
+export enum CommandCode {
   say, // 对话
   changeBg, // 更改背景
   changeFigure, // 更改立绘
@@ -115,61 +134,64 @@ export enum commandType {
   wait, // 等待
 }
 
+export { CommandCode as commandType };
+
 /** 命令代码列表 */
-export type CommandCodeList = Array<commandType>;
+export type CommandCodeList = Array<CommandCode>;
 
 /** 添加 next 参数的命令代码列表 */
 export const ADD_NEXT_ARG_LIST: CommandCodeList = [
-  commandType.bgm,
-  commandType.pixi,
-  commandType.pixiInit,
-  commandType.label,
-  commandType.if,
-  commandType.miniAvatar,
-  commandType.setVar,
-  commandType.unlockBgm,
-  commandType.unlockCg,
-  commandType.filmMode,
-  commandType.playEffect,
+  CommandCode.bgm,
+  CommandCode.pixi,
+  CommandCode.pixiInit,
+  CommandCode.label,
+  CommandCode.if,
+  CommandCode.miniAvatar,
+  CommandCode.setVar,
+  CommandCode.unlockBgm,
+  CommandCode.unlockCg,
+  CommandCode.filmMode,
+  CommandCode.playEffect,
 ];
 
 /** 配置项 */
-export type ConfigItem = { scriptString: string; scriptType: commandType };
+export type CommandCodeItem = { scriptString: string; scriptType: CommandCode };
+
+export type { CommandCodeItem as ConfigItem };
 
 /** 配置项Map */
-export type ConfigMap = Map<string, ConfigItem>;
+export type CommandCodeMap = Map<string, CommandCodeItem>;
+
+export type { CommandCodeMap as ConfigMap };
 
 /** 脚本配置 */
-export const SCRIPT_CONFIG: Array<ConfigItem> = [
-  { scriptString: 'intro', scriptType: commandType.intro },
-  { scriptString: 'changeBg', scriptType: commandType.changeBg },
-  { scriptString: 'changeFigure', scriptType: commandType.changeFigure },
-  { scriptString: 'miniAvatar', scriptType: commandType.miniAvatar },
-  { scriptString: 'changeScene', scriptType: commandType.changeScene },
-  { scriptString: 'choose', scriptType: commandType.choose },
-  { scriptString: 'end', scriptType: commandType.end },
-  { scriptString: 'bgm', scriptType: commandType.bgm },
-  { scriptString: 'playVideo', scriptType: commandType.video },
-  {
-    scriptString: 'setComplexAnimation',
-    scriptType: commandType.setComplexAnimation,
-  },
-  { scriptString: 'setFilter', scriptType: commandType.setFilter },
-  { scriptString: 'pixiInit', scriptType: commandType.pixiInit },
-  { scriptString: 'pixiPerform', scriptType: commandType.pixi },
-  { scriptString: 'label', scriptType: commandType.label },
-  { scriptString: 'jumpLabel', scriptType: commandType.jumpLabel },
-  { scriptString: 'setVar', scriptType: commandType.setVar },
-  { scriptString: 'callScene', scriptType: commandType.callScene },
-  { scriptString: 'showVars', scriptType: commandType.showVars },
-  { scriptString: 'unlockCg', scriptType: commandType.unlockCg },
-  { scriptString: 'unlockBgm', scriptType: commandType.unlockBgm },
-  { scriptString: 'say', scriptType: commandType.say },
-  { scriptString: 'filmMode', scriptType: commandType.filmMode },
-  { scriptString: 'callScene', scriptType: commandType.callScene },
-  { scriptString: 'setTextbox', scriptType: commandType.setTextbox },
-  { scriptString: 'setAnimation', scriptType: commandType.setAnimation },
-  { scriptString: 'playEffect', scriptType: commandType.playEffect },
-  { scriptString: 'applyStyle', scriptType: commandType.applyStyle },
-  { scriptString: 'wait', scriptType: commandType.wait },
+export const SCRIPT_CONFIG: Array<CommandCodeItem> = [
+  { scriptString: 'intro', scriptType: CommandCode.intro },
+  { scriptString: 'changeBg', scriptType: CommandCode.changeBg },
+  { scriptString: 'changeFigure', scriptType: CommandCode.changeFigure },
+  { scriptString: 'miniAvatar', scriptType: CommandCode.miniAvatar },
+  { scriptString: 'changeScene', scriptType: CommandCode.changeScene },
+  { scriptString: 'choose', scriptType: CommandCode.choose },
+  { scriptString: 'end', scriptType: CommandCode.end },
+  { scriptString: 'bgm', scriptType: CommandCode.bgm },
+  { scriptString: 'playVideo', scriptType: CommandCode.video },
+  { scriptString: 'setComplexAnimation', scriptType: CommandCode.setComplexAnimation },
+  { scriptString: 'setFilter', scriptType: CommandCode.setFilter },
+  { scriptString: 'pixiInit', scriptType: CommandCode.pixiInit },
+  { scriptString: 'pixiPerform', scriptType: CommandCode.pixi },
+  { scriptString: 'label', scriptType: CommandCode.label },
+  { scriptString: 'jumpLabel', scriptType: CommandCode.jumpLabel },
+  { scriptString: 'setVar', scriptType: CommandCode.setVar },
+  { scriptString: 'callScene', scriptType: CommandCode.callScene },
+  { scriptString: 'showVars', scriptType: CommandCode.showVars },
+  { scriptString: 'unlockCg', scriptType: CommandCode.unlockCg },
+  { scriptString: 'unlockBgm', scriptType: CommandCode.unlockBgm },
+  { scriptString: 'say', scriptType: CommandCode.say },
+  { scriptString: 'filmMode', scriptType: CommandCode.filmMode },
+  { scriptString: 'callScene', scriptType: CommandCode.callScene },
+  { scriptString: 'setTextbox', scriptType: CommandCode.setTextbox },
+  { scriptString: 'setAnimation', scriptType: CommandCode.setAnimation },
+  { scriptString: 'playEffect', scriptType: CommandCode.playEffect },
+  { scriptString: 'applyStyle', scriptType: CommandCode.applyStyle },
+  { scriptString: 'wait', scriptType: CommandCode.wait },
 ];

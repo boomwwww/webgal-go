@@ -2,8 +2,8 @@ import { type ParserPlugin } from '@/lib/config';
 import { concat, pipe, unique } from '@/lib/utils';
 import * as plugins from '@/lib/plugins';
 import { type CompatArticle } from './config';
-import { type IAsset, fileType, type AssetsPrefetcher, type AssetSetter } from './config';
-import { commandType, type CommandCodeList, type ConfigMap } from './config';
+import { type Asset, FileCode, type AssetsPrefetcher, type AssetSetter } from './config';
+import { CommandCode, type CommandCodeList, type CommandCodeMap } from './config';
 
 export const commentPlugin: ParserPlugin = (input) => ({
   ...input,
@@ -37,13 +37,13 @@ export const undefinedPlugin: ParserPlugin = (input) => ({
   })),
 });
 
-export const createCommandCodePlugin = (scriptConfigMap: ConfigMap): ParserPlugin => {
+export const createCommandCodePlugin = (scriptConfigMap: CommandCodeMap): ParserPlugin => {
   return (input): CompatArticle => ({
     ...input,
     sections: input.sections.map((section) => {
       return {
         ...section,
-        commandCode: scriptConfigMap.get(section.header!)?.scriptType ?? commandType.say,
+        commandCode: scriptConfigMap.get(section.header!)?.scriptType ?? CommandCode.say,
       };
     }),
   });
@@ -52,7 +52,7 @@ export const createCommandCodePlugin = (scriptConfigMap: ConfigMap): ParserPlugi
 export const sayPlugin: ParserPlugin = (input: CompatArticle) => ({
   ...input,
   sections: input.sections.map((section) => {
-    if (section.commandCode !== commandType.say) return section;
+    if (section.commandCode !== CommandCode.say) return section;
     if (section.header === '' && section.body !== undefined) return section;
     return {
       ...section,
@@ -87,7 +87,7 @@ export const createAssetSetterPlugin = (assetSetter: AssetSetter): ParserPlugin 
     }
     const parsedChooseList = chooseValueList.map((chooseValue) => {
       if (chooseValue.match(/\./)) {
-        return assetSetter(chooseValue, fileType.scene);
+        return assetSetter(chooseValue, FileCode.scene);
       } else {
         return chooseValue;
       }
@@ -109,48 +109,48 @@ export const createAssetSetterPlugin = (assetSetter: AssetSetter): ParserPlugin 
         _body = '';
       } else {
         switch (section.commandCode) {
-          case commandType.playEffect: {
-            _body = assetSetter(section.body!, fileType.vocal);
+          case CommandCode.playEffect: {
+            _body = assetSetter(section.body!, FileCode.vocal);
             break;
           }
-          case commandType.changeBg: {
-            _body = assetSetter(section.body!, fileType.background);
+          case CommandCode.changeBg: {
+            _body = assetSetter(section.body!, FileCode.background);
             break;
           }
-          case commandType.changeFigure: {
-            _body = assetSetter(section.body!, fileType.figure);
+          case CommandCode.changeFigure: {
+            _body = assetSetter(section.body!, FileCode.figure);
             break;
           }
-          case commandType.bgm: {
-            _body = assetSetter(section.body!, fileType.bgm);
+          case CommandCode.bgm: {
+            _body = assetSetter(section.body!, FileCode.bgm);
             break;
           }
-          case commandType.callScene: {
-            _body = assetSetter(section.body!, fileType.scene);
+          case CommandCode.callScene: {
+            _body = assetSetter(section.body!, FileCode.scene);
             break;
           }
-          case commandType.changeScene: {
-            _body = assetSetter(section.body!, fileType.scene);
+          case CommandCode.changeScene: {
+            _body = assetSetter(section.body!, FileCode.scene);
             break;
           }
-          case commandType.miniAvatar: {
-            _body = assetSetter(section.body!, fileType.figure);
+          case CommandCode.miniAvatar: {
+            _body = assetSetter(section.body!, FileCode.figure);
             break;
           }
-          case commandType.video: {
-            _body = assetSetter(section.body!, fileType.video);
+          case CommandCode.video: {
+            _body = assetSetter(section.body!, FileCode.video);
             break;
           }
-          case commandType.choose: {
+          case CommandCode.choose: {
             _body = _getChooseContent(section.body!);
             break;
           }
-          case commandType.unlockBgm: {
-            _body = assetSetter(section.body!, fileType.bgm);
+          case CommandCode.unlockBgm: {
+            _body = assetSetter(section.body!, FileCode.bgm);
             break;
           }
-          case commandType.unlockCg: {
-            _body = assetSetter(section.body!, fileType.background);
+          case CommandCode.unlockCg: {
+            _body = assetSetter(section.body!, FileCode.background);
             break;
           }
           default: {
@@ -167,7 +167,7 @@ export const createAssetSetterPlugin = (assetSetter: AssetSetter): ParserPlugin 
             if (attribute.key!.toLowerCase().match(/\.(ogg|mp3|wav|flac)$/)) {
               return {
                 key: 'vocal',
-                value: assetSetter(attribute.key!, fileType.vocal),
+                value: assetSetter(attribute.key!, FileCode.vocal),
               };
             }
           }
@@ -180,15 +180,15 @@ export const createAssetSetterPlugin = (assetSetter: AssetSetter): ParserPlugin 
 
 export const assetsScannerPlugin: ParserPlugin = (input: CompatArticle): CompatArticle => {
   const _sections = input.sections.map((section) => {
-    const _assets: Array<IAsset> = [];
-    if (section.commandCode === commandType.say) {
+    const _assets: Array<Asset> = [];
+    if (section.commandCode === CommandCode.say) {
       section.attributes.forEach((attribute) => {
         if (attribute.key === 'vocal') {
           _assets.push({
             name: attribute.value as string,
             url: attribute.value as string,
             lineNumber: section.position.line,
-            type: fileType.vocal,
+            type: FileCode.vocal,
           });
         }
       });
@@ -197,48 +197,48 @@ export const assetsScannerPlugin: ParserPlugin = (input: CompatArticle): CompatA
       return { ...section, assets: _assets };
     }
     switch (section.commandCode) {
-      case commandType.changeBg: {
+      case CommandCode.changeBg: {
         _assets.push({
           name: section.body,
           url: section.body,
           lineNumber: section.position.line,
-          type: fileType.background,
+          type: FileCode.background,
         });
         break;
       }
-      case commandType.changeFigure: {
+      case CommandCode.changeFigure: {
         _assets.push({
           name: section.body,
           url: section.body,
           lineNumber: section.position.line,
-          type: fileType.figure,
+          type: FileCode.figure,
         });
         break;
       }
-      case commandType.miniAvatar: {
+      case CommandCode.miniAvatar: {
         _assets.push({
           name: section.body,
           url: section.body,
           lineNumber: section.position.line,
-          type: fileType.figure,
+          type: FileCode.figure,
         });
         break;
       }
-      case commandType.video: {
+      case CommandCode.video: {
         _assets.push({
           name: section.body,
           url: section.body,
           lineNumber: section.position.line,
-          type: fileType.video,
+          type: FileCode.video,
         });
         break;
       }
-      case commandType.bgm: {
+      case CommandCode.bgm: {
         _assets.push({
           name: section.body,
           url: section.body,
           lineNumber: section.position.line,
-          type: fileType.bgm,
+          type: FileCode.bgm,
         });
         break;
       }
@@ -258,10 +258,10 @@ export const assetsScannerPlugin: ParserPlugin = (input: CompatArticle): CompatA
 export const subSceneScannerPlugin: ParserPlugin = (input: CompatArticle): CompatArticle => {
   const _sections = input.sections.map((section) => {
     const _sub: Array<string> = [];
-    if (section.commandCode === commandType.changeScene || section.commandCode === commandType.callScene) {
+    if (section.commandCode === CommandCode.changeScene || section.commandCode === CommandCode.callScene) {
       _sub.push(section.body!);
     }
-    if (section.commandCode === commandType.choose) {
+    if (section.commandCode === CommandCode.choose) {
       const chooseList = section.body!.split('|');
       const chooseValueList = chooseList.map((choose) => choose.split(':')[1] ?? '');
       chooseValueList.forEach((chooseValue) => {
@@ -290,14 +290,14 @@ export const createCompatPlugin = (options: {
   assetsPrefetcher: AssetsPrefetcher;
   assetSetter: AssetSetter;
   addNextArgList: CommandCodeList;
-  scriptConfigMap: ConfigMap;
-  prePlugin?: Array<ParserPlugin>;
-  middlePlugin?: Array<ParserPlugin>;
-  postPlugin?: Array<ParserPlugin>;
+  scriptConfigMap: CommandCodeMap;
+  prePlugins?: Array<ParserPlugin>;
+  middlePlugins?: Array<ParserPlugin>;
+  postPlugins?: Array<ParserPlugin>;
 }): ParserPlugin => {
-  const _prePluginComposer = pipe(...(options.prePlugin ?? []));
-  const _middlePluginComposer = pipe(...(options.middlePlugin ?? []));
-  const _postPluginComposer = pipe(...(options.postPlugin ?? []));
+  const _prePluginComposer = pipe(...(options.prePlugins ?? []));
+  const _middlePluginComposer = pipe(...(options.middlePlugins ?? []));
+  const _postPluginComposer = pipe(...(options.postPlugins ?? []));
   const _compatPluginComposer = pipe(
     _prePluginComposer,
     plugins.trimPlugin,

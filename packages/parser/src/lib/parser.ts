@@ -7,9 +7,10 @@ export const createParserFactory = (parserConfig?: ParserConfig) => {
 
   const _plugins: Array<ParserPlugin> = [];
 
-  return {
-    use: (plugin: ParserPlugin): void => {
+  const _parserFactory = {
+    use: (plugin: ParserPlugin) => {
       _plugins.push(plugin);
+      return _parserFactory;
     },
 
     create: (): Parser => {
@@ -45,4 +46,6 @@ export const createParserFactory = (parserConfig?: ParserConfig) => {
 
     preParser: _preParser,
   };
+
+  return _parserFactory;
 };

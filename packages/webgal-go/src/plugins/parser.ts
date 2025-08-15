@@ -1,7 +1,9 @@
-// import { SceneParser } from '@webgal-go/parser';
+import SceneParser, { SCRIPT_CONFIG, ADD_NEXT_ARG_LIST } from '@webgal-go/parser';
 
-// export const parserPlugin = {
-//   install: (wg: any) => {
-//     wg.parser = parser;
-//   },
-// };
+const assetsPrefetcher = () => {};
+
+const assetSetter = (fileName: string) => fileName;
+
+const parser = new SceneParser(assetsPrefetcher, assetSetter, ADD_NEXT_ARG_LIST, SCRIPT_CONFIG);
+
+export default parser;
