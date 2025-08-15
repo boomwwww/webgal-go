@@ -1,6 +1,6 @@
 import { createParserFactory } from '@/lib/parser';
 import * as plugins from '@/lib/plugins';
-import { type Arg, type CompatArticle, type Scene, compatParserConfig } from './config';
+import { type CompatArticle, type Scene, compatParserConfig } from './config';
 import { commentPlugin, undefinedPlugin } from './plugins';
 
 /**
@@ -264,18 +264,31 @@ export type { WebgalConfigItem as IConfigItem };
 /** WebGAL 配置 */
 export type WebgalConfig = Array<WebgalConfigItem>;
 
-const configParserFactory = createParserFactory(compatParserConfig)
+const _configPreParser = createParserFactory(compatParserConfig)
   .use(plugins.trimPlugin)
   .use(plugins.attributePlugin)
   .use(commentPlugin)
-  .use(undefinedPlugin);
-configParserFactory;
+  .use(undefinedPlugin)
+  .create();
 
-// todo
 export const configParser = {
   parse: (configText: string) => {
-    const configLines = configText.replaceAll(`\r`, '').split('\n');
-    return configLines.map((e) => configLineParser(e)).filter((e) => e.command !== '');
+    const preParsed = _configPreParser.parse({
+      str: configText,
+      name: '@config',
+      url: '@config',
+    });
+    return preParsed.sections.map((section) => ({
+      command: section.header!,
+      args: section
+        .body!.split('|')
+        .map((arg) => arg.trim())
+        .filter((arg) => arg !== ''),
+      options: section.attributes.map((attribute) => ({
+        key: attribute.key!,
+        value: attribute.value!,
+      })),
+    }));
   },
   stringify: (input: WebgalConfig) => {
     return input.reduce(
@@ -289,99 +302,6 @@ export const configParser = {
     );
   },
 };
-
-function configLineParser(inputLine: string): WebgalConfigItem {
-  const options: Array<WebgalConfigItemOption> = [];
-  let command: string;
-
-  let newSentenceRaw = inputLine.split(';')[0];
-  if (newSentenceRaw === '') {
-    // 注释提前返回
-    return {
-      command: '',
-      args: [],
-      options: [],
-    };
-  }
-  // 截取命令
-  const getCommandResult = /\s*:\s*/.exec(newSentenceRaw);
-
-  // 没有command
-  if (getCommandResult === null) {
-    command = '';
-  } else {
-    command = newSentenceRaw.substring(0, getCommandResult.index);
-    // 划分命令区域和content区域
-    newSentenceRaw = newSentenceRaw.substring(getCommandResult.index + 1, newSentenceRaw.length);
-  }
-  // 截取 Options 区域
-  const getOptionsResult = / -/.exec(newSentenceRaw);
-  // 获取到参数
-  if (getOptionsResult) {
-    const optionsRaw = newSentenceRaw.substring(getOptionsResult.index, newSentenceRaw.length);
-    newSentenceRaw = newSentenceRaw.substring(0, getOptionsResult.index);
-    const args = argsParser(optionsRaw);
-    for (const arg of args) {
-      options.push(arg);
-    }
-  }
-  return {
-    command,
-    args: newSentenceRaw
-      .split('|')
-      .map((e) => e.trim())
-      .filter((e) => e !== ''),
-    options,
-  };
-}
-
-export function argsParser(argsRaw: string): Array<Arg> {
-  const returnArrayList: Array<Arg> = [];
-  const rawArgList: Array<string> = argsRaw.split(' -');
-  const filteredArgList = rawArgList.filter((e) => e !== '');
-  filteredArgList.forEach((arg) => {
-    const equalSignIndex = arg.indexOf('=');
-    let argName = arg.slice(0, equalSignIndex);
-    let argValue: string | undefined = arg.slice(equalSignIndex + 1);
-    if (equalSignIndex < 0) {
-      argName = arg;
-      argValue = undefined;
-    }
-    if (argName.toLowerCase().match(/\.(ogg|mp3|wav|flac)$/)) {
-      returnArrayList.push({
-        key: 'vocal',
-        value: arg,
-      });
-    } else {
-      if (argValue === undefined) {
-        returnArrayList.push({
-          key: argName,
-          value: true,
-        });
-      } else {
-        if (argValue === 'true' || argValue === 'false') {
-          returnArrayList.push({
-            key: argName,
-            value: argValue === 'true',
-          });
-        } else {
-          if (!isNaN(Number(argValue))) {
-            returnArrayList.push({
-              key: argName,
-              value: Number(argValue),
-            });
-          } else {
-            returnArrayList.push({
-              key: argName,
-              value: argValue,
-            });
-          }
-        }
-      }
-    }
-  });
-  return returnArrayList;
-}
 
 export interface WebGALStyle {
   classNameStyles: Record<string, string>;
