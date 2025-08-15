@@ -49,7 +49,7 @@ export type { Scene as IScene };
 
 /** 语句 */
 export interface Sentence {
-  command: CommandCode; // 语句类型
+  command: CommandCode | number; // 语句类型
   commandRaw: string; // 命令的原始内容，方便调试
   content: string; // 语句内容
   args: Array<Arg>; // 参数列表
@@ -70,7 +70,7 @@ export type { Arg as arg };
 /** 资源 */
 export interface Asset {
   name: string; // 资源名称
-  type: FileCode; // 资源类型
+  type: FileCode | number; // 资源类型
   url: string; // 资源url
   lineNumber: number; // 触发资源语句的行号
 }
@@ -94,7 +94,7 @@ export { FileCode as fileType };
 export type AssetsPrefetcher = (assetList: Array<Asset>) => void;
 
 /** 资源路径设置器 */
-export type AssetSetter = (fileName: string, assetType: FileCode) => string;
+export type AssetSetter = (fileName: string, assetType: FileCode | number) => string;
 
 /** 命令类型枚举 */
 export enum CommandCode {
@@ -137,7 +137,7 @@ export enum CommandCode {
 export { CommandCode as commandType };
 
 /** 命令代码列表 */
-export type CommandCodeList = Array<CommandCode>;
+export type CommandCodeList = Array<CommandCode | number>;
 
 /** 添加 next 参数的命令代码列表 */
 export const ADD_NEXT_ARG_LIST: CommandCodeList = [
@@ -155,7 +155,7 @@ export const ADD_NEXT_ARG_LIST: CommandCodeList = [
 ];
 
 /** 配置项 */
-export type CommandCodeItem = { scriptString: string; scriptType: CommandCode };
+export type CommandCodeItem = { scriptString: string; scriptType: CommandCode | number };
 
 export type { CommandCodeItem as ConfigItem };
 
