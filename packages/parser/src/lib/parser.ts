@@ -1,4 +1,4 @@
-import type { Parser, ParserConfig, ParserPlugin } from './config';
+import { type Parser, type ParserConfig, type ParserPlugin } from './config';
 import { createPreParser } from './pre';
 import { pipe } from './utils';
 
@@ -21,13 +21,12 @@ export const createParserFactory = (parserConfig?: ParserConfig) => {
         },
 
         parse: (rawArticle) => {
-          const { name, url, str } = rawArticle;
-          const initialSections = _preParser.parse(str);
+          const initialSections = _preParser.parse(rawArticle.str);
           const initialArticle = {
-            name: name,
-            url: url,
+            name: rawArticle.name,
+            url: rawArticle.url,
             sections: initialSections,
-            raw: str,
+            raw: rawArticle.str,
           };
           return _pluginParse(initialArticle);
         },

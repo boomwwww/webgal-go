@@ -1,3 +1,32 @@
+import { type Article, type Section } from '@/lib/config';
+import { type CompleteParserConfig, defaultEscapeConfigs } from '@/lib/config';
+
+/** 兼容的文章 */
+export interface CompatArticle extends Article {
+  sections: Array<CompatSection>;
+  assets?: Array<IAsset>;
+  sub?: Array<string>;
+}
+
+/** 兼容的段落 */
+export interface CompatSection extends Section {
+  commandCode?: number;
+  assets?: Array<IAsset>;
+  sub?: Array<string>;
+}
+
+/** 兼容的解析器配置 */
+export const compatParserConfig: CompleteParserConfig = {
+  separators: {
+    bodyStart: [':'],
+    attributeStart: [' -'],
+    attributeKeyValue: ['='],
+    commentSeparators: [{ start: ';', end: ['\r\n', '\n', '\r'] }],
+    sectionEnd: ['\r\n', '\n', '\r'],
+  },
+  escapeConfigs: defaultEscapeConfigs,
+};
+
 /** 场景接口 */
 export interface IScene {
   sceneName: string; // 场景名称
@@ -21,22 +50,6 @@ export interface ISentence {
 export interface arg {
   key: string; // 参数键
   value: string | boolean | number; // 参数值
-}
-
-import type { Article, Section } from '@/lib/config';
-
-/** 兼容的文章 */
-export interface CompatArticle extends Article {
-  sections: Array<CompatSection>;
-  assets?: Array<IAsset>;
-  sub?: Array<string>;
-}
-
-/** 兼容的段落 */
-export interface CompatSection extends Section {
-  commandCode?: number;
-  assets?: Array<IAsset>;
-  sub?: Array<string>;
 }
 
 /** 资源接口 */
@@ -160,17 +173,3 @@ export const SCRIPT_CONFIG: Array<ConfigItem> = [
   { scriptString: 'applyStyle', scriptType: commandType.applyStyle },
   { scriptString: 'wait', scriptType: commandType.wait },
 ];
-
-import { type CompleteParserConfig, defaultEscapeConfigs } from '@/lib/config';
-
-/** 兼容的解析器配置 */
-export const compatParserConfig: CompleteParserConfig = {
-  separators: {
-    bodyStart: [':'],
-    attributeStart: [' -'],
-    attributeKeyValue: ['='],
-    commentSeparators: [{ start: ';', end: ['\r\n', '\n', '\r'] }],
-    sectionEnd: ['\r\n', '\n', '\r'],
-  },
-  escapeConfigs: defaultEscapeConfigs,
-};

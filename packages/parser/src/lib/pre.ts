@@ -1,4 +1,4 @@
-import type { Section, PreParser, ParserConfig, CompleteParserConfig } from './config';
+import { type Section, type PreParser, type ParserConfig, type CompleteParserConfig } from './config';
 import { getCompleteConfig } from './config';
 import { concat, getPositionByIndex } from './utils';
 

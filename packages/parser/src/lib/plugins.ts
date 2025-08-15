@@ -1,4 +1,4 @@
-import type { ParserPlugin } from './config';
+import { type ParserPlugin } from './config';
 
 export const trimPlugin: ParserPlugin = (input) => ({
   ...input,

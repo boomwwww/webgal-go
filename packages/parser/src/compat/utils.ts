@@ -1,5 +1,5 @@
 import { concat } from '@/lib/utils';
-import type { IScene, CompatArticle } from './config';
+import { type CompatArticle, type IScene } from './config';
 
 /**
  * Preprocessor for scene text.

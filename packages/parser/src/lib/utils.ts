@@ -1,9 +1,9 @@
-/** 拼接字符串 */
+/** 拼接字符串(忽略undefined) */
 export const concat = (...args: Array<string | undefined>) => {
   return args.filter((arg) => arg !== undefined).join('');
 };
 
-/**  根据索引获取行和列 */
+/** 根据索引获取行和列 */
 export const getPositionByIndex = (str: string, index: number): { line: number; column: number } => {
   if (!str) {
     if (index !== 0) {

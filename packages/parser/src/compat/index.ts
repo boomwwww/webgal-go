@@ -1,9 +1,9 @@
-import type { Parser, ParserConfig, ParserPlugin } from '@/lib/config';
+import { type Parser, type ParserConfig, type ParserPlugin } from '@/lib/config';
 import { createParserFactory } from '@/lib/parser';
 
-import type { IScene } from './config';
-import type { AssetsPrefetcher, AssetSetter } from './config';
-import type { CommandCodeList, ConfigItem, ConfigMap } from './config';
+import { type IScene } from './config';
+import { type AssetsPrefetcher, type AssetSetter } from './config';
+import { type CommandCodeList, type ConfigItem, type ConfigMap } from './config';
 
 import { type WebgalConfig, configParser } from './utils';
 import { type IWebGALStyleObj, scssParser } from './utils';
@@ -91,13 +91,13 @@ export class SceneParser {
 export { ADD_NEXT_ARG_LIST, SCRIPT_CONFIG } from './config';
 export { sceneTextPreProcess } from './utils';
 
-export type { IScene, ISentence, arg } from './config';
-export type { CompatArticle, CompatSection } from './config';
+export { type CompatArticle, type CompatSection } from './config';
+export { type IScene, type ISentence, type arg } from './config';
 export { type IAsset, fileType } from './config';
-export type { AssetsPrefetcher, AssetSetter } from './config';
+export { type AssetsPrefetcher, type AssetSetter } from './config';
 export { commandType, type CommandCodeList } from './config';
-export type { ConfigItem, ConfigMap } from './config';
+export { type ConfigItem, type ConfigMap } from './config';
 export { compatParserConfig } from './config';
-export type { IOptionItem, IConfigItem, WebgalConfig } from './utils';
-export type { IWebGALStyleObj } from './utils';
+export { type IOptionItem, type IConfigItem, type WebgalConfig, configParser } from './utils';
+export { type IWebGALStyleObj, scssParser } from './utils';
 export * as compatPlugins from './plugins';
