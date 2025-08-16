@@ -1,11 +1,5 @@
 <script setup lang="ts">
-import { createWebgal } from 'webgal-go';
-import { myPlugin } from '@webgal-go/test-plugin';
-const wg = createWebgal();
-wg.use(myPlugin);
-
-const _p = wg.ctx.stage;
-wg.bus.emit('play', null);
+import wg from '@/webgal';
 </script>
 
 <template>

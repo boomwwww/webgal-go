@@ -1,5 +1,13 @@
 import { ISceneData } from './sceneInterface';
 
+interface SceneManager {
+  settledScenes: Array<string>;
+  settledAssets: Array<string>;
+  sceneData: ISceneData;
+  lockSceneWrite: boolean;
+  reset: () => void;
+}
+
 const createSceneContext = () => {
   return {
     currentSentenceId: 0, // 当前语句ID
@@ -38,11 +46,3 @@ export const createSceneManager = (): SceneManager => {
   };
   return sceneManager;
 };
-
-interface SceneManager {
-  settledScenes: Array<string>;
-  settledAssets: Array<string>;
-  sceneData: ISceneData;
-  lockSceneWrite: boolean;
-  reset: () => void;
-}
