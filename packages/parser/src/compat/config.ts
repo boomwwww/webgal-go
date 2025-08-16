@@ -32,7 +32,7 @@ export type CreateSceneParserOptions = SceneParserOptions & {
   scriptConfigInput?: Array<CommandCodeItem> | CommandCodeMap;
 };
 
-export type CompatParser = {
+export type CompatSceneParser = {
   parse: (rawScene: string, sceneName: string, sceneUrl: string) => Scene;
   parseConfig: (configText: string) => WebgalConfig;
   stringifyConfig: (config: WebgalConfig) => string;

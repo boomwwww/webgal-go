@@ -1,9 +1,12 @@
-import SceneParser, { SCRIPT_CONFIG, ADD_NEXT_ARG_LIST } from '@webgal-go/parser';
+import { createSceneParser, SCRIPT_CONFIG, ADD_NEXT_ARG_LIST } from '@webgal-go/parser';
 
-const assetsPrefetcher = () => {};
+const _assetsPrefetcher = () => {};
 
-const assetSetter = (fileName: string) => fileName;
+const _assetSetter = (fileName: string) => fileName;
 
-const parser = new SceneParser(assetsPrefetcher, assetSetter, ADD_NEXT_ARG_LIST, SCRIPT_CONFIG);
-
-export default parser;
+export const parser = createSceneParser({
+  assetsPrefetcher: _assetsPrefetcher,
+  assetSetter: _assetSetter,
+  addNextArgList: ADD_NEXT_ARG_LIST,
+  scriptConfigInput: SCRIPT_CONFIG,
+});

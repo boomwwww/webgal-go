@@ -1,14 +1,19 @@
+import { type CompatSceneParser } from '@webgal-go/parser';
 import { createBus } from '@/utils/bus';
 import { config } from '@/config';
+import { parser as _parser } from '@/plugins/parser';
 
 export interface Webgal {
   readonly version: string;
   readonly ctx: Context;
+  readonly parser: CompatSceneParser;
   readonly bus: ReturnType<typeof createBus<Events>>;
   readonly use: (plugin: Plugin) => Webgal;
 }
 
-export interface Context {}
+export interface Context {
+
+}
 
 export interface BusEvents {
   'text-settle': null;
@@ -20,22 +25,19 @@ export interface BusEvents {
 type Events = Required<BusEvents>;
 
 export interface Plugin {
-  install: (wg: Webgal) => void;
+  install: (webgal: Webgal) => void;
 }
 
 export const createWebgal = (): Webgal => {
-  const wg: Webgal = {
+  const _webgal: Webgal = {
     version: config.version,
     ctx: {},
+    parser: _parser,
     bus: createBus<Events>(),
     use: <P extends Plugin>(plugin: P) => {
-      plugin.install(wg);
-      return wg;
+      plugin.install(_webgal);
+      return _webgal;
     },
   };
-  return wg;
+  return _webgal;
 };
-
-// import { parserPlugin } from '@/plugins/parser';
-// const wg = createWebgal();
-// wg.use(parserPlugin);
