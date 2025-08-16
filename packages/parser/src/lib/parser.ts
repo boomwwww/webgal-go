@@ -1,13 +1,13 @@
-import { type Parser, type ParserConfig, type ParserPlugin } from './config';
+import { type Parser, type ParserFactory, type ParserConfig, type ParserPlugin } from './config';
 import { createPreParser } from './pre';
 import { pipe } from './utils';
 
-export const createParserFactory = (parserConfig?: ParserConfig) => {
+export const createParserFactory = (parserConfig?: ParserConfig): ParserFactory => {
   const _preParser = createPreParser(parserConfig);
 
   const _plugins: Array<ParserPlugin> = [];
 
-  const _parserFactory = {
+  const _parserFactory: ParserFactory = {
     use: (plugin: ParserPlugin) => {
       _plugins.push(plugin);
       return _parserFactory;

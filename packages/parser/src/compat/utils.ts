@@ -1,6 +1,7 @@
 import { createParserFactory } from '@/lib/parser';
 import * as plugins from '@/lib/plugins';
 import { type CompatArticle, type Scene, compatParserConfig } from './config';
+import { type WebgalConfig, type WebGALStyle } from './config';
 import { undefinedPlugin } from './plugins';
 
 /**
@@ -244,26 +245,6 @@ export const getCompatScene = (input: CompatArticle): Scene => ({
   subSceneList: input.sub!,
 });
 
-/** WebGAL 配置选项接口 */
-export interface WebgalConfigItemOption {
-  key: string;
-  value: string | number | boolean;
-}
-
-export type { WebgalConfigItemOption as IOptionItem };
-
-/** WebGAL 配置项接口 */
-export interface WebgalConfigItem {
-  command: string;
-  args: Array<string>;
-  options: Array<WebgalConfigItemOption>;
-}
-
-export type { WebgalConfigItem as IConfigItem };
-
-/** WebGAL 配置 */
-export type WebgalConfig = Array<WebgalConfigItem>;
-
 const _configPreParser = createParserFactory(compatParserConfig)
   .use(plugins.trimPlugin)
   .use(plugins.attributePlugin)
@@ -271,7 +252,7 @@ const _configPreParser = createParserFactory(compatParserConfig)
   .create();
 
 export const configParser = {
-  parse: (configText: string) => {
+  parse: (configText: string): WebgalConfig => {
     const preParsed = _configPreParser.parse({
       str: configText,
       name: '@config',
@@ -289,7 +270,7 @@ export const configParser = {
       })),
     }));
   },
-  stringify: (input: WebgalConfig) => {
+  stringify: (input: WebgalConfig): string => {
     return input.reduce(
       (previousValue, curr) =>
         previousValue +
@@ -301,13 +282,6 @@ export const configParser = {
     );
   },
 };
-
-export interface WebGALStyle {
-  classNameStyles: Record<string, string>;
-  others: string;
-}
-
-export type { WebGALStyle as IWebGALStyleObj };
 
 // todo
 export const styleParser = {

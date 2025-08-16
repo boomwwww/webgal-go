@@ -3,10 +3,11 @@ import { createParserFactory } from '@/lib/parser';
 
 import { type AssetsPrefetcher, type AssetSetter } from './config';
 import { type CommandCodeList, type CommandCodeItem, type CommandCodeMap } from './config';
-import { type SceneParserOptions } from './config';
+import { type SceneParserOptions, type CreateSceneParserOptions } from './config';
+import { type CompatParser } from './config';
 
-import { type WebgalConfig, configParser } from './utils';
-import { type WebGALStyle, styleParser } from './utils';
+import { type WebgalConfig, type WebGALStyle } from './config';
+import { configParser, styleParser } from './utils';
 
 import { compatParserConfig } from './config';
 import { createCompatPlugin } from './plugins';
@@ -94,7 +95,72 @@ export class SceneParser {
 export { ADD_NEXT_ARG_LIST, SCRIPT_CONFIG } from './config';
 export { sceneTextPreProcess } from './utils';
 
+export const createSceneParser = (options?: CreateSceneParserOptions): CompatParser => {
+  const _assetsPrefetcher: AssetsPrefetcher = options?.assetsPrefetcher ?? (() => {});
+
+  const _assetSetter: AssetSetter = options?.assetSetter ?? ((n) => n);
+
+  const _addNextArgList: CommandCodeList = options?.addNextArgList ?? [];
+
+  let _scriptConfigMap: CommandCodeMap;
+  if (!options?.scriptConfigInput) {
+    _scriptConfigMap = new Map();
+  } else if (Array.isArray(options?.scriptConfigInput)) {
+    _scriptConfigMap = new Map();
+    options.scriptConfigInput.forEach((config) => {
+      _scriptConfigMap.set(config.scriptString, config);
+    });
+  } else {
+    _scriptConfigMap = options?.scriptConfigInput;
+  }
+
+  const parserFactory = createParserFactory(options?.config ?? compatParserConfig);
+  if (Array.isArray(options?.plugins)) {
+    for (const plugin of options.plugins) {
+      parserFactory.use(plugin);
+    }
+  } else {
+    parserFactory.use(
+      createCompatPlugin({
+        assetsPrefetcher: _assetsPrefetcher,
+        assetSetter: _assetSetter,
+        addNextArgList: _addNextArgList,
+        scriptConfigMap: _scriptConfigMap,
+        prePlugins: options?.plugins?.pre,
+        middlePlugins: options?.plugins?.middle,
+        postPlugins: options?.plugins?.post,
+      })
+    );
+  }
+  const _parser = parserFactory.create();
+
+  return {
+    parse(rawScene: string, sceneName: string, sceneUrl: string) {
+      const parsed = _parser.parse({
+        str: rawScene,
+        name: sceneName,
+        url: sceneUrl,
+      });
+      return getCompatScene(parsed);
+    },
+
+    parseConfig(configText: string): WebgalConfig {
+      return configParser.parse(configText);
+    },
+
+    stringifyConfig(config: WebgalConfig): string {
+      return configParser.stringify(config);
+    },
+
+    parseScssToWebgalStyleObj(scssString: string): WebGALStyle {
+      return styleParser.parse(scssString);
+    },
+  };
+};
+
 export { type CompatArticle, type CompatSection } from './config';
+export { type SceneParserOptions, type CreateSceneParserOptions } from './config';
+export { type CompatParser } from './config';
 export { type Scene, type Sentence, type Arg } from './config';
 export { type IScene, type ISentence, type arg } from './config';
 export { type IAsset, fileType } from './config';
@@ -105,8 +171,9 @@ export { commandType } from './config';
 export { type CommandCodeItem, type CommandCodeMap } from './config';
 export { type ConfigItem, type ConfigMap } from './config';
 export { compatParserConfig } from './config';
-export { type WebgalConfigItemOption, type WebgalConfigItem, type WebgalConfig, configParser } from './utils';
-export { type IOptionItem, type IConfigItem } from './utils';
-export { type WebGALStyle, styleParser } from './utils';
-export { type IWebGALStyleObj } from './utils';
+export { type WebgalConfigItemOption, type WebgalConfigItem, type WebgalConfig } from './config';
+export { type IOptionItem, type IConfigItem } from './config';
+export { type WebGALStyle } from './config';
+export { type IWebGALStyleObj } from './config';
+export { configParser, styleParser } from './utils';
 export * as compatPlugins from './plugins';

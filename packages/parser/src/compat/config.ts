@@ -24,6 +24,21 @@ export type SceneParserOptions = {
     | { pre?: Array<ParserPlugin>; middle?: Array<ParserPlugin>; post?: Array<ParserPlugin> };
 };
 
+/** 创建场景解析器选项 */
+export type CreateSceneParserOptions = SceneParserOptions & {
+  assetsPrefetcher?: AssetsPrefetcher;
+  assetSetter?: AssetSetter;
+  addNextArgList?: CommandCodeList;
+  scriptConfigInput?: Array<CommandCodeItem> | CommandCodeMap;
+};
+
+export type CompatParser = {
+  parse: (rawScene: string, sceneName: string, sceneUrl: string) => Scene;
+  parseConfig: (configText: string) => WebgalConfig;
+  stringifyConfig: (config: WebgalConfig) => string;
+  parseScssToWebgalStyleObj: (scssString: string) => WebGALStyle;
+};
+
 /** 兼容的解析器配置 */
 export const compatParserConfig: CompleteParserConfig = {
   separators: {
@@ -195,3 +210,30 @@ export const SCRIPT_CONFIG: Array<CommandCodeItem> = [
   { scriptString: 'applyStyle', scriptType: CommandCode.applyStyle },
   { scriptString: 'wait', scriptType: CommandCode.wait },
 ];
+
+/** WebGAL 配置选项接口 */
+export interface WebgalConfigItemOption {
+  key: string;
+  value: string | number | boolean;
+}
+
+export type { WebgalConfigItemOption as IOptionItem };
+
+/** WebGAL 配置项接口 */
+export interface WebgalConfigItem {
+  command: string;
+  args: Array<string>;
+  options: Array<WebgalConfigItemOption>;
+}
+
+export type { WebgalConfigItem as IConfigItem };
+
+/** WebGAL 配置 */
+export type WebgalConfig = Array<WebgalConfigItem>;
+
+export interface WebGALStyle {
+  classNameStyles: Record<string, string>;
+  others: string;
+}
+
+export type { WebGALStyle as IWebGALStyleObj };

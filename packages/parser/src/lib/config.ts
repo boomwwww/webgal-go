@@ -38,6 +38,13 @@ export type Parser = {
   config: CompleteParserConfig;
 };
 
+/** 解析器工厂 */
+export type ParserFactory = {
+  use: (plugin: ParserPlugin) => ParserFactory;
+  create: () => Parser;
+  preParser: PreParser;
+};
+
 /** 解析器配置 */
 export type ParserConfig = {
   separators?: SeparatorConfig; // 分隔符配置
