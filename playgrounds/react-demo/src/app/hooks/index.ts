@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+// import webgal from '@/webgal'
 
 export const useAppInit = () => {
   /** 在窗口大小改变时进行强制缩放 */
@@ -21,7 +22,7 @@ export const useAppInit = () => {
       let mw2os = targetHeight / 2 - h / 2 // 竖屏时 x轴移动距离
       let transform = ''
       let ebgTransform = ''
-      const appRoot = document.getElementById('app-root') // 获取app-root元素
+      const appRoot = document.getElementById('webgal-root') // 获取webgal-root元素
       const title = document.getElementById('Title_enter_page')
       const ebg = document.getElementById('ebg')
       const elements = [appRoot, title]
@@ -96,7 +97,6 @@ export const useAppInit = () => {
       // 将该标签添加到 head 中
       document.getElementsByTagName('head')[0].appendChild(metaTag)
       const styleTag = document.createElement('style')
-      styleTag.type = 'text/css'
       styleTag.textContent = '* { font-synthesis: none !important; }'
       document.head.appendChild(styleTag)
     }
@@ -140,12 +140,6 @@ export const useAppInit = () => {
       const target = document.getElementById('enter_game_target')
       if (target) {
         target.dispatchEvent(event)
-      }
-      if (event) {
-        const logo = document.getElementById('logo_target')
-        if (logo) {
-          logo.style.display = 'contents'
-        }
       }
     })
     /** 点击屏幕，进入引擎主界面 */
@@ -223,6 +217,8 @@ export const useAppInit = () => {
     const live2d4Promise = loadIifePlugin('lib/live2dcubismcore.min.js')
     // @ts-expect-error live2dPromise is a global variable
     window.live2dPromise = Promise.all([live2d2Promise, live2d4Promise])
+    // // @ts-expect-error todo ctx
+    // webgal.ctx.live2d.promise = Promise.all([live2d2Promise, live2d4Promise])
   }, [])
   return
 }
