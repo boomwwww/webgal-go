@@ -103,9 +103,8 @@ export const createSceneParser = (options?: CreateSceneParserOptions): CompatSce
   const _addNextArgList: CommandCodeList = options?.addNextArgList ?? []
 
   const _scriptConfigMap: CommandCodeMap = (() => {
-    if (!options?.scriptConfigInput) {
-      return new Map()
-    } else if (Array.isArray(options?.scriptConfigInput)) {
+    if (!options?.scriptConfigInput) return new Map()
+    if (Array.isArray(options?.scriptConfigInput)) {
       const _map = new Map()
       options.scriptConfigInput.forEach((config) => {
         _map.set(config.scriptString, config)
@@ -116,13 +115,13 @@ export const createSceneParser = (options?: CreateSceneParserOptions): CompatSce
     }
   })()
 
-  const parserFactory = createParserFactory(options?.config ?? compatParserConfig)
+  const _parserFactory = createParserFactory(options?.config ?? compatParserConfig)
   if (Array.isArray(options?.plugins)) {
     for (const plugin of options.plugins) {
-      parserFactory.use(plugin)
+      _parserFactory.use(plugin)
     }
   } else {
-    parserFactory.use(
+    _parserFactory.use(
       createCompatPlugin({
         assetsPrefetcher: _assetsPrefetcher,
         assetSetter: _assetSetter,
@@ -134,7 +133,7 @@ export const createSceneParser = (options?: CreateSceneParserOptions): CompatSce
       })
     )
   }
-  const _parser = parserFactory.create()
+  const _parser = _parserFactory.create()
 
   return {
     parse(rawScene: string, sceneName: string, sceneUrl: string) {

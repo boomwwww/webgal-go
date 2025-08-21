@@ -2,7 +2,6 @@ import { createParserFactory } from '@/lib/parser'
 import * as plugins from '@/lib/plugins'
 import { type CompatArticle, type Scene, compatParserConfig } from './config'
 import { type WebgalConfig, type WebGALStyle } from './config'
-import { undefinedPlugin } from './plugins'
 
 /**
  * Preprocessor for scene text.
@@ -227,10 +226,10 @@ function placeholderLine(content = '') {
 //   return processedLines.join('\n');
 // }
 
-export const getCompatScene = (input: CompatArticle): Scene => ({
-  sceneName: input.name,
-  sceneUrl: input.url,
-  sentenceList: input.sections.map((section) => ({
+export const getCompatScene = (inputArticle: CompatArticle): Scene => ({
+  sceneName: inputArticle.name,
+  sceneUrl: inputArticle.url,
+  sentenceList: inputArticle.sections.map((section) => ({
     command: section.commandCode!,
     commandRaw: section.header!,
     content: section.body!,
@@ -241,34 +240,24 @@ export const getCompatScene = (input: CompatArticle): Scene => ({
     sentenceAssets: section.assets!,
     subScene: section.sub!,
   })),
-  assetsList: input.assets!,
-  subSceneList: input.sub!,
+  assetsList: inputArticle.assets!,
+  subSceneList: inputArticle.sub!,
 })
 
 const _configPreParser = createParserFactory(compatParserConfig)
   .use(plugins.trimPlugin)
   .use(plugins.attributePlugin)
-  .use(undefinedPlugin)
+  .use(plugins.undefinedPlugin)
   .create()
 
 export const configParser = {
   parse: (configText: string): WebgalConfig => {
-    const preParsed = _configPreParser.parse({
+    const parsed = _configPreParser.parse({
       str: configText,
       name: '@config',
       url: '@config',
     })
-    return preParsed.sections.map((section) => ({
-      command: section.header!,
-      args: section
-        .body!.split('|')
-        .map((arg) => arg.trim())
-        .filter((arg) => arg !== ''),
-      options: section.attributes.map((attribute) => ({
-        key: attribute.key!,
-        value: attribute.value!,
-      })),
-    }))
+    return getCompatConfig(parsed)
   },
   stringify: (input: WebgalConfig): string => {
     return input.reduce(
@@ -281,6 +270,20 @@ export const configParser = {
       ''
     )
   },
+}
+
+const getCompatConfig = (inputArticle: CompatArticle): WebgalConfig => {
+  return inputArticle.sections.map((section) => ({
+    command: section.header!,
+    args: section
+      .body!.split('|')
+      .map((arg) => arg.trim())
+      .filter((arg) => arg !== ''),
+    options: section.attributes.map((attribute) => ({
+      key: attribute.key!,
+      value: attribute.value!,
+    })),
+  }))
 }
 
 // todo

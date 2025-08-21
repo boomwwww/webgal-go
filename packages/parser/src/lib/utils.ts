@@ -32,7 +32,7 @@ export const getPositionByIndex = (str: string, index: number): { line: number; 
     } else if (str[p] === '\r' && str[p + 1] === '\n') {
       column++ // 处理 \r\n 换行符组合
     } else if (str[p] === '\n' || str[p] === '\r') {
-      line++ // 处理其他换行符（\n 或 \r）
+      line++ // 处理其他换行符(\n 或 \r)
       column = 1
     } else {
       column++ // 普通字符

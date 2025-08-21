@@ -24,14 +24,14 @@ export interface Attribute {
 }
 
 /** 预解析器 */
-export type PreParser = {
+export interface PreParser {
   parse: (str: string) => Array<Section>
   stringify: (input: Array<Section>, options?: { raw: boolean }) => string
   config: CompleteParserConfig
 }
 
 /** 解析器 */
-export type Parser = {
+export interface Parser {
   preParse: (str: string) => Array<Section>
   parse: (rawArticle: { name: string; url: string; str: string }) => Article
   stringify: (input: Article | Array<Section>, options?: { raw: boolean }) => string
@@ -39,20 +39,20 @@ export type Parser = {
 }
 
 /** 解析器工厂 */
-export type ParserFactory = {
+export interface ParserFactory {
   use: (plugin: ParserPlugin) => ParserFactory
   create: () => Parser
   preParser: PreParser
 }
 
 /** 解析器配置 */
-export type ParserConfig = {
+export interface ParserConfig {
   separators?: SeparatorConfig // 分隔符配置
   escapeConfigs?: Array<EscapeConfig> // 转义规则配置
 }
 
 /** 完整的解析器配置 */
-export type CompleteParserConfig = {
+export interface CompleteParserConfig {
   separators: Required<SeparatorConfig>
   escapeConfigs: Array<EscapeConfig>
 }
@@ -61,16 +61,16 @@ export type CompleteParserConfig = {
 export type ParserPlugin = (input: Article) => Article
 
 /** 分隔符配置 */
-export type SeparatorConfig = {
-  bodyStart?: Array<string> // 用于分隔header和body的字符（如':'）
-  attributeStart?: Array<string> // 用于开始新属性的字符（如' -'）
-  attributeKeyValue?: Array<string> // 用于分隔属性键值的字符（如'='）
-  commentSeparators?: Array<{ start: string; end: Array<string> }> // 用于分隔注释的分隔符（如';'）
-  sectionEnd?: Array<string> // 用于结束section的分隔符（如'\n'）
+export interface SeparatorConfig {
+  bodyStart?: Array<string> // 用于分隔header和body的字符(如':')
+  attributeStart?: Array<string> // 用于开始新属性的字符(如' -')
+  attributeKeyValue?: Array<string> // 用于分隔属性键值的字符(如'=')
+  commentSeparators?: Array<{ start: string; end: Array<string> }> // 用于分隔注释的分隔符(如';')
+  sectionEnd?: Array<string> // 用于结束section的分隔符(如'\n')
 }
 
 /**  转义配置 */
-export type EscapeConfig = {
+export interface EscapeConfig {
   key: string // 字符如果匹配，则让handler处理
   handle: (str: string, index: number) => { value: string; rawValue: string }
 }

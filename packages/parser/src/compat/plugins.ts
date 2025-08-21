@@ -1,14 +1,14 @@
 import { type ParserPlugin } from '@/lib/config'
-import { concat, pipe, unique } from '@/lib/utils'
+import { pipe, unique } from '@/lib/utils'
 import * as plugins from '@/lib/plugins'
 import { type CompatArticle } from './config'
 import { type Asset, FileCode, type AssetsPrefetcher, type AssetSetter } from './config'
 import { CommandCode, type CommandCodeList, type CommandCodeMap } from './config'
 
 export const createCommandCodePlugin = (scriptConfigMap: CommandCodeMap): ParserPlugin => {
-  return (input): CompatArticle => ({
-    ...input,
-    sections: input.sections.map((section) => {
+  return (inputArticle): CompatArticle => ({
+    ...inputArticle,
+    sections: inputArticle.sections.map((section) => {
       if (section.header === '' && section.body === undefined) {
         return {
           ...section,
@@ -30,9 +30,9 @@ export const createCommandCodePlugin = (scriptConfigMap: CommandCodeMap): Parser
   })
 }
 
-export const sayPlugin: ParserPlugin = (input: CompatArticle) => ({
-  ...input,
-  sections: input.sections.map((section) => {
+export const sayPlugin: ParserPlugin = (inputArticle: CompatArticle) => ({
+  ...inputArticle,
+  sections: inputArticle.sections.map((section) => {
     if (section.commandCode !== CommandCode.say) return section
     if (section.body === undefined) {
       return {
@@ -56,24 +56,10 @@ export const sayPlugin: ParserPlugin = (input: CompatArticle) => ({
   }),
 })
 
-export const undefinedPlugin: ParserPlugin = (input) => ({
-  ...input,
-  sections: input.sections.map((section) => ({
-    ...section,
-    header: concat(section.header),
-    body: concat(section.body),
-    attributes: section.attributes.map((attribute) => ({
-      key: concat(attribute.key),
-      value: attribute.value === undefined ? true : attribute.value,
-    })),
-    comment: concat(section.comment),
-  })),
-})
-
 export const createAddNextArgPlugin = (addNextArgList: CommandCodeList): ParserPlugin => {
-  return (input: CompatArticle) => ({
-    ...input,
-    sections: input.sections.map((section) => {
+  return (inputArticle: CompatArticle) => ({
+    ...inputArticle,
+    sections: inputArticle.sections.map((section) => {
       if (addNextArgList.includes(section.commandCode!)) {
         section.attributes.push({
           key: 'next',
@@ -110,10 +96,10 @@ export const createAssetSetterPlugin = (assetSetter: AssetSetter): ParserPlugin 
     }
     return ret
   }
-  return (input: CompatArticle) => ({
-    ...input,
-    sections: input.sections.map((section) => {
-      let _body
+  return (inputArticle: CompatArticle) => ({
+    ...inputArticle,
+    sections: inputArticle.sections.map((section) => {
+      let _body: string
       if (section.body === 'none' || section.body === '') {
         _body = ''
       } else {
@@ -187,8 +173,8 @@ export const createAssetSetterPlugin = (assetSetter: AssetSetter): ParserPlugin 
   })
 }
 
-export const assetsScannerPlugin: ParserPlugin = (input: CompatArticle): CompatArticle => {
-  const _sections = input.sections.map((section) => {
+export const assetsScannerPlugin: ParserPlugin = (inputArticle: CompatArticle): CompatArticle => {
+  const _sections = inputArticle.sections.map((section) => {
     const _assets: Array<Asset> = []
     if (section.commandCode === CommandCode.say) {
       section.attributes.forEach((attribute) => {
@@ -258,14 +244,14 @@ export const assetsScannerPlugin: ParserPlugin = (input: CompatArticle): CompatA
     return { ...section, assets: _assets }
   })
   return {
-    ...input,
+    ...inputArticle,
     sections: _sections,
     assets: unique(_sections.map((section) => section.assets).flat()),
   }
 }
 
-export const subSceneScannerPlugin: ParserPlugin = (input: CompatArticle): CompatArticle => {
-  const _sections = input.sections.map((section) => {
+export const subSceneScannerPlugin: ParserPlugin = (inputArticle: CompatArticle): CompatArticle => {
+  const _sections = inputArticle.sections.map((section) => {
     const _sub: Array<string> = []
     if (section.commandCode === CommandCode.changeScene || section.commandCode === CommandCode.callScene) {
       _sub.push(section.body!)
@@ -282,16 +268,16 @@ export const subSceneScannerPlugin: ParserPlugin = (input: CompatArticle): Compa
     return { ...section, sub: _sub }
   })
   return {
-    ...input,
+    ...inputArticle,
     sections: _sections,
     sub: unique(_sections.map((section) => section.sub).flat()),
   }
 }
 
 export const createAssetsPrefetcherPlugin = (assetsPrefetcher: AssetsPrefetcher): ParserPlugin => {
-  return (input: CompatArticle) => {
-    if (input.assets) assetsPrefetcher(input.assets)
-    return input
+  return (inputArticle: CompatArticle) => {
+    if (inputArticle.assets) assetsPrefetcher(inputArticle.assets)
+    return inputArticle
   }
 }
 
@@ -304,23 +290,23 @@ export const createCompatPlugin = (options: {
   middlePlugins?: Array<ParserPlugin>
   postPlugins?: Array<ParserPlugin>
 }): ParserPlugin => {
-  const _prePluginComposer = pipe(...(options.prePlugins ?? []))
-  const _middlePluginComposer = pipe(...(options.middlePlugins ?? []))
-  const _postPluginComposer = pipe(...(options.postPlugins ?? []))
-  const _compatPluginComposer = pipe(
-    _prePluginComposer,
+  const _prePlugin = pipe(...(options.prePlugins ?? []))
+  const _middlePlugin = pipe(...(options.middlePlugins ?? []))
+  const _postPlugin = pipe(...(options.postPlugins ?? []))
+  const _compatPlugin = pipe(
+    _prePlugin,
     plugins.trimPlugin,
     plugins.attributePlugin,
     createCommandCodePlugin(options.scriptConfigMap),
-    _middlePluginComposer,
+    _middlePlugin,
     sayPlugin,
-    undefinedPlugin,
+    plugins.undefinedPlugin,
     createAddNextArgPlugin(options.addNextArgList),
     createAssetSetterPlugin(options.assetSetter),
     assetsScannerPlugin,
     subSceneScannerPlugin,
     createAssetsPrefetcherPlugin(options.assetsPrefetcher),
-    _postPluginComposer
+    _postPlugin
   )
-  return (input) => _compatPluginComposer(input)
+  return _compatPlugin
 }

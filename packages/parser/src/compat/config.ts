@@ -17,7 +17,7 @@ export interface CompatSection extends Section {
 }
 
 /** 场景解析器选项 */
-export type SceneParserOptions = {
+export interface SceneParserOptions {
   config?: ParserConfig
   plugins?:
     | Array<ParserPlugin>
@@ -25,14 +25,14 @@ export type SceneParserOptions = {
 }
 
 /** 创建场景解析器选项 */
-export type CreateSceneParserOptions = SceneParserOptions & {
+export interface CreateSceneParserOptions extends SceneParserOptions {
   assetsPrefetcher?: AssetsPrefetcher
   assetSetter?: AssetSetter
   addNextArgList?: CommandCodeList
   scriptConfigInput?: Array<CommandCodeItem> | CommandCodeMap
 }
 
-export type CompatSceneParser = {
+export interface CompatSceneParser {
   parse: (rawScene: string, sceneName: string, sceneUrl: string) => Scene
   parseConfig: (configText: string) => WebgalConfig
   stringifyConfig: (config: WebgalConfig) => string
@@ -159,14 +159,16 @@ export const ADD_NEXT_ARG_LIST: CommandCodeList = [
   CommandCode.bgm,
   CommandCode.pixi,
   CommandCode.pixiInit,
+  CommandCode.miniAvatar,
   CommandCode.label,
   CommandCode.if,
-  CommandCode.miniAvatar,
   CommandCode.setVar,
-  CommandCode.unlockBgm,
   CommandCode.unlockCg,
+  CommandCode.unlockBgm,
   CommandCode.filmMode,
   CommandCode.playEffect,
+  CommandCode.setTransition,
+  CommandCode.applyStyle,
 ]
 
 /** 配置项 */
@@ -181,32 +183,38 @@ export type { CommandCodeMap as ConfigMap }
 
 /** 脚本配置 */
 export const SCRIPT_CONFIG: Array<CommandCodeItem> = [
-  { scriptString: 'intro', scriptType: CommandCode.intro },
+  { scriptString: 'say', scriptType: CommandCode.say },
   { scriptString: 'changeBg', scriptType: CommandCode.changeBg },
   { scriptString: 'changeFigure', scriptType: CommandCode.changeFigure },
+  { scriptString: 'bgm', scriptType: CommandCode.bgm },
+  { scriptString: 'playVideo', scriptType: CommandCode.video },
+  { scriptString: 'pixiPerform', scriptType: CommandCode.pixi },
+  { scriptString: 'pixiInit', scriptType: CommandCode.pixiInit },
+  { scriptString: 'intro', scriptType: CommandCode.intro },
   { scriptString: 'miniAvatar', scriptType: CommandCode.miniAvatar },
   { scriptString: 'changeScene', scriptType: CommandCode.changeScene },
   { scriptString: 'choose', scriptType: CommandCode.choose },
   { scriptString: 'end', scriptType: CommandCode.end },
-  { scriptString: 'bgm', scriptType: CommandCode.bgm },
-  { scriptString: 'playVideo', scriptType: CommandCode.video },
   { scriptString: 'setComplexAnimation', scriptType: CommandCode.setComplexAnimation },
   { scriptString: 'setFilter', scriptType: CommandCode.setFilter },
-  { scriptString: 'pixiInit', scriptType: CommandCode.pixiInit },
-  { scriptString: 'pixiPerform', scriptType: CommandCode.pixi },
   { scriptString: 'label', scriptType: CommandCode.label },
   { scriptString: 'jumpLabel', scriptType: CommandCode.jumpLabel },
+  { scriptString: 'chooseLabel', scriptType: CommandCode.chooseLabel },
   { scriptString: 'setVar', scriptType: CommandCode.setVar },
+  { scriptString: 'if', scriptType: CommandCode.if },
   { scriptString: 'callScene', scriptType: CommandCode.callScene },
   { scriptString: 'showVars', scriptType: CommandCode.showVars },
   { scriptString: 'unlockCg', scriptType: CommandCode.unlockCg },
   { scriptString: 'unlockBgm', scriptType: CommandCode.unlockBgm },
-  { scriptString: 'say', scriptType: CommandCode.say },
   { scriptString: 'filmMode', scriptType: CommandCode.filmMode },
-  { scriptString: 'callScene', scriptType: CommandCode.callScene },
   { scriptString: 'setTextbox', scriptType: CommandCode.setTextbox },
   { scriptString: 'setAnimation', scriptType: CommandCode.setAnimation },
   { scriptString: 'playEffect', scriptType: CommandCode.playEffect },
+  { scriptString: 'setTempAnimation', scriptType: CommandCode.setTempAnimation },
+  // comment
+  { scriptString: 'setTransform', scriptType: CommandCode.setTransform },
+  { scriptString: 'setTransition', scriptType: CommandCode.setTransition },
+  { scriptString: 'getUserInput', scriptType: CommandCode.getUserInput },
   { scriptString: 'applyStyle', scriptType: CommandCode.applyStyle },
   { scriptString: 'wait', scriptType: CommandCode.wait },
 ]

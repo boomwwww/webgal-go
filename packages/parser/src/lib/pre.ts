@@ -32,7 +32,7 @@ export const createPreParser = (parserConfig?: ParserConfig): PreParser => {
 }
 
 /** 解析上下文 */
-type Context = {
+interface Context {
   raw: string // 原始字符串
   state: State // 当前状态
   p: number // 当前指针位置
@@ -45,7 +45,7 @@ type Context = {
 type State = 'header' | 'body' | 'attributeKey' | 'attributeValue' | 'comment'
 
 /** 当前段落的临时数据 */
-type Current = Record<State, string | undefined> & {
+interface Current extends Record<State, string | undefined> {
   attributes: Array<{ key: string | undefined; value: string | true | undefined }>
   commentStart: string
   str: string // 段落字符串(转义后)

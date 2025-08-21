@@ -1,8 +1,9 @@
 import { type ParserPlugin } from './config'
+import { concat } from './utils'
 
-export const trimPlugin: ParserPlugin = (input) => ({
-  ...input,
-  sections: input.sections.map((section) => ({
+export const trimPlugin: ParserPlugin = (inputArticle) => ({
+  ...inputArticle,
+  sections: inputArticle.sections.map((section) => ({
     ...section,
     header: section.header?.trim(),
     body: section.body?.trim(),
@@ -23,9 +24,9 @@ export const createDequotationPlugin = (quotations: Array<[string, string]>): Pa
     }
     return str
   }
-  return (input) => ({
-    ...input,
-    sections: input.sections.map((section) => ({
+  return (inputArticle) => ({
+    ...inputArticle,
+    sections: inputArticle.sections.map((section) => ({
       ...section,
       header: _removeQuotation(section.header),
       body: _removeQuotation(section.body),
@@ -37,9 +38,9 @@ export const createDequotationPlugin = (quotations: Array<[string, string]>): Pa
   })
 }
 
-export const attributePlugin: ParserPlugin = (input) => ({
-  ...input,
-  sections: input.sections.map((section) => ({
+export const attributePlugin: ParserPlugin = (inputArticle) => ({
+  ...inputArticle,
+  sections: inputArticle.sections.map((section) => ({
     ...section,
     attributes: section.attributes.map((attribute) => {
       if (attribute.value === undefined) return attribute
@@ -54,5 +55,19 @@ export const attributePlugin: ParserPlugin = (input) => ({
           : attribute.value,
       }
     }),
+  })),
+})
+
+export const undefinedPlugin: ParserPlugin = (inputArticle) => ({
+  ...inputArticle,
+  sections: inputArticle.sections.map((section) => ({
+    ...section,
+    header: concat(section.header),
+    body: concat(section.body),
+    attributes: section.attributes.map((attribute) => ({
+      key: concat(attribute.key),
+      value: attribute.value === undefined ? true : attribute.value,
+    })),
+    comment: concat(section.comment),
   })),
 })
