@@ -1,12 +1,12 @@
-import { createWebgal } from 'webgal-go';
-import { createStage } from '@webgal-go/test-plugin';
+import { createWebgal } from 'webgal-go'
+import { createStage } from '@webgal-go/test-plugin'
 
-const webgal = createWebgal();
+const webgal = createWebgal()
 
-webgal.use(createStage());
+webgal.use(createStage())
 
-webgal.ctx.stage.pixi;
+webgal.ctx.stage.pixi
 
-webgal.bus.emit('num', 0);
+webgal.bus.emit('num', 0)
 
-export default webgal;
+export default webgal

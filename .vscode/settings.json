@@ -1,7 +1,7 @@
 {
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.patterns": {
-    "package.json": "package-lock.json,npm*,.npm*,yarn*,.yarn*,pnpm*,.pnpm*,.editorconfig,LICENSE*",
+    "package.json": "package-lock.json,npm*,.npm*,yarn*,.yarn*,pnpm*,.pnpm*,.editorconfig,LICENSE*,.prettierrc",
     "README.md": "*.md",
     ".gitignore": ".git*",
     "tsconfig.json": "tsconfig.*.json, env.d.ts",
@@ -9,5 +9,5 @@
     "vite.config.ts": "*config.js,*config.json,*rc,.eslint*,eslint*,.prettier*,prettier*",
     "index.js": "index*"
   },
-  "oxc.enable": true
+  "oxc.enable": false
 }

@@ -1,5 +1,5 @@
-import { defineConfig } from 'tsdown';
-import packageJson from './package.json';
+import { defineConfig } from 'tsdown'
+import packageJson from './package.json'
 
 export default defineConfig({
   dts: true,
@@ -9,4 +9,4 @@ export default defineConfig({
     __VERSION__: JSON.stringify(packageJson.version),
     __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
   },
-});
+})

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import wg from '@/webgal';
+import wg from '@/webgal'
 </script>
 
 <template>

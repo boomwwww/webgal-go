@@ -15,9 +15,9 @@ export enum fileType {
 }
 
 interface ISceneEntry {
-  sceneName: string; // 场景名称
-  sceneUrl: string; // 场景url
-  continueLine: number; // 继续原场景的行号
+  sceneName: string // 场景名称
+  sceneUrl: string // 场景url
+  continueLine: number // 继续原场景的行号
 }
 
 export enum commandType {
@@ -62,8 +62,8 @@ export enum commandType {
  * @interface arg
  */
 export interface arg {
-  key: string; // 参数键
-  value: string | boolean | number; // 参数值
+  key: string // 参数键
+  value: string | boolean | number // 参数值
 }
 
 /**
@@ -71,10 +71,10 @@ export interface arg {
  * @interface IAsset
  */
 export interface IAsset {
-  name: string; // 资源名称
-  type: fileType; // 资源类型
-  url: string; // 资源url
-  lineNumber: number; // 触发资源语句的行号
+  name: string // 资源名称
+  type: fileType // 资源类型
+  url: string // 资源url
+  lineNumber: number // 触发资源语句的行号
 }
 
 /**
@@ -82,12 +82,12 @@ export interface IAsset {
  * @interface ISentence
  */
 export interface ISentence {
-  command: commandType; // 语句类型
-  commandRaw: string; // 命令的原始内容，方便调试
-  content: string; // 语句内容
-  args: Array<arg>; // 参数列表
-  sentenceAssets: Array<IAsset>; // 语句携带的资源列表
-  subScene: Array<string>; // 语句包含子场景列表
+  command: commandType // 语句类型
+  commandRaw: string // 命令的原始内容，方便调试
+  content: string // 语句内容
+  args: Array<arg> // 参数列表
+  sentenceAssets: Array<IAsset> // 语句携带的资源列表
+  subScene: Array<string> // 语句包含子场景列表
 }
 
 /**
@@ -95,11 +95,11 @@ export interface ISentence {
  * @interface IScene
  */
 export interface IScene {
-  sceneName: string; // 场景名称
-  sceneUrl: string; // 场景url
-  sentenceList: Array<ISentence>; // 语句列表
-  assetsList: Array<IAsset>; // 资源列表
-  subSceneList: Array<string>; // 子场景的url列表
+  sceneName: string // 场景名称
+  sceneUrl: string // 场景url
+  sentenceList: Array<ISentence> // 语句列表
+  assetsList: Array<IAsset> // 资源列表
+  subSceneList: Array<string> // 子场景的url列表
 }
 
 /**
@@ -107,9 +107,9 @@ export interface IScene {
  * @interface ISceneData
  */
 export interface ISceneData {
-  currentSentenceId: number; // 当前语句ID
-  sceneStack: Array<ISceneEntry>; // 场景栈
-  currentScene: IScene; // 当前场景数据
+  currentSentenceId: number // 当前语句ID
+  sceneStack: Array<ISceneEntry> // 场景栈
+  currentScene: IScene // 当前场景数据
 }
 
 /**
@@ -117,6 +117,6 @@ export interface ISceneData {
  * @interface parsedCommand
  */
 export interface parsedCommand {
-  type: commandType;
-  additionalArgs: Array<arg>;
+  type: commandType
+  additionalArgs: Array<arg>
 }

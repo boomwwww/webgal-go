@@ -3,6 +3,6 @@ declare module 'webgal-go' {
 }
 
 export interface StageEvents {
-  play: null;
-  num: number;
+  play: null
+  num: number
 }

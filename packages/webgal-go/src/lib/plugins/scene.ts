@@ -1,11 +1,11 @@
-import { ISceneData } from './sceneInterface';
+import { ISceneData } from './sceneInterface'
 
 interface SceneManager {
-  settledScenes: Array<string>;
-  settledAssets: Array<string>;
-  sceneData: ISceneData;
-  lockSceneWrite: boolean;
-  reset: () => void;
+  settledScenes: Array<string>
+  settledAssets: Array<string>
+  sceneData: ISceneData
+  lockSceneWrite: boolean
+  reset: () => void
 }
 
 const createSceneContext = () => {
@@ -20,8 +20,8 @@ const createSceneContext = () => {
       assetsList: [], // 资源列表
       subSceneList: [], // 子场景列表
     },
-  };
-};
+  }
+}
 
 // export class SceneManager {
 //   public settledScenes: Array<string> = [];
@@ -41,8 +41,8 @@ export const createSceneManager = (): SceneManager => {
     sceneData: createSceneContext(),
     lockSceneWrite: false,
     reset: () => {
-      sceneManager.sceneData = createSceneContext();
+      sceneManager.sceneData = createSceneContext()
     },
-  };
-  return sceneManager;
-};
+  }
+  return sceneManager
+}

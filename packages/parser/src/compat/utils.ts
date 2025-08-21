@@ -1,8 +1,8 @@
-import { createParserFactory } from '@/lib/parser';
-import * as plugins from '@/lib/plugins';
-import { type CompatArticle, type Scene, compatParserConfig } from './config';
-import { type WebgalConfig, type WebGALStyle } from './config';
-import { undefinedPlugin } from './plugins';
+import { createParserFactory } from '@/lib/parser'
+import * as plugins from '@/lib/plugins'
+import { type CompatArticle, type Scene, compatParserConfig } from './config'
+import { type WebgalConfig, type WebGALStyle } from './config'
+import { undefinedPlugin } from './plugins'
 
 /**
  * Preprocessor for scene text.
@@ -15,12 +15,12 @@ import { undefinedPlugin } from './plugins';
  * @returns The processed scene text
  */
 export function sceneTextPreProcess(sceneText: string): string {
-  let lines = sceneText.replaceAll('\r', '').split('\n');
+  let lines = sceneText.replaceAll('\r', '').split('\n')
 
-  lines = sceneTextPreProcessPassOne(lines);
-  lines = sceneTextPreProcessPassTwo(lines);
+  lines = sceneTextPreProcessPassOne(lines)
+  lines = sceneTextPreProcessPassTwo(lines)
 
-  return lines.join('\n');
+  return lines.join('\n')
 }
 
 /**
@@ -32,40 +32,40 @@ export function sceneTextPreProcess(sceneText: string): string {
  * @returns The processed lines
  */
 function sceneTextPreProcessPassOne(lines: string[]): string[] {
-  const processedLines: string[] = [];
-  let lastLineIsMultiline = false;
-  let thisLineIsMultiline = false;
+  const processedLines: string[] = []
+  let lastLineIsMultiline = false
+  let thisLineIsMultiline = false
 
   for (const line of lines) {
-    thisLineIsMultiline = false;
+    thisLineIsMultiline = false
 
     if (canBeMultiline(line)) {
-      thisLineIsMultiline = true;
+      thisLineIsMultiline = true
     }
 
     if (shouldNotBeMultiline(line, lastLineIsMultiline)) {
-      thisLineIsMultiline = false;
+      thisLineIsMultiline = false
     }
 
     if (thisLineIsMultiline) {
-      processedLines[processedLines.length - 1] += '\\';
+      processedLines[processedLines.length - 1] += '\\'
     }
 
-    processedLines.push(line);
+    processedLines.push(line)
 
-    lastLineIsMultiline = thisLineIsMultiline;
+    lastLineIsMultiline = thisLineIsMultiline
   }
 
-  return processedLines;
+  return processedLines
 }
 
 function canBeMultiline(line: string): boolean {
   if (!line.startsWith(' ')) {
-    return false;
+    return false
   }
 
-  const trimmedLine = line.trimStart();
-  return trimmedLine.startsWith('|') || trimmedLine.startsWith('-');
+  const trimmedLine = line.trimStart()
+  return trimmedLine.startsWith('|') || trimmedLine.startsWith('-')
 }
 
 /**
@@ -76,19 +76,19 @@ function canBeMultiline(line: string): boolean {
  */
 function shouldNotBeMultiline(line: string, lastLineIsMultiline: boolean): boolean {
   if (!lastLineIsMultiline && isEmptyLine(line)) {
-    return true;
+    return true
   }
 
   // Custom logic: if the line contains -concat, it should not be multiline
   if (line.indexOf('-concat') !== -1) {
-    return true;
+    return true
   }
 
-  return false;
+  return false
 }
 
 function isEmptyLine(line: string): boolean {
-  return line.trim() === '';
+  return line.trim() === ''
 }
 
 /**
@@ -102,49 +102,49 @@ function isEmptyLine(line: string): boolean {
  * @returns The processed lines
  */
 function sceneTextPreProcessPassTwo(lines: string[]): string[] {
-  const processedLines: string[] = [];
-  let currentMultilineContent = '';
-  let placeHolderLines: string[] = [];
+  const processedLines: string[] = []
+  let currentMultilineContent = ''
+  let placeHolderLines: string[] = []
 
   function _concat(line: string) {
-    let trimmed = line.trim();
+    let trimmed = line.trim()
     if (trimmed.startsWith('-')) {
-      trimmed = ' ' + trimmed;
+      trimmed = ' ' + trimmed
     }
-    currentMultilineContent = currentMultilineContent + trimmed;
-    placeHolderLines.push(placeholderLine(line));
+    currentMultilineContent = currentMultilineContent + trimmed
+    placeHolderLines.push(placeholderLine(line))
   }
 
   for (const line of lines) {
     // console.log(line);
     if (line.endsWith('\\')) {
-      const trueLine = line.slice(0, -1);
+      const trueLine = line.slice(0, -1)
 
       if (currentMultilineContent === '') {
         // first line
-        currentMultilineContent = trueLine;
+        currentMultilineContent = trueLine
       } else {
         // middle line
-        _concat(trueLine);
+        _concat(trueLine)
       }
-      continue;
+      continue
     }
 
     if (currentMultilineContent !== '') {
       // end line
-      _concat(line);
-      processedLines.push(currentMultilineContent);
-      processedLines.push(...placeHolderLines);
+      _concat(line)
+      processedLines.push(currentMultilineContent)
+      processedLines.push(...placeHolderLines)
 
-      placeHolderLines = [];
-      currentMultilineContent = '';
-      continue;
+      placeHolderLines = []
+      currentMultilineContent = ''
+      continue
     }
 
-    processedLines.push(line);
+    processedLines.push(line)
   }
 
-  return processedLines;
+  return processedLines
 }
 
 /**
@@ -155,7 +155,7 @@ function sceneTextPreProcessPassTwo(lines: string[]): string[] {
  * @returns The placeholder line
  */
 function placeholderLine(content = '') {
-  return ';_WEBGAL_LINE_BREAK_' + content;
+  return ';_WEBGAL_LINE_BREAK_' + content
 }
 
 // export function sceneTextPreProcess(sceneText: string): string {
@@ -243,13 +243,13 @@ export const getCompatScene = (input: CompatArticle): Scene => ({
   })),
   assetsList: input.assets!,
   subSceneList: input.sub!,
-});
+})
 
 const _configPreParser = createParserFactory(compatParserConfig)
   .use(plugins.trimPlugin)
   .use(plugins.attributePlugin)
   .use(undefinedPlugin)
-  .create();
+  .create()
 
 export const configParser = {
   parse: (configText: string): WebgalConfig => {
@@ -257,7 +257,7 @@ export const configParser = {
       str: configText,
       name: '@config',
       url: '@config',
-    });
+    })
     return preParsed.sections.map((section) => ({
       command: section.header!,
       args: section
@@ -268,7 +268,7 @@ export const configParser = {
         key: attribute.key!,
         value: attribute.value!,
       })),
-    }));
+    }))
   },
   stringify: (input: WebgalConfig): string => {
     return input.reduce(
@@ -279,23 +279,23 @@ export const configParser = {
         curr.options.reduce((p, c) => `${p} -${c.key}=${c.value}`, '') +
         ';\n',
       ''
-    );
+    )
   },
-};
+}
 
 // todo
 export const styleParser = {
   parse: (scssText: string): WebGALStyle => {
-    return scss2cssinjsParser(scssText);
+    return scss2cssinjsParser(scssText)
   },
-};
+}
 
 export function scss2cssinjsParser(scssString: string): WebGALStyle {
-  const [classNameStyles, others] = parseCSS(scssString);
+  const [classNameStyles, others] = parseCSS(scssString)
   return {
     classNameStyles,
     others,
-  };
+  }
 }
 
 /**
@@ -304,23 +304,23 @@ export function scss2cssinjsParser(scssString: string): WebGALStyle {
  * @param css
  */
 function parseCSS(css: string): [Record<string, string>, string] {
-  const result: Record<string, string> = {};
-  let specialRules = '';
-  let matches;
+  const result: Record<string, string> = {}
+  let specialRules = ''
+  let matches
 
   // 使用非贪婪匹配，尝试正确处理任意层次的嵌套
-  const classRegex = /\.([^{\s]+)\s*{((?:[^{}]*|{[^}]*})*)}/g;
-  const specialRegex = /(@[^{]+{\s*(?:[^{}]*{[^}]*}[^{}]*)+\s*})/g;
+  const classRegex = /\.([^{\s]+)\s*{((?:[^{}]*|{[^}]*})*)}/g
+  const specialRegex = /(@[^{]+{\s*(?:[^{}]*{[^}]*}[^{}]*)+\s*})/g
 
   while ((matches = classRegex.exec(css)) !== null) {
-    const key = matches[1];
-    const value = matches[2].trim().replace(/\s*;\s*/g, ';\n');
-    result[key] = value;
+    const key = matches[1]
+    const value = matches[2].trim().replace(/\s*;\s*/g, ';\n')
+    result[key] = value
   }
 
   while ((matches = specialRegex.exec(css)) !== null) {
-    specialRules += matches[1].trim() + '\n';
+    specialRules += matches[1].trim() + '\n'
   }
 
-  return [result, specialRules.trim()];
+  return [result, specialRules.trim()]
 }

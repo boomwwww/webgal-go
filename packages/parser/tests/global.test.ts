@@ -1,4 +1,4 @@
-import SceneParser, { SCRIPT_CONFIG, ADD_NEXT_ARG_LIST } from '@/index';
+import SceneParser, { SCRIPT_CONFIG, ADD_NEXT_ARG_LIST } from '@/index'
 
 describe('global-test', () => {
   const parser = new SceneParser(
@@ -6,7 +6,7 @@ describe('global-test', () => {
     (fileName, _fileType) => fileName,
     ADD_NEXT_ARG_LIST,
     SCRIPT_CONFIG
-  );
+  )
   it('should work', () => {
     console.log(
       JSON.stringify(
@@ -32,6 +32,6 @@ changeFigure:stand2.png -right -next;
         undefined,
         2
       )
-    );
-  });
-});
+    )
+  })
+})
