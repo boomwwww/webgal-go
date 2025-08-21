@@ -220,5 +220,4 @@ export const useAppInit = () => {
     // // @ts-expect-error todo ctx
     // webgal.ctx.live2d.promise = Promise.all([live2d2Promise, live2d4Promise])
   }, [])
-  return
 }
