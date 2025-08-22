@@ -1,13 +1,13 @@
-import { useTitleEnterPage } from './hooks'
+import { useHooks } from './hooks'
 
 export default function TitleEnterPage() {
-  useTitleEnterPage()
+  useHooks()
   return (
     <>
       {/* 背景模糊 */}
-      <div className="html-body__effect-background"></div>
+      <div className="title-enter-page__effect-background"></div>
       {/* 落地页 */}
-      <div className="html-body__title-enter">
+      <div className="title-enter-page__title-enter">
         <div className="title-enter__initial-background"></div>
         <div className="title-enter__white-background"></div>
         <div className="title-enter__container">

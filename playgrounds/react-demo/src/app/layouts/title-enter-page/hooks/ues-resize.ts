@@ -22,8 +22,8 @@ export const useResize = () => {
       let transform = ''
       let effectBackgroundTransform = ''
       const webgalRoot = document.querySelector<HTMLElement>('#webgal-root') // 获取根元素
-      const titleEnter = document.querySelector<HTMLElement>('.html-body__title-enter')
-      const effectBackground = document.querySelector<HTMLElement>('.html-body__effect-background')
+      const titleEnter = document.querySelector<HTMLElement>('.title-enter-page__title-enter')
+      const effectBackground = document.querySelector<HTMLElement>('.title-enter-page__effect-background')
       const elements = [webgalRoot, titleEnter]
       if (w > h) {
         if (effectBackground) {

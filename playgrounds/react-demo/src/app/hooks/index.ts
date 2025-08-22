@@ -1,3 +1,3 @@
 // import webgal from '@/webgal'
 
-export const useAppInit = () => {}
+export const useHooks = () => {}

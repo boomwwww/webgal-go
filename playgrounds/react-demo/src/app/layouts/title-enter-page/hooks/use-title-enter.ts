@@ -44,7 +44,7 @@ export const useTitleEnter = () => {
           whiteBackground.style.opacity = '1'
         }
       }, 50) // 在50ms后开始显示白色渐变
-      const titleEnter = document.querySelector<HTMLElement>('.html-body__title-enter')
+      const titleEnter = document.querySelector<HTMLElement>('.title-enter-page__title-enter')
       setTimeout(() => {
         if (titleEnter) titleEnter.style.opacity = '0'
       }, 500) // 500ms后开始降低落地页透明度
@@ -59,7 +59,7 @@ export const useTitleEnter = () => {
       }, 2000) // 将落地页设置为不显示
       enterPromiseResolve()
     }
-    const titleEnter = document.querySelector<HTMLElement>('.html-body__title-enter')
+    const titleEnter = document.querySelector<HTMLElement>('.title-enter-page__title-enter')
     if (titleEnter) {
       titleEnter.onclick = enter
     }

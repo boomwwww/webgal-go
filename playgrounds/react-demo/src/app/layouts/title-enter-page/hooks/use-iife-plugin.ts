@@ -15,10 +15,11 @@ export const useIifePlugin = () => {
     }
     const loadIifePlugin = async (pluginPath: string) => {
       try {
-        await loadScript(pluginPath)
+        const info = await loadScript(pluginPath)
+        console.log(info)
         return true
       } catch (error) {
-        console.error(error)
+        console.warn(error)
         return false
       }
     }
@@ -35,7 +36,5 @@ export const useIifePlugin = () => {
     const live2d4Promise = loadIifePlugin('lib/live2dcubismcore.min.js')
     // @ts-expect-error live2dPromise is a global variable
     window.live2dPromise = Promise.all([live2d2Promise, live2d4Promise])
-    // // @ts-expect-error todo ctx
-    // webgal.ctx.live2d.promise = Promise.all([live2d2Promise, live2d4Promise])
   }, [])
 }
