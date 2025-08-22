@@ -1,4 +1,16 @@
-#Title_enter_page {
+.html-body__effect-background {
+  height: 100vh;
+  width: 100vw;
+  filter: blur(50px);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.html-body__title-enter {
   width: 2560px;
   height: 1440px;
   overflow: hidden;
@@ -9,7 +21,7 @@
   transition: opacity 1.5s;
 }
 
-#Title_bg_container {
+.title-enter__initial-background {
   height: 100%;
   width: 100%;
   position: absolute;
@@ -19,7 +31,7 @@
   transition: opacity 1s;
 }
 
-#Title_white_container {
+.title-enter__white-background {
   width: 100%;
   height: 100%;
   position: absolute;
@@ -34,7 +46,7 @@
   transition: opacity 1s;
 }
 
-#Title_enter_text {
+.title-enter__container {
   width: 100%;
   position: absolute;
   top: 0;
@@ -46,7 +58,7 @@
   font-family: '思源宋体', Georgia, serif;
 }
 
-#Title_enter_text > div.toCenter {
+.title-enter-container__center-text {
   width: 100%;
   height: 100%;
   display: flex;
@@ -54,15 +66,28 @@
   align-items: center;
 }
 
-#Title_enter_text > div.toCenter > div.StartButton {
+.title-enter-container__center-text > div {
   letter-spacing: 0.25em;
   padding: 2em 2em 2em 2em;
   text-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
   transition: text-shadow 1s;
   font-size: 175%;
+  animation: title-enter-container__center-text--blink 4s infinite;
 }
 
-#Title_enter_text > div.link-to-github {
+@keyframes title-enter-container__center-text--blink {
+  0% {
+    text-shadow: 0 0 15px rgba(0, 0, 0, 0.65);
+  }
+  50% {
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+  }
+  100% {
+    text-shadow: 0 0 15px rgba(0, 0, 0, 0.65);
+  }
+}
+
+.title-enter-container__link-to-github {
   position: absolute;
   bottom: 1em;
   color: #999;
@@ -74,6 +99,6 @@
   align-items: center;
 }
 
-#Title_enter_text > div.link-to-github > div {
+.title-enter-container__link-to-github > div {
   padding: 0 0 0.25em 0;
 }
