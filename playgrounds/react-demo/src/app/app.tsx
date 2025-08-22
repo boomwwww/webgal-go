@@ -1,5 +1,6 @@
 import { useAppInit } from './hooks'
-import { EnterPage, WebgalRoot } from './layouts'
+import EnterPage from './layouts/enter-page'
+import WebgalRoot from './layouts/webgal-root'
 import './style/app.css'
 
 export default function App() {
