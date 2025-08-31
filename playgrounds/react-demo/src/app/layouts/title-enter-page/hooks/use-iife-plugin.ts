@@ -32,9 +32,10 @@ export const useIifePlugin = () => {
     // Live2D SDK の読み込みを試みます。
     // ユーザーが Live2D ライセンスを取得し、以下のディレクトリに配置した場合のみ、読み込みが成功します。
     // このプロジェクトには Live2D SDK は**含まれていません**
-    const live2d2Promise = loadIifePlugin('lib/live2d.min.js')
-    const live2d4Promise = loadIifePlugin('lib/live2dcubismcore.min.js')
     // @ts-expect-error live2dPromise is a global variable
-    window.live2dPromise = Promise.all([live2d2Promise, live2d4Promise])
+    window.live2dPromise = Promise.all([
+      loadIifePlugin('lib/live2d.min.js'),
+      loadIifePlugin('lib/live2dcubismcore.min.js'),
+    ])
   }, [])
 }

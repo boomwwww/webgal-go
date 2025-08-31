@@ -1,35 +1,31 @@
-import { type Section, type PreParser, type ParserConfig, type CompleteParserConfig } from './config'
+import { type Section, type PreParser, type ParserOptions, type ParserConfig } from './config'
 import { getCompleteConfig } from './config'
 import { concat, getPositionByIndex } from './utils'
 
 /** Create a pre parser */
-export const createPreParser = (parserConfig?: ParserConfig): PreParser => {
-  const _parserConfig = getCompleteConfig(parserConfig)
+export const createPreParser = (parserConfig?: ParserOptions): PreParser => ({
+  config: getCompleteConfig(parserConfig),
 
-  return {
-    parse: (str) => {
-      const ctx = createContext(str, _parserConfig) // 初始化上下文
-      ctx.current.header = '' // 段落头初始化为字符串
+  parse(str) {
+    const ctx = createContext(str, this.config) // 初始化上下文
+    ctx.current.header = '' // 段落头初始化为字符串
 
-      while (ctx.p < ctx.raw.length) {
-        stateHandlers[ctx.state](ctx) // 主循环：根据当前状态调用对应处理函数，直到指针结束
-      }
+    while (ctx.p < ctx.raw.length) {
+      stateHandlers[ctx.state](ctx) // 主循环：根据当前状态调用对应处理函数，直到指针结束
+    }
 
-      if (ctx.current.str !== '') {
-        ctx.current.attributeKey && pushCurrentAttribute(ctx)
-        pushCurrentSection(ctx) // 处理可能遗漏的最后一个段落
-      }
+    if (ctx.current.str !== '') {
+      ctx.current.attributeKey && pushCurrentAttribute(ctx)
+      pushCurrentSection(ctx) // 处理可能遗漏的最后一个段落
+    }
 
-      return ctx.sections
-    },
+    return ctx.sections
+  },
 
-    stringify: (sections, options = { raw: false }): string => {
-      return sections.map((section) => section[options.raw ? 'raw' : 'str']).join('')
-    },
-
-    config: _parserConfig,
-  }
-}
+  stringify(sections, options = { raw: false }) {
+    return sections.map((section) => section[options.raw ? 'raw' : 'str']).join('')
+  },
+})
 
 /** 解析上下文 */
 interface Context {
@@ -38,7 +34,7 @@ interface Context {
   p: number // 当前指针位置
   sections: Array<Section> // 结果数组
   current: Current // 当前段落的临时数据
-  config: CompleteParserConfig // 配置
+  config: ParserConfig // 配置
 }
 
 /** 状态 */
@@ -54,7 +50,7 @@ interface Current extends Record<State, string | undefined> {
 }
 
 /** 辅助函数：新建上下文对象 */
-const createContext = (str: string, parserConfig: CompleteParserConfig): Context => ({
+const createContext = (str: string, parserConfig: ParserConfig): Context => ({
   raw: str,
   state: 'header',
   p: 0,

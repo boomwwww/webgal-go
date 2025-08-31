@@ -1,6 +1,6 @@
 import { type Article, type Section } from '@/lib/config'
-import { type ParserConfig, type ParserPlugin } from '@/lib/config'
-import { type CompleteParserConfig, defaultEscapeConfigs } from '@/lib/config'
+import { type ParserOptions, type ParserPlugin } from '@/lib/config'
+import { type ParserConfig, defaultEscapeConfigs } from '@/lib/config'
 
 /** 兼容的文章 */
 export interface CompatArticle extends Article {
@@ -18,7 +18,7 @@ export interface CompatSection extends Section {
 
 /** 场景解析器选项 */
 export interface SceneParserOptions {
-  config?: ParserConfig
+  config?: ParserOptions
   plugins?:
     | Array<ParserPlugin>
     | { pre?: Array<ParserPlugin>; middle?: Array<ParserPlugin>; post?: Array<ParserPlugin> }
@@ -40,7 +40,7 @@ export interface CompatSceneParser {
 }
 
 /** 兼容的解析器配置 */
-export const compatParserConfig: CompleteParserConfig = {
+export const compatParserConfig: ParserConfig = {
   separators: {
     bodyStart: [':'],
     attributeStart: [' -'],

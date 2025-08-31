@@ -5,16 +5,15 @@ import { createBus } from './bus'
 import { createDebugger } from './debugger'
 
 export const createWebgal = (): Webgal => {
-  const _webgal: Webgal = {
+  return {
     version: config.version,
     ctx: {},
     parser: createParser(),
     bus: createBus(),
     debugger: createDebugger({ shouldDebug: false }),
-    use: (plugin) => {
-      plugin.install(_webgal)
-      return _webgal
+    use(plugin) {
+      plugin.install(this)
+      return this
     },
   }
-  return _webgal
 }

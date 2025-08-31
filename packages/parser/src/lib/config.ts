@@ -25,9 +25,9 @@ export interface Attribute {
 
 /** 预解析器 */
 export interface PreParser {
+  config: ParserConfig
   parse: (str: string) => Array<Section>
   stringify: (input: Array<Section>, options?: { raw: boolean }) => string
-  config: CompleteParserConfig
 }
 
 /** 解析器 */
@@ -35,7 +35,7 @@ export interface Parser {
   preParse: (str: string) => Array<Section>
   parse: (rawArticle: { name: string; url: string; str: string }) => Article
   stringify: (input: Article | Array<Section>, options?: { raw: boolean }) => string
-  config: CompleteParserConfig
+  config: ParserConfig
 }
 
 /** 解析器工厂 */
@@ -46,13 +46,13 @@ export interface ParserFactory {
 }
 
 /** 解析器配置 */
-export interface ParserConfig {
+export interface ParserOptions {
   separators?: SeparatorConfig // 分隔符配置
   escapeConfigs?: Array<EscapeConfig> // 转义规则配置
 }
 
 /** 完整的解析器配置 */
-export interface CompleteParserConfig {
+export interface ParserConfig {
   separators: Required<SeparatorConfig>
   escapeConfigs: Array<EscapeConfig>
 }
@@ -205,7 +205,7 @@ export const defaultEscapeConfigs: Array<EscapeConfig> = [
 ]
 
 /** 默认解析器配置 */
-export const defaultParserConfig: CompleteParserConfig = {
+export const defaultParserConfig: ParserConfig = {
   separators: {
     bodyStart: [':'],
     attributeStart: [' -'],
@@ -217,15 +217,15 @@ export const defaultParserConfig: CompleteParserConfig = {
 }
 
 /** 合并用户配置与默认配置 */
-export const getCompleteConfig = (parserConfig?: ParserConfig): CompleteParserConfig => ({
+export const getCompleteConfig = (parserOptions?: ParserOptions): ParserConfig => ({
   separators: {
     ...defaultParserConfig.separators,
-    ...parserConfig?.separators,
+    ...parserOptions?.separators,
   },
   escapeConfigs: [
-    ...(parserConfig?.escapeConfigs || []),
+    ...(parserOptions?.escapeConfigs || []),
     ...defaultParserConfig.escapeConfigs.filter(
-      (defCfg) => !parserConfig?.escapeConfigs?.some((cfg) => cfg.key === defCfg.key)
+      (defCfg) => !parserOptions?.escapeConfigs?.some((cfg) => cfg.key === defCfg.key)
     ),
   ],
 })
