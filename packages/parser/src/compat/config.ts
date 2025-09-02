@@ -25,7 +25,7 @@ export interface SceneParserOptions {
 }
 
 /** 创建场景解析器选项 */
-export interface CreateSceneParserOptions extends SceneParserOptions {
+export interface CompatSceneParserOptions extends SceneParserOptions {
   assetsPrefetcher?: AssetsPrefetcher
   assetSetter?: AssetSetter
   addNextArgList?: CommandCodeList
@@ -44,8 +44,11 @@ export interface CompatSceneParser {
   parseScssToWebgalStyleObj: (scssString: string) => WebGALStyle
 }
 
-/** 兼容的解析器配置 */
-export const compatParserConfig: ParserConfig = {
+/** 兼容的解析器配置
+ * @return CompatParserConfig
+ * @pure
+ */
+export const getCompatParserConfig = (): ParserConfig => ({
   separators: {
     bodyStart: [':'],
     attributeStart: [' -'],
@@ -55,7 +58,7 @@ export const compatParserConfig: ParserConfig = {
   },
   escapeConfigs: getDefaultEscapeConfigs(),
   plugins: [],
-}
+})
 
 /** 场景 */
 export interface Scene {

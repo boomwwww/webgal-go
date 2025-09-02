@@ -1,12 +1,25 @@
 import { createWebgal } from 'webgal-go'
 import { createStage } from '@webgal-go/test-plugin'
 
-const webgal = createWebgal()
-
-webgal.use(createStage())
-
-webgal.ctx.stage.pixi
-
-webgal.bus.emit('num', 0)
-
-export default webgal
+export const webgal = createWebgal({
+  debug: true,
+  plugins: [
+    {
+      install: (webgal) => {
+        webgal.bus.on('text-settle', () => {
+          console.log('text-settle')
+        })
+      },
+    },
+  ],
+})
+  .use(createStage())
+  .use(createStage())
+  .use(createStage())
+  .use(createStage())
+  .use(createStage())
+  .use(createStage())
+  .use(createStage())
+  .use(createStage())
+  .use(createStage())
+  .use(createStage())

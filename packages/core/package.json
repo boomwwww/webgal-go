@@ -12,7 +12,6 @@
   "type": "module",
   "scripts": {
     "build": "tsdown",
-    "test": "vitest",
     "lint": "npx oxlint@latest"
   },
   "publishConfig": {
@@ -31,7 +30,6 @@
   "devDependencies": {
     "@types/node": "^24.0.0",
     "tsdown": "0.14.2",
-    "typescript": "^5.0.0",
-    "vitest": "^3.0.0"
+    "typescript": "^5.0.0"
   }
 }

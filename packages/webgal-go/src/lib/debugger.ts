@@ -1,20 +1,22 @@
 import type { Debugger } from '@/types'
 
-export const createDebugger = ({ shouldDebug }: { shouldDebug: boolean }): Debugger => {
-  const _debugger: Debugger = {
-    shouldDebug: shouldDebug,
-    log: (...args) => {
-      if (!_debugger.shouldDebug) return
+export const createDebugger = ({ debug }: { debug: boolean }): Debugger => {
+  return {
+    debug: debug,
+    log(...args) {
       console.log(...args)
     },
-    warn: (...args) => {
-      if (!_debugger.shouldDebug) return
+    warn(...args) {
+      if (!this.debug) return
       console.warn(...args)
     },
-    error: (...args) => {
-      if (!_debugger.shouldDebug) return
+    error(...args) {
+      if (!this.debug) return
       console.error(...args)
     },
+    info(...args) {
+      if (!this.debug) return
+      console.info(...args)
+    },
   }
-  return _debugger
 }

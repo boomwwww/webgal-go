@@ -5,7 +5,7 @@
     "strict": true,
     "declaration": true,
     "types": ["node", "vitest/globals"],
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "paths": {
       "@/*": ["./src/*"]
     }

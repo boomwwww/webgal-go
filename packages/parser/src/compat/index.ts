@@ -3,13 +3,13 @@ import { createParser } from '@/lib/parser'
 
 import { type AssetsPrefetcher, type AssetSetter } from './config'
 import { type CommandCodeList, type CommandCodeItem, type CommandCodeMap } from './config'
-import { type SceneParserOptions, type CreateSceneParserOptions } from './config'
+import { type SceneParserOptions, type CompatSceneParserOptions } from './config'
 import { type CompatSceneParser } from './config'
 
 import { type WebgalConfig, type WebGALStyle } from './config'
 import { configParser, styleParser } from './utils'
 
-import { compatParserConfig } from './config'
+import { getCompatParserConfig } from './config'
 import { createCompatPlugin } from './plugins'
 import { getCompatScene } from './utils'
 
@@ -42,7 +42,7 @@ export class SceneParser {
       this.SCRIPT_CONFIG_MAP = SCRIPT_CONFIG_INPUT
     }
 
-    const parser = createParser(options?.parserOptions ?? compatParserConfig)
+    const parser = createParser(options?.parserOptions ?? getCompatParserConfig())
     if (Array.isArray(options?.plugins)) {
       for (const plugin of options.plugins) {
         parser.use(plugin)
@@ -95,7 +95,7 @@ export class SceneParser {
 export { ADD_NEXT_ARG_LIST, SCRIPT_CONFIG } from './config'
 export { sceneTextPreProcess } from './utils'
 
-export const createSceneParser = (options?: CreateSceneParserOptions): CompatSceneParser => {
+export const createCompatSceneParser = (options?: CompatSceneParserOptions): CompatSceneParser => {
   const _assetsPrefetcher: AssetsPrefetcher = options?.assetsPrefetcher ?? (() => {})
 
   const _assetSetter: AssetSetter = options?.assetSetter ?? ((n) => n)
@@ -115,7 +115,7 @@ export const createSceneParser = (options?: CreateSceneParserOptions): CompatSce
     }
   })()
 
-  const _parser = createParser(options?.parserOptions ?? compatParserConfig)
+  const _parser = createParser(options?.parserOptions ?? getCompatParserConfig())
   if (Array.isArray(options?.plugins)) {
     for (const plugin of options.plugins) {
       _parser.use(plugin)
@@ -169,7 +169,7 @@ export const createSceneParser = (options?: CreateSceneParserOptions): CompatSce
 }
 
 export { type CompatArticle, type CompatSection } from './config'
-export { type SceneParserOptions, type CreateSceneParserOptions } from './config'
+export { type SceneParserOptions, type CompatSceneParserOptions } from './config'
 export { type CompatSceneParser } from './config'
 export { type Scene, type Sentence, type Arg } from './config'
 export { type IScene, type ISentence, type arg } from './config'
@@ -180,10 +180,9 @@ export { CommandCode, type CommandCodeList } from './config'
 export { commandType } from './config'
 export { type CommandCodeItem, type CommandCodeMap } from './config'
 export { type ConfigItem, type ConfigMap } from './config'
-export { compatParserConfig } from './config'
+export { getCompatParserConfig } from './config'
 export { type WebgalConfigItemOption, type WebgalConfigItem, type WebgalConfig } from './config'
 export { type IOptionItem, type IConfigItem } from './config'
 export { type WebGALStyle } from './config'
 export { type IWebGALStyleObj } from './config'
-export { configParser, styleParser } from './utils'
 export * from './plugins'

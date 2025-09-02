@@ -1,6 +1,6 @@
 import { createParser } from '@/lib/parser'
 import * as plugins from '@/lib/plugins'
-import { type CompatArticle, type Scene, compatParserConfig } from './config'
+import { type CompatArticle, type Scene, getCompatParserConfig } from './config'
 import { type WebgalConfig, type WebGALStyle } from './config'
 
 /**
@@ -250,7 +250,7 @@ export const getCompatScene = (inputArticle: CompatArticle): Scene => ({
   subSceneList: inputArticle.sub!,
 })
 
-const _configPreParser = createParser(compatParserConfig)
+const _configPreParser = createParser(getCompatParserConfig())
   .use(plugins.trimPlugin)
   .use(plugins.attributePlugin)
   .use(plugins.undefinedPlugin)
