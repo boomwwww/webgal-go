@@ -1,10 +1,11 @@
 {
-  "name": "webgal-go",
-  "version": "0.0.1",
-  "description": "webgal-go",
+  "name": "@webgal-go/core",
+  "version": "0.0.0",
+  "description": "webgal-go/core",
   "keywords": [
     "webgal",
-    "webgal-go"
+    "webgal-go",
+    "core"
   ],
   "author": "boomwwww",
   "license": "MPL-2.0",
@@ -28,13 +29,9 @@
     "./package.json": "./package.json"
   },
   "devDependencies": {
-    "@types/node": "^24.2.1",
-    "tsdown": "^0.13.3",
-    "typescript": "^5.9.2",
-    "vitest": "^3.2.4"
-  },
-  "dependencies": {
-    "@webgal-go/core": "workspace:*",
-    "@webgal-go/parser": "workspace:*"
+    "@types/node": "^24.0.0",
+    "tsdown": "0.14.2",
+    "typescript": "^5.0.0",
+    "vitest": "^3.0.0"
   }
 }

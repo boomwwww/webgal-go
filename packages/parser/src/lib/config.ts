@@ -140,7 +140,10 @@ const handleEscapeX = (str: string, index: number) => {
   return { value: String.fromCharCode(code), rawValue: cut }
 }
 
-/** 默认转义配置 */
+/** 默认转义配置
+ * @return DefaultEscapeConfigs
+ * @pure
+ */
 export const getDefaultEscapeConfigs = (): Array<EscapeConfig> => [
   {
     key: '\\a',

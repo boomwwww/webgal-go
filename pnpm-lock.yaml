@@ -8,6 +8,21 @@ importers:
 
   .: {}
 
+  packages/core:
+    devDependencies:
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.2.1
+      tsdown:
+        specifier: 0.14.2
+        version: 0.14.2(typescript@5.8.3)(vue-tsc@3.0.5(typescript@5.8.3))
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.4(@types/node@24.2.1)(jiti@2.5.1)(sass-embedded@1.90.0)(sass@1.90.0)
+
   packages/parser:
     devDependencies:
       '@types/node':
@@ -23,24 +38,11 @@ importers:
         specifier: ^3.0.0
         version: 3.2.4(@types/node@24.2.1)(jiti@2.5.1)(sass-embedded@1.90.0)(sass@1.90.0)
 
-  packages/test-plugin:
-    dependencies:
-      webgal-go:
-        specifier: workspace:*
-        version: link:../webgal-go
-    devDependencies:
-      '@types/node':
-        specifier: ^24.2.1
-        version: 24.2.1
-      tsdown:
-        specifier: ^0.13.3
-        version: 0.13.3(typescript@5.9.2)(vue-tsc@3.0.5(typescript@5.9.2))
-      typescript:
-        specifier: ^5.9.2
-        version: 5.9.2
-
   packages/webgal-go:
     dependencies:
+      '@webgal-go/core':
+        specifier: workspace:*
+        version: link:../core
       '@webgal-go/parser':
         specifier: workspace:*
         version: link:../parser
@@ -120,7 +122,7 @@ importers:
     dependencies:
       '@webgal-go/test-plugin':
         specifier: workspace:*
-        version: link:../../packages/test-plugin
+        version: link:../../plugins/test-plugin
       pinia:
         specifier: ^3.0.3
         version: 3.0.3(typescript@5.8.3)(vue@3.5.18(typescript@5.8.3))
@@ -161,6 +163,22 @@ importers:
       vue-tsc:
         specifier: ^3.0.4
         version: 3.0.5(typescript@5.8.3)
+
+  plugins/test-plugin:
+    dependencies:
+      webgal-go:
+        specifier: workspace:*
+        version: link:../../packages/webgal-go
+    devDependencies:
+      '@types/node':
+        specifier: ^24.2.1
+        version: 24.2.1
+      tsdown:
+        specifier: ^0.13.3
+        version: 0.13.3(typescript@5.9.2)(vue-tsc@3.0.5(typescript@5.9.2))
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.2
 
 packages:
 

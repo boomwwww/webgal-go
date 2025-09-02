@@ -2,7 +2,7 @@ import { type Section, type PreParser, type PreParserConfig } from './config'
 import { concat, getPositionByIndex } from './utils'
 
 /** Create a pre parser
- * @param preParserConfig - pre parser config
+ * @param preParserConfig pre parser config
  * @returns pre parser
  * @pure
  */
@@ -57,8 +57,8 @@ interface Current extends Record<State, string | undefined> {
 }
 
 /** 辅助函数：新建上下文对象
- * @param str - 原始字符串
- * @param parserConfig - 解析器配置
+ * @param str 原始字符串
+ * @param parserConfig 解析器配置
  * @returns 上下文对象
  * @pure
  */
@@ -86,9 +86,7 @@ const createContext = (str: string, preParserConfig: PreParserConfig): Context =
  * @param ctx 上下文对象
  * @param value 值
  * @param rawValue 原始值
- * @mutates ctx.current[ctx.state]
- * @mutates ctx.current.str
- * @mutates ctx.current.raw
+ * @mutates ctx.current
  * @mutates ctx.p
  */
 const pushValue = (ctx: Context, value: string, rawValue?: string): void => {
@@ -102,9 +100,8 @@ const pushValue = (ctx: Context, value: string, rawValue?: string): void => {
 /** 辅助函数：添加分隔符到当前段落
  * @param ctx 上下文对象
  * @param separator 分隔符
- * @mutates ctx.current.str
- * @mutates ctx.current.raw
- * @mutates ctx.current.p
+ * @mutates ctx.current
+ * @mutates ctx.p
  */
 const pushSeparator = (ctx: Context, separator: string): void => {
   ctx.current.str = concat(ctx.current.str, separator)
@@ -114,9 +111,7 @@ const pushSeparator = (ctx: Context, separator: string): void => {
 
 /** 辅助函数：将当前属性加入到属性列表中，并重置当前属性
  * @param ctx 上下文对象
- * @mutates ctx.current.attributes
- * @mutates ctx.current.attributeKey
- * @mutates ctx.current.attributeValue
+ * @mutates ctx.current
  */
 const pushCurrentAttribute = (ctx: Context): void => {
   ctx.current.attributes.push({
@@ -162,9 +157,7 @@ const pushCurrentSection = (ctx: Context): void => {
 /** 辅助函数，尝试处理转义
  * @param ctx 上下文对象
  * @returns 是否成功处理转义
- * @mutates ctx.current[ctx.state]
- * @mutates ctx.current.str
- * @mutates ctx.current.raw
+ * @mutates ctx.current
  * @mutates ctx.p
  */
 const unescape = (ctx: Context): boolean => {
@@ -176,14 +169,12 @@ const unescape = (ctx: Context): boolean => {
   return true
 }
 
-/** 辅助函数：尝试进入body状态
+/** 辅助函数：尝试进入 body 状态
  * @param ctx 上下文对象
- * @returns 是否成功进入body状态
- * @mutates ctx.current.str
- * @mutates ctx.current.raw
- * @mutates ctx.p
+ * @returns 是否成功进入 body 状态
  * @mutates ctx.state
- * @mutates ctx.current.body
+ * @mutates ctx.current
+ * @mutates ctx.p
  */
 const enterBody = (ctx: Context): boolean => {
   const { bodyStart } = ctx.config.separators
@@ -195,7 +186,13 @@ const enterBody = (ctx: Context): boolean => {
   return true
 }
 
-/** 辅助函数：尝试进入attributeKey状态 */
+/** 辅助函数：尝试进入 attributeKey 状态
+ * @param ctx 上下文对象
+ * @returns 是否成功进入 attributeKey 状态
+ * @mutates ctx.state
+ * @mutates ctx.current
+ * @mutates ctx.p
+ */
 const enterAttributeKey = (ctx: Context): boolean => {
   const { attributeStart } = ctx.config.separators
   const matchedAttributeStart = attributeStart.find((sep) => ctx.raw.startsWith(sep, ctx.p))
@@ -207,7 +204,13 @@ const enterAttributeKey = (ctx: Context): boolean => {
   return true
 }
 
-/** 辅助函数：尝试进入attributeValue状态 */
+/** 辅助函数：尝试进入 attributeValue 状态
+ * @param ctx 上下文对象
+ * @returns 是否成功进入 attributeValue 状态
+ * @mutates ctx.state
+ * @mutates ctx.current
+ * @mutates ctx.p
+ */
 const enterAttributeValue = (ctx: Context): boolean => {
   const { attributeKeyValue } = ctx.config.separators
   const matchedAttributeKeyValue = attributeKeyValue.find((sep) => ctx.raw.startsWith(sep, ctx.p))
@@ -218,7 +221,13 @@ const enterAttributeValue = (ctx: Context): boolean => {
   return true
 }
 
-/** 辅助函数，尝试进入comment状态 */
+/** 辅助函数，尝试进入 comment 状态
+ * @param ctx 上下文对象
+ * @returns 是否成功进入 comment 状态
+ * @mutates ctx.state
+ * @mutates ctx.current
+ * @mutates ctx.p
+ */
 const enterComment = (ctx: Context): boolean => {
   const { commentSeparators } = ctx.config.separators
   const matchedCommentStart = commentSeparators.find((sep) => ctx.raw.startsWith(sep.start, ctx.p))?.start
@@ -231,7 +240,13 @@ const enterComment = (ctx: Context): boolean => {
   return true
 }
 
-/** 辅助函数：尝试退出comment状态 */
+/** 辅助函数：尝试退出 comment 状态
+ * @param ctx 上下文对象
+ * @returns 是否成功退出 comment 状态
+ * @mutates ctx.state
+ * @mutates ctx.current
+ * @mutates ctx.p
+ */
 const exitComment = (ctx: Context): boolean => {
   const { commentSeparators } = ctx.config.separators
   const commentEndSeparators = commentSeparators.find((sep) => sep.start === ctx.current.commentStart)
@@ -244,7 +259,13 @@ const exitComment = (ctx: Context): boolean => {
   return true
 }
 
-/** 辅助函数：尝试退出当前段落 */
+/** 辅助函数：尝试退出当前段落
+ * @param ctx 上下文对象
+ * @returns 是否成功退出当前段落
+ * @mutates ctx.state
+ * @mutates ctx.current
+ * @mutates ctx.p
+ */
 const exitSection = (ctx: Context): boolean => {
   const { sectionEnd } = ctx.config.separators
   const matchedSectionEnd = sectionEnd.find((sep) => ctx.raw.startsWith(sep, ctx.p))
@@ -257,15 +278,20 @@ const exitSection = (ctx: Context): boolean => {
   return true
 }
 
-/** 辅助函数：添加单个字符到当前段落 */
+/** 辅助函数：添加单个字符到当前段落
+ * @param ctx 上下文对象
+ * @return 是否成功
+ * @mutates ctx.current
+ * @mutates ctx.p
+ */
 const pushChar = (ctx: Context): boolean => {
   pushValue(ctx, ctx.raw[ctx.p])
   return true
 }
 
 /** 创建状态处理函数的工厂函数
- * @param fns - 状态处理函数列表
- * @returns - 状态处理函数
+ * @param fns 状态处理函数列表
+ * @returns 状态处理函数
  * @pure
  */
 const handle = (fns: Array<(ctx: Context) => boolean>): ((ctx: Context) => void) => {

@@ -12,6 +12,7 @@ describe('compat: parser', () => {
     ADD_NEXT_ARG_LIST,
     SCRIPT_CONFIG
   )
+
   test('label', async () => {
     const sceneRaw = await fsp.readFile(path.join(__dirname, './scene/test-resources/start.txt'))
     const sceneText = sceneRaw.toString()
