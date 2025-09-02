@@ -1,9 +1,18 @@
-/** 拼接字符串(忽略undefined) */
+/** 拼接字符串(忽略undefined)
+ * @param args 字符串数组
+ * @returns 拼接后的字符串
+ * @pure
+ */
 export const concat = (...args: Array<string | undefined>) => {
   return args.filter((arg) => arg !== undefined).join('')
 }
 
-/** 根据索引获取行和列 */
+/** 根据索引获取行和列
+ * @param str 字符串
+ * @param index 索引
+ * @returns 行和列
+ * @pure
+ */
 export const getPositionByIndex = (str: string, index: number): { line: number; column: number } => {
   if (!str) {
     if (index !== 0) {
@@ -45,17 +54,30 @@ export const getPositionByIndex = (str: string, index: number): { line: number; 
   return { line, column }
 }
 
-/** 函数管道 */
+/** 函数管道
+ * @param fns 函数列表
+ * @returns 函数管道
+ * @pure
+ */
 export const pipe = <T>(...fns: Array<(arg: T) => T>): ((arg: T) => T) => {
   return (initialValue) => fns.reduce((acc, fn) => fn(acc), initialValue)
 }
 
-/** 判断一个值是否为原始值 */
+/** 判断一个值是否为原始值
+ * @param value 待判断的值
+ * @returns 是否为原始值
+ * @pure
+ */
 export const isPrimitive = (value: any) => {
   return value === null || (typeof value !== 'object' && typeof value !== 'function')
 }
 
-/** 判断两个值是否相等 */
+/** 判断两个值是否相等
+ * @param value1 待比较的值1
+ * @param value2 待比较的值2
+ * @returns 是否相等
+ * @pure
+ */
 export const equal = (value1: any, value2: any) => {
   if (isPrimitive(value1) || isPrimitive(value2)) {
     return Object.is(value1, value2)
@@ -73,16 +95,18 @@ export const equal = (value1: any, value2: any) => {
   return true
 }
 
-/** 数组去重 */
+/** 数组去重
+ * @param arr 数组
+ * @returns 去重后的数组
+ * @pure
+ */
 export const unique = <T>(arr: Array<T>): Array<T> => {
-  const _result: Array<T> = []
+  const _arr: Array<T> = []
   outer: for (const item of arr) {
-    for (const _r of _result) {
-      if (equal(_r, item)) {
-        continue outer
-      }
+    for (const _item of _arr) {
+      if (equal(_item, item)) continue outer
     }
-    _result.push(item)
+    _arr.push(item)
   }
-  return _result
+  return _arr
 }

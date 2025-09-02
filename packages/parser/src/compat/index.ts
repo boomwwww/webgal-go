@@ -1,5 +1,5 @@
 import { type Parser } from '@/lib/config'
-import { createParserFactory } from '@/lib/parser'
+import { createParser } from '@/lib/parser'
 
 import { type AssetsPrefetcher, type AssetSetter } from './config'
 import { type CommandCodeList, type CommandCodeItem, type CommandCodeMap } from './config'
@@ -42,13 +42,13 @@ export class SceneParser {
       this.SCRIPT_CONFIG_MAP = SCRIPT_CONFIG_INPUT
     }
 
-    const parserFactory = createParserFactory(options?.config ?? compatParserConfig)
+    const parser = createParser(options?.parserOptions ?? compatParserConfig)
     if (Array.isArray(options?.plugins)) {
       for (const plugin of options.plugins) {
-        parserFactory.use(plugin)
+        parser.use(plugin)
       }
     } else {
-      parserFactory.use(
+      parser.use(
         createCompatPlugin({
           assetsPrefetcher: this.assetsPrefetcher,
           assetSetter: this.assetSetter,
@@ -60,7 +60,7 @@ export class SceneParser {
         })
       )
     }
-    this.parser = parserFactory.create()
+    this.parser = parser
   }
 
   /**
@@ -115,13 +115,13 @@ export const createSceneParser = (options?: CreateSceneParserOptions): CompatSce
     }
   })()
 
-  const _parserFactory = createParserFactory(options?.config ?? compatParserConfig)
+  const _parser = createParser(options?.parserOptions ?? compatParserConfig)
   if (Array.isArray(options?.plugins)) {
     for (const plugin of options.plugins) {
-      _parserFactory.use(plugin)
+      _parser.use(plugin)
     }
   } else {
-    _parserFactory.use(
+    _parser.use(
       createCompatPlugin({
         assetsPrefetcher: _assetsPrefetcher,
         assetSetter: _assetSetter,
@@ -133,10 +133,19 @@ export const createSceneParser = (options?: CreateSceneParserOptions): CompatSce
       })
     )
   }
-  const _parser = _parserFactory.create()
 
   return {
-    parse(rawScene: string, sceneName: string, sceneUrl: string) {
+    _assetsPrefetcher,
+
+    _assetSetter,
+
+    _addNextArgList,
+
+    _scriptConfigMap,
+
+    _parser,
+
+    parse(rawScene, sceneName, sceneUrl) {
       const parsed = _parser.parse({
         str: rawScene,
         name: sceneName,
@@ -145,15 +154,15 @@ export const createSceneParser = (options?: CreateSceneParserOptions): CompatSce
       return getCompatScene(parsed)
     },
 
-    parseConfig(configText: string): WebgalConfig {
+    parseConfig(configText) {
       return configParser.parse(configText)
     },
 
-    stringifyConfig(config: WebgalConfig): string {
+    stringifyConfig(config) {
       return configParser.stringify(config)
     },
 
-    parseScssToWebgalStyleObj(scssString: string): WebGALStyle {
+    parseScssToWebgalStyleObj(scssString) {
       return styleParser.parse(scssString)
     },
   }
@@ -177,4 +186,4 @@ export { type IOptionItem, type IConfigItem } from './config'
 export { type WebGALStyle } from './config'
 export { type IWebGALStyleObj } from './config'
 export { configParser, styleParser } from './utils'
-export * as compatPlugins from './plugins'
+export * from './plugins'

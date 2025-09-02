@@ -1,4 +1,4 @@
-import { createParserFactory } from '@/lib/parser'
+import { createParser } from '@/lib/parser'
 import * as plugins from '@/lib/plugins'
 import { type CompatArticle, type Scene, compatParserConfig } from './config'
 import { type WebgalConfig, type WebGALStyle } from './config'
@@ -226,6 +226,12 @@ function placeholderLine(content = '') {
 //   return processedLines.join('\n');
 // }
 
+/**
+ * 处理兼容性场景
+ * @param inputArticle
+ * @returns 处理后的场景
+ * @pure
+ */
 export const getCompatScene = (inputArticle: CompatArticle): Scene => ({
   sceneName: inputArticle.name,
   sceneUrl: inputArticle.url,
@@ -244,22 +250,22 @@ export const getCompatScene = (inputArticle: CompatArticle): Scene => ({
   subSceneList: inputArticle.sub!,
 })
 
-const _configPreParser = createParserFactory(compatParserConfig)
+const _configPreParser = createParser(compatParserConfig)
   .use(plugins.trimPlugin)
   .use(plugins.attributePlugin)
   .use(plugins.undefinedPlugin)
-  .create()
 
 export const configParser = {
-  parse: (configText: string): WebgalConfig => {
-    const parsed = _configPreParser.parse({
+  _configPreParser,
+  parse(configText: string): WebgalConfig {
+    const parsed = this._configPreParser.parse({
       str: configText,
       name: '@config',
       url: '@config',
     })
     return getCompatConfig(parsed)
   },
-  stringify: (input: WebgalConfig): string => {
+  stringify(input: WebgalConfig): string {
     return input.reduce(
       (previousValue, curr) =>
         previousValue +
@@ -272,6 +278,12 @@ export const configParser = {
   },
 }
 
+/**
+ * 获取兼容的配置
+ * @param inputArticle
+ * @returns 兼容的配置
+ * @pure
+ */
 const getCompatConfig = (inputArticle: CompatArticle): WebgalConfig => {
   return inputArticle.sections.map((section) => ({
     command: section.header!,

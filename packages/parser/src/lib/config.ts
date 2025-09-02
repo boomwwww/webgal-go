@@ -25,36 +25,39 @@ export interface Attribute {
 
 /** 预解析器 */
 export interface PreParser {
-  config: ParserConfig
+  _config: PreParserConfig
   parse: (str: string) => Array<Section>
   stringify: (input: Array<Section>, options?: { raw: boolean }) => string
 }
 
 /** 解析器 */
 export interface Parser {
+  _config: ParserConfig
+  _preParser: PreParser
+  use: (plugin: ParserPlugin) => this
   preParse: (str: string) => Array<Section>
   parse: (rawArticle: { name: string; url: string; str: string }) => Article
   stringify: (input: Article | Array<Section>, options?: { raw: boolean }) => string
-  config: ParserConfig
 }
 
-/** 解析器工厂 */
-export interface ParserFactory {
-  use: (plugin: ParserPlugin) => ParserFactory
-  create: () => Parser
-  preParser: PreParser
+/** 预解析器配置 */
+export interface PreParserConfig {
+  separators: Required<SeparatorConfig>
+  escapeConfigs: Array<EscapeConfig>
 }
 
-/** 解析器配置 */
+/** 解析器选项 */
 export interface ParserOptions {
   separators?: SeparatorConfig // 分隔符配置
   escapeConfigs?: Array<EscapeConfig> // 转义规则配置
+  plugins?: Array<ParserPlugin> // 解析器插件
 }
 
-/** 完整的解析器配置 */
+/** 解析器配置 */
 export interface ParserConfig {
   separators: Required<SeparatorConfig>
   escapeConfigs: Array<EscapeConfig>
+  plugins: Array<ParserPlugin>
 }
 
 /** 解析器插件 */
@@ -138,7 +141,7 @@ const handleEscapeX = (str: string, index: number) => {
 }
 
 /** 默认转义配置 */
-export const defaultEscapeConfigs: Array<EscapeConfig> = [
+export const getDefaultEscapeConfigs = (): Array<EscapeConfig> => [
   {
     key: '\\a',
     handle: () => ({ value: '\u0007', rawValue: '\\a' }),
@@ -204,8 +207,11 @@ export const defaultEscapeConfigs: Array<EscapeConfig> = [
   },
 ]
 
-/** 默认解析器配置 */
-export const defaultParserConfig: ParserConfig = {
+/** 默认解析器配置
+ * @return DefaultParserConfig
+ * @pure
+ */
+export const getDefaultParserConfig = (): ParserConfig => ({
   separators: {
     bodyStart: [':'],
     attributeStart: [' -'],
@@ -213,19 +219,28 @@ export const defaultParserConfig: ParserConfig = {
     commentSeparators: [{ start: ';', end: ['\r\n', '\n', '\r'] }],
     sectionEnd: [],
   },
-  escapeConfigs: defaultEscapeConfigs,
-}
-
-/** 合并用户配置与默认配置 */
-export const getCompleteConfig = (parserOptions?: ParserOptions): ParserConfig => ({
-  separators: {
-    ...defaultParserConfig.separators,
-    ...parserOptions?.separators,
-  },
-  escapeConfigs: [
-    ...(parserOptions?.escapeConfigs || []),
-    ...defaultParserConfig.escapeConfigs.filter(
-      (defCfg) => !parserOptions?.escapeConfigs?.some((cfg) => cfg.key === defCfg.key)
-    ),
-  ],
+  escapeConfigs: getDefaultEscapeConfigs(),
+  plugins: [],
 })
+
+/** 合并用户配置与默认配置
+ * @param parserOptions 用户配置
+ * @return 合并后的配置
+ * @pure
+ */
+export const defineParserConfig = (parserOptions?: ParserOptions): ParserConfig => {
+  const defaultParserConfig = getDefaultParserConfig()
+  return {
+    separators: {
+      ...defaultParserConfig.separators,
+      ...parserOptions?.separators,
+    },
+    escapeConfigs: [
+      ...(parserOptions?.escapeConfigs || []),
+      ...defaultParserConfig.escapeConfigs.filter(
+        (defCfg) => !parserOptions?.escapeConfigs?.some((cfg) => cfg.key === defCfg.key)
+      ),
+    ],
+    plugins: [...defaultParserConfig.plugins, ...(parserOptions?.plugins || [])],
+  }
+}

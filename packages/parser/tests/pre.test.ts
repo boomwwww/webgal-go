@@ -1,13 +1,14 @@
 import * as fs from 'node:fs'
 import * as path from 'node:path'
-import { type ParserConfig } from '@/lib/config'
+import { type PreParserConfig } from '@/lib/config'
+import { defineParserConfig } from '@/lib/config'
 import { createPreParser } from '@/lib/pre'
 import { compatParserConfig } from '@/compat/config'
 
 describe('PreParser', () => {
   const test1Txt = fs.readFileSync(path.join(__dirname, './scene/test1.txt'), 'utf-8')
 
-  const parser = createPreParser()
+  const parser = createPreParser(defineParserConfig())
 
   it('should parse basic header, body and comment', () => {
     const input = 'webgal:hello;say hello\n'
@@ -73,12 +74,12 @@ describe('PreParser', () => {
   })
 
   it('should handle multi-character separators', () => {
-    const config: ParserConfig = {
+    const config: PreParserConfig = defineParserConfig({
       separators: {
         bodyStart: ['==>'],
         attributeStart: ['|>>'],
       },
-    }
+    })
     const customParser = createPreParser(config)
     const input = 'test==>body|>>key=val|>>boo;comment\n'
     const result = customParser.parse(input)
@@ -99,7 +100,7 @@ describe('PreParser', () => {
   })
 
   it('should handle custom escape configs', () => {
-    const config: ParserConfig = {
+    const config: PreParserConfig = defineParserConfig({
       escapeConfigs: [
         {
           key: '&lt;',
@@ -116,7 +117,7 @@ describe('PreParser', () => {
           }),
         },
       ],
-    }
+    })
     const customParser = createPreParser(config)
     const input = 'header:&lt;body&gt; -key=&lt;value&gt;;\n'
     const result = customParser.parse(input)

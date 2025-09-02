@@ -1,6 +1,6 @@
 import { type Article, type Section } from '@/lib/config'
-import { type ParserOptions, type ParserPlugin } from '@/lib/config'
-import { type ParserConfig, defaultEscapeConfigs } from '@/lib/config'
+import { type Parser, type ParserOptions, type ParserPlugin } from '@/lib/config'
+import { type ParserConfig, getDefaultEscapeConfigs } from '@/lib/config'
 
 /** 兼容的文章 */
 export interface CompatArticle extends Article {
@@ -18,7 +18,7 @@ export interface CompatSection extends Section {
 
 /** 场景解析器选项 */
 export interface SceneParserOptions {
-  config?: ParserOptions
+  parserOptions?: ParserOptions
   plugins?:
     | Array<ParserPlugin>
     | { pre?: Array<ParserPlugin>; middle?: Array<ParserPlugin>; post?: Array<ParserPlugin> }
@@ -33,6 +33,11 @@ export interface CreateSceneParserOptions extends SceneParserOptions {
 }
 
 export interface CompatSceneParser {
+  _assetsPrefetcher: AssetsPrefetcher
+  _assetSetter: AssetSetter
+  _addNextArgList: CommandCodeList
+  _scriptConfigMap: CommandCodeMap
+  _parser: Parser
   parse: (rawScene: string, sceneName: string, sceneUrl: string) => Scene
   parseConfig: (configText: string) => WebgalConfig
   stringifyConfig: (config: WebgalConfig) => string
@@ -48,7 +53,8 @@ export const compatParserConfig: ParserConfig = {
     commentSeparators: [{ start: ';', end: ['\r\n', '\n', '\r'] }],
     sectionEnd: ['\r\n', '\n', '\r'],
   },
-  escapeConfigs: defaultEscapeConfigs,
+  escapeConfigs: getDefaultEscapeConfigs(),
+  plugins: [],
 }
 
 /** 场景 */

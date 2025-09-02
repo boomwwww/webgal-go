@@ -1,31 +1,38 @@
-import { type Section, type PreParser, type ParserOptions, type ParserConfig } from './config'
-import { getCompleteConfig } from './config'
+import { type Section, type PreParser, type PreParserConfig } from './config'
 import { concat, getPositionByIndex } from './utils'
 
-/** Create a pre parser */
-export const createPreParser = (parserConfig?: ParserOptions): PreParser => ({
-  config: getCompleteConfig(parserConfig),
+/** Create a pre parser
+ * @param preParserConfig - pre parser config
+ * @returns pre parser
+ * @pure
+ */
+export const createPreParser = (preParserConfig: PreParserConfig): PreParser => {
+  const _config = preParserConfig
 
-  parse(str) {
-    const ctx = createContext(str, this.config) // 初始化上下文
-    ctx.current.header = '' // 段落头初始化为字符串
+  return {
+    _config,
 
-    while (ctx.p < ctx.raw.length) {
-      stateHandlers[ctx.state](ctx) // 主循环：根据当前状态调用对应处理函数，直到指针结束
-    }
+    parse(str) {
+      const ctx = createContext(str, this._config) // 初始化上下文
+      ctx.current.header = '' // 段落头初始化为字符串
 
-    if (ctx.current.str !== '') {
-      ctx.current.attributeKey && pushCurrentAttribute(ctx)
-      pushCurrentSection(ctx) // 处理可能遗漏的最后一个段落
-    }
+      while (ctx.p < ctx.raw.length) {
+        stateHandlers[ctx.state](ctx) // 主循环：根据当前状态调用对应处理函数，直到指针结束
+      }
 
-    return ctx.sections
-  },
+      if (ctx.current.str !== '') {
+        ctx.current.attributeKey && pushCurrentAttribute(ctx)
+        pushCurrentSection(ctx) // 处理可能遗漏的最后一个段落
+      }
 
-  stringify(sections, options = { raw: false }) {
-    return sections.map((section) => section[options.raw ? 'raw' : 'str']).join('')
-  },
-})
+      return ctx.sections
+    },
+
+    stringify(sections, options = { raw: false }) {
+      return sections.map((section) => section[options.raw ? 'raw' : 'str']).join('')
+    },
+  }
+}
 
 /** 解析上下文 */
 interface Context {
@@ -34,7 +41,7 @@ interface Context {
   p: number // 当前指针位置
   sections: Array<Section> // 结果数组
   current: Current // 当前段落的临时数据
-  config: ParserConfig // 配置
+  config: PreParserConfig // 配置
 }
 
 /** 状态 */
@@ -49,8 +56,13 @@ interface Current extends Record<State, string | undefined> {
   startIndex: number // 段落起始索引
 }
 
-/** 辅助函数：新建上下文对象 */
-const createContext = (str: string, parserConfig: ParserConfig): Context => ({
+/** 辅助函数：新建上下文对象
+ * @param str - 原始字符串
+ * @param parserConfig - 解析器配置
+ * @returns 上下文对象
+ * @pure
+ */
+const createContext = (str: string, preParserConfig: PreParserConfig): Context => ({
   raw: str,
   state: 'header',
   p: 0,
@@ -67,10 +79,18 @@ const createContext = (str: string, parserConfig: ParserConfig): Context => ({
     raw: '',
     startIndex: 0,
   },
-  config: parserConfig,
+  config: preParserConfig,
 })
 
-/** 辅助函数：添加值到当前段落 */
+/** 辅助函数：添加值到当前段落
+ * @param ctx 上下文对象
+ * @param value 值
+ * @param rawValue 原始值
+ * @mutates ctx.current[ctx.state]
+ * @mutates ctx.current.str
+ * @mutates ctx.current.raw
+ * @mutates ctx.p
+ */
 const pushValue = (ctx: Context, value: string, rawValue?: string): void => {
   const _rawValue = rawValue ?? value
   ctx.current[ctx.state] = concat(ctx.current[ctx.state], value)
@@ -79,14 +99,25 @@ const pushValue = (ctx: Context, value: string, rawValue?: string): void => {
   ctx.p += _rawValue.length
 }
 
-/** 辅助函数：添加分隔符到当前段落 */
+/** 辅助函数：添加分隔符到当前段落
+ * @param ctx 上下文对象
+ * @param separator 分隔符
+ * @mutates ctx.current.str
+ * @mutates ctx.current.raw
+ * @mutates ctx.current.p
+ */
 const pushSeparator = (ctx: Context, separator: string): void => {
   ctx.current.str = concat(ctx.current.str, separator)
   ctx.current.raw = concat(ctx.current.raw, separator)
   ctx.p += separator.length
 }
 
-/** 辅助函数：将当前属性加入到属性列表中，并重置当前属性 */
+/** 辅助函数：将当前属性加入到属性列表中，并重置当前属性
+ * @param ctx 上下文对象
+ * @mutates ctx.current.attributes
+ * @mutates ctx.current.attributeKey
+ * @mutates ctx.current.attributeValue
+ */
 const pushCurrentAttribute = (ctx: Context): void => {
   ctx.current.attributes.push({
     key: ctx.current.attributeKey,
@@ -96,7 +127,11 @@ const pushCurrentAttribute = (ctx: Context): void => {
   ctx.current.attributeValue = undefined
 }
 
-/** 辅助函数：将当前段落推入结果数组并重置当前段落 */
+/** 辅助函数：将当前段落推入结果数组并重置当前段落
+ * @param ctx 上下文对象
+ * @mutates ctx.sections
+ * @mutates ctx.current
+ */
 const pushCurrentSection = (ctx: Context): void => {
   ctx.sections.push({
     header: ctx.current.header,
@@ -124,7 +159,14 @@ const pushCurrentSection = (ctx: Context): void => {
   }
 }
 
-/** 辅助函数，尝试处理转义 */
+/** 辅助函数，尝试处理转义
+ * @param ctx 上下文对象
+ * @returns 是否成功处理转义
+ * @mutates ctx.current[ctx.state]
+ * @mutates ctx.current.str
+ * @mutates ctx.current.raw
+ * @mutates ctx.p
+ */
 const unescape = (ctx: Context): boolean => {
   const { escapeConfigs } = ctx.config
   const matchedEscapeConfig = escapeConfigs.find((cfg) => ctx.raw.startsWith(cfg.key, ctx.p))
@@ -134,7 +176,15 @@ const unescape = (ctx: Context): boolean => {
   return true
 }
 
-/** 辅助函数：尝试进入body状态 */
+/** 辅助函数：尝试进入body状态
+ * @param ctx 上下文对象
+ * @returns 是否成功进入body状态
+ * @mutates ctx.current.str
+ * @mutates ctx.current.raw
+ * @mutates ctx.p
+ * @mutates ctx.state
+ * @mutates ctx.current.body
+ */
 const enterBody = (ctx: Context): boolean => {
   const { bodyStart } = ctx.config.separators
   const matchedBodyStart = bodyStart.find((sep) => ctx.raw.startsWith(sep, ctx.p))
@@ -213,7 +263,11 @@ const pushChar = (ctx: Context): boolean => {
   return true
 }
 
-/** 创建状态处理函数的工厂函数 */
+/** 创建状态处理函数的工厂函数
+ * @param fns - 状态处理函数列表
+ * @returns - 状态处理函数
+ * @pure
+ */
 const handle = (fns: Array<(ctx: Context) => boolean>): ((ctx: Context) => void) => {
   return (ctx) => {
     for (const fn of fns) {

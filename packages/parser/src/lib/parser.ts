@@ -1,51 +1,50 @@
-import { type Parser, type ParserFactory, type ParserOptions, type ParserPlugin } from './config'
+import { type Parser, type ParserOptions, type ParserPlugin } from './config'
+import { defineParserConfig } from './config'
 import { createPreParser } from './pre'
 import { pipe } from './utils'
 
-export const createParserFactory = (parserConfig?: ParserOptions): ParserFactory => {
-  const _preParser = createPreParser(parserConfig)
+/**
+ * 创建解析器
+ * @param parserOptions 解析器配置
+ * @returns 解析器
+ * @pure
+ */
+export const createParser = (parserOptions?: ParserOptions): Parser => {
+  const _config = defineParserConfig(parserOptions)
 
-  const _plugins: Array<ParserPlugin> = []
+  const _preParser = createPreParser(_config)
 
-  const _parserFactory: ParserFactory = {
-    use: (plugin: ParserPlugin) => {
-      _plugins.push(plugin)
-      return _parserFactory
+  return {
+    _config,
+
+    _preParser,
+
+    use(plugin: ParserPlugin) {
+      this._config.plugins.push(plugin)
+      return this
     },
 
-    create: (): Parser => {
-      const _pluginParse = pipe(..._plugins)
+    preParse(str) {
+      return this._preParser.parse(str)
+    },
 
-      return {
-        preParse: (str) => {
-          return _preParser.parse(str)
-        },
-
-        parse: (rawArticle) => {
-          const initialSections = _preParser.parse(rawArticle.str)
-          const initialArticle = {
-            name: rawArticle.name,
-            url: rawArticle.url,
-            sections: initialSections,
-            raw: rawArticle.str,
-          }
-          return _pluginParse(initialArticle)
-        },
-
-        stringify: (input, options = { raw: false }) => {
-          return Array.isArray(input)
-            ? _preParser.stringify(input, options)
-            : options.raw
-            ? input.raw
-            : _preParser.stringify(input.sections, { raw: false })
-        },
-
-        config: _preParser.config,
+    parse(rawArticle) {
+      const initialSections = this._preParser.parse(rawArticle.str)
+      const initialArticle = {
+        name: rawArticle.name,
+        url: rawArticle.url,
+        sections: initialSections,
+        raw: rawArticle.str,
       }
+      return pipe(...this._config.plugins)(initialArticle)
     },
 
-    preParser: _preParser,
+    stringify(input, options = { raw: false }) {
+      return Array.isArray(input)
+        ? this._preParser.stringify(input, options)
+        : options.raw
+        ? input.raw
+        : this._preParser.stringify(input.sections, { raw: false })
+    },
   }
-
-  return _parserFactory
 }
