@@ -1,5 +1,5 @@
-import { createWebgalCore } from '@webgal-go/core'
-import type { CreateWebgalAppOptions, WebgalApp } from '@/types'
+import { createWebgalCore, type WebgalApp } from '@webgal-go/core'
+import type { CreateWebgalAppOptions } from '@/types'
 import { config } from '@/config'
 import { createParser } from './parser'
 import { createBus } from './bus'
@@ -15,3 +15,5 @@ export const createWebgalApp = (options?: CreateWebgalAppOptions): WebgalApp => 
   webgalApp.debugger = createDebugger({ debug: options?.debug ?? false })
   return webgalApp
 }
+
+export { type WebgalApp }

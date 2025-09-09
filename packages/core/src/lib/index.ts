@@ -1,6 +1,6 @@
 import { config } from '@/config'
 
-export interface WebgalCore {
+export interface WebgalApp {
   version: string
   ctx: Context
 }
@@ -13,14 +13,14 @@ export interface CreateWebgalCoreOptions {
 }
 
 export interface WebgalPlugin {
-  install: (webgal: WebgalCore) => void
+  install: (webgal: WebgalApp) => void
 }
 
-export const createWebgalCore = (options?: CreateWebgalCoreOptions): WebgalCore => {
+export const createWebgalCore = (options?: CreateWebgalCoreOptions): WebgalApp => {
   const webgalCore = {
     version: '',
     ctx: {},
-  } as WebgalCore
+  } as WebgalApp
   webgalCore.version = options?.version || config.version
   options?.plugins?.forEach((plugin) => {
     plugin.install(webgalCore)
