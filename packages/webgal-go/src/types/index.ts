@@ -1,12 +1,11 @@
-import { type WebgalCore, type Context } from '@webgal-go/core'
+import { type WebgalCore, type Context, type WebgalPlugin } from '@webgal-go/core'
 import { type CompatSceneParser } from '@webgal-go/parser'
 import { type Emitter } from '@/vendors/mitt'
 
-export interface Webgal extends WebgalCore {
-  readonly parser: CompatSceneParser
-  readonly bus: Emitter<Required<BusEvents>>
-  readonly debugger: Debugger
-  readonly use: (plugin: WebgalPlugin) => Webgal
+export interface WebgalApp extends WebgalCore {
+  parser: CompatSceneParser
+  bus: Emitter<Required<BusEvents>>
+  debugger: Debugger
 }
 
 export { type Context }
@@ -29,8 +28,4 @@ export interface Debugger {
   warn: (...args: any[]) => void
   error: (...args: any[]) => void
   info: (...args: any[]) => void
-}
-
-export interface WebgalPlugin {
-  install: (webgal: Webgal) => void
 }

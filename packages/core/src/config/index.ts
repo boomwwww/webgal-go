@@ -1,0 +1,4 @@
+export const config = {
+  version: __VERSION__,
+  buildTime: __BUILD_TIME__,
+}

@@ -1,24 +1,17 @@
-import * as _core from '@webgal-go/core'
-import type { CreateWebgalOptions, Webgal } from '@/types'
+import { createWebgalCore } from '@webgal-go/core'
+import type { CreateWebgalOptions, WebgalApp } from '@/types'
 import { config } from '@/config'
 import { createParser } from './parser'
 import { createBus } from './bus'
 import { createDebugger } from './debugger'
 
-export const createWebgal = (options?: CreateWebgalOptions): Webgal => {
-  const _webgal: Webgal = {
+export const createWebgalApp = (options?: CreateWebgalOptions): WebgalApp => {
+  const webgalApp = createWebgalCore({
     version: config.version,
-    ctx: {},
-    parser: createParser(),
-    bus: createBus(),
-    debugger: createDebugger({ debug: options?.debug ?? false }),
-    use(plugin) {
-      plugin.install(this)
-      return this
-    },
-  }
-  for (const plugin of options?.plugins ?? []) {
-    plugin.install(_webgal)
-  }
-  return _webgal
+    plugins: options?.plugins,
+  }) as WebgalApp
+  webgalApp.parser = createParser()
+  webgalApp.bus = createBus()
+  webgalApp.debugger = createDebugger({ debug: options?.debug ?? false })
+  return webgalApp
 }

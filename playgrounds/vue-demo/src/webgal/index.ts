@@ -1,25 +1,6 @@
-import { createWebgal } from 'webgal-go'
-import { createStage } from '@webgal-go/test-plugin'
+import { createWebgalApp } from 'webgal-go'
 
-export const webgal = createWebgal({
+export const webgal = createWebgalApp({
   debug: true,
-  plugins: [
-    {
-      install: (webgal) => {
-        webgal.bus.on('text-settle', () => {
-          console.log('text-settle')
-        })
-      },
-    },
-  ],
+  plugins: [],
 })
-  .use(createStage())
-  .use(createStage())
-  .use(createStage())
-  .use(createStage())
-  .use(createStage())
-  .use(createStage())
-  .use(createStage())
-  .use(createStage())
-  .use(createStage())
-  .use(createStage())

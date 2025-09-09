@@ -3,7 +3,7 @@ import { webgal } from '@/webgal'
 </script>
 
 <template>
-  <h1>You did it! pixi: {{ webgal.ctx.stage.pixi }}</h1>
+  <h1>You did it! pixi: {{}}</h1>
   <p>Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the documentation</p>
 </template>
 

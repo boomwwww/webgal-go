@@ -1,5 +1,5 @@
-import { createWebgal } from 'webgal-go'
+import { createWebgalApp } from 'webgal-go'
 
-const webgal = createWebgal()
+const webgal = createWebgalApp()
 
 export default webgal
