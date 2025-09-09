@@ -17,7 +17,7 @@ export interface BusEvents {
   'style-update': null
 }
 
-export interface CreateWebgalOptions {
+export interface CreateWebgalAppOptions {
   debug?: boolean
   plugins?: Array<WebgalPlugin>
 }

@@ -1,11 +1,11 @@
 import { createWebgalCore } from '@webgal-go/core'
-import type { CreateWebgalOptions, WebgalApp } from '@/types'
+import type { CreateWebgalAppOptions, WebgalApp } from '@/types'
 import { config } from '@/config'
 import { createParser } from './parser'
 import { createBus } from './bus'
 import { createDebugger } from './debugger'
 
-export const createWebgalApp = (options?: CreateWebgalOptions): WebgalApp => {
+export const createWebgalApp = (options?: CreateWebgalAppOptions): WebgalApp => {
   const webgalApp = createWebgalCore({
     version: config.version,
     plugins: options?.plugins,
