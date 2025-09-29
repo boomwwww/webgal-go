@@ -2,10 +2,14 @@ import type { WebgalPlugin } from 'webgal-go'
 
 export const createPluginStage = (): WebgalPlugin => {
   return (webgal) => {
-    if (!webgal.ctx) throw new Error('Webgal not initialized')
     webgal.ctx.stage = { pixi: 'pipixixi' }
+    const handleNum = (num: number) => {
+      console.log('num', num)
+    }
+    webgal.bus.on('num', handleNum)
     return () => {
       console.log('uninstall stage')
+      webgal.bus.off('num', handleNum)
     }
   }
 }
