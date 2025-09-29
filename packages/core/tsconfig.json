@@ -4,11 +4,11 @@
     "target": "es6",
     "strict": true,
     "declaration": true,
-    "types": ["node", "vitest/globals"],
+    "types": ["node"],
     "moduleResolution": "node",
     "paths": {
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "tests"]
+  "include": ["src"]
 }
