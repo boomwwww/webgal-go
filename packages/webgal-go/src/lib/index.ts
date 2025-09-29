@@ -1,19 +1,39 @@
-import { createWebgalCore, type WebgalApp } from '@webgal-go/core'
-import type { CreateWebgalAppOptions } from '@/types'
-import { config } from '@/config'
-import { createParser } from './parser'
-import { createBus } from './bus'
-import { createDebugger } from './debugger'
+import { createAppCore, type AppCore } from '@webgal-go/core'
+import { innerPluginVersion } from './version'
+import { innerPluginContext } from './ctx'
+import { innerPluginParser } from './parser'
+import { innerPluginBus } from './bus'
+import { createInnerPluginDebugger } from './debugger'
 
-export const createWebgalApp = (options?: CreateWebgalAppOptions): WebgalApp => {
-  const webgalApp = createWebgalCore({
-    version: config.version,
-    plugins: options?.plugins,
-  }) as WebgalApp
-  webgalApp.parser = createParser()
-  webgalApp.bus = createBus()
-  webgalApp.debugger = createDebugger({ debug: options?.debug ?? false })
-  return webgalApp
+declare module '@webgal-go/core' {
+  export interface AppCore {
+    use(plugin: WebgalPlugin): this
+    unuse(plugin: WebgalPlugin): this
+    hasUsedPlugin(plugin: WebgalPlugin): boolean
+    version?: string
+  }
 }
 
-export { type WebgalApp }
+export type Webgal = Required<AppCore>
+
+export type WebgalPlugin = (webgal: Webgal) => () => void
+
+export interface CreateWebgalAppOptions {
+  debug?: boolean
+}
+
+export const createWebgal = (options?: CreateWebgalAppOptions): Webgal => {
+  const webgal = createAppCore() as Webgal
+
+  webgal
+    .use(innerPluginVersion)
+    .use(innerPluginContext)
+    .use(innerPluginParser)
+    .use(innerPluginBus)
+    .use(createInnerPluginDebugger({ debug: options?.debug ?? false }))
+
+  return webgal
+}
+
+export type { Context, Effect } from './ctx'
+export type { BusEvents } from './bus'

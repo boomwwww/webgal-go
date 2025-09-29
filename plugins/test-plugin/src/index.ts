@@ -1,14 +1,14 @@
-import { type WebgalApp, type WebgalPlugin } from 'webgal-go'
+import type { WebgalPlugin } from 'webgal-go'
 
-export const createStage = (): WebgalPlugin => {
-  return {
-    install: (webgal: WebgalApp) => {
-      webgal.ctx.stage = { pixi: 'pipixixi' }
-    },
+export const createPluginStage = (): WebgalPlugin => {
+  return (webgal) => {
+    if (!webgal.ctx) throw new Error('Webgal not initialized')
+    webgal.ctx.stage = { pixi: 'pipixixi' }
+    return () => {
+      console.log('uninstall stage')
+    }
   }
 }
-
-export { type WebgalApp }
 
 export * from './types'
 export * from './bus'

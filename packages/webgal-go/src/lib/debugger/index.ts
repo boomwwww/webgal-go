@@ -1,6 +1,20 @@
-import type { Debugger } from '@/types'
+import type { AppPlugin } from '@webgal-go/core'
 
-export const createDebugger = ({ debug }: { debug: boolean }): Debugger => {
+declare module '@webgal-go/core' {
+  export interface AppCore {
+    debugger?: Debugger
+  }
+}
+
+export interface Debugger {
+  debug: boolean
+  log: (...args: any[]) => void
+  warn: (...args: any[]) => void
+  error: (...args: any[]) => void
+  info: (...args: any[]) => void
+}
+
+const createDebugger = ({ debug }: { debug: boolean }): Debugger => {
   return {
     debug: debug,
     log(...args) {
@@ -18,5 +32,12 @@ export const createDebugger = ({ debug }: { debug: boolean }): Debugger => {
       if (!this.debug) return
       console.info(...args)
     },
+  }
+}
+
+export const createInnerPluginDebugger = ({ debug }: { debug: boolean }): AppPlugin => {
+  return (app) => () => {
+    app.debugger = createDebugger({ debug })
+    return () => delete app.debugger
   }
 }

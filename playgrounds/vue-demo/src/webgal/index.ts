@@ -1,6 +1,8 @@
-import { createWebgalApp } from 'webgal-go'
+import { createWebgal } from 'webgal-go'
+import { createPluginStage } from '@webgal-go/test-plugin'
 
-export const webgal = createWebgalApp({
-  debug: true,
-  plugins: [],
-})
+const webgal = createWebgal({ debug: true })
+
+webgal.use(createPluginStage())
+
+export default webgal
