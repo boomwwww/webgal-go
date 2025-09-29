@@ -40,7 +40,7 @@ export const createAppCore = (): AppCore => {
       return Reflect.set(target, property, value, receiver)
     },
     deleteProperty(target, property) {
-      if ((['version', 'use', 'unuse', 'hasUsedPlugin'] as any[]).includes(property)) {
+      if ((['version', 'use', 'unuse', 'hasUsedPlugin'] as (string | symbol)[]).includes(property)) {
         throw new Error(`Cannot delete property '${String(property)}'`)
       }
       return Reflect.deleteProperty(target, property)
