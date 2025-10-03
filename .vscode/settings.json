@@ -3,7 +3,7 @@
   "explorer.fileNesting.patterns": {
     "package.json": "package-lock.json,npm*,.npm*,pnpm*,.pnpm*,env.d.ts",
     "README.md": "*.md,,LICENSE",
-    ".gitignore": ".git*,commitlint.config.js",
+    ".gitignore": ".git*,commitlint.config.js,.lintstagedrc.js",
     ".editorconfig": "eslint*,.eslint*,prettier*,.prettier*,cspell.json",
     "tsconfig.json": "tsconfig.*.json",
     "tsdown.config.ts": "*config.js,*config.ts,*config.json,*rc",

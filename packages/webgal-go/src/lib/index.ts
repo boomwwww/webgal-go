@@ -8,7 +8,7 @@ import { createInnerPluginDebugger } from './debugger'
 declare module '@webgal-go/core' {
   export interface AppCore {
     use(plugin: WebgalPlugin): this
-    unuse(plugin: WebgalPlugin): this
+    unUse(plugin: WebgalPlugin): this
     hasUsedPlugin(plugin: WebgalPlugin): boolean
     version?: string
   }

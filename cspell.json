@@ -12,10 +12,12 @@
   "ignorePaths": [
     "**/node_modules/**",
     "**/dist/**",
+    "**/.vscode/**",
     "**/docs/**",
     "**/public/**",
     "**/package.json",
     "**/pnpm-lock.yaml",
+    "**/*.svg",
     ".gitignore",
     ".prettierignore"
   ]

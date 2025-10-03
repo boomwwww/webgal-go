@@ -1,4 +1,12 @@
-webgal
-pixi
+lintstagedrc
+Avenir
+flac
 live2d
 live2dcubismcore
+LXGW
+notend
+OPPO
+pixi
+prefetcher
+serviceworker
+webgal

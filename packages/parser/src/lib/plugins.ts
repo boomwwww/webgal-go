@@ -14,7 +14,7 @@ export const trimPlugin: ParserPlugin = (inputArticle) => ({
   })),
 })
 
-export const createDequotationPlugin = (quotations: Array<[string, string]>): ParserPlugin => {
+export const createDeQuotationPlugin = (quotations: Array<[string, string]>): ParserPlugin => {
   const _removeQuotation = (str: string | undefined) => {
     if (!str) return str
     for (const [quotationStart, quotationEnd] of quotations) {

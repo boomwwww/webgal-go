@@ -2,7 +2,7 @@ import type { WebgalPlugin } from 'webgal-go'
 
 export const createPluginStage = (): WebgalPlugin => {
   return (webgal) => {
-    webgal.ctx.stage = { pixi: 'pipixixi' }
+    webgal.ctx.stage = { pixi: 'pi-pixi-xi' }
     const handleNum = (num: number) => {
       console.log('num', num)
     }

@@ -43,9 +43,9 @@
 //     const currentStageState = webgalStore.getState().stage;
 //     const stageStateToBacklog = cloneDeep(currentStageState);
 //     stageStateToBacklog.PerformList.forEach((ele) => {
-//       ele.script.args.forEach((argelement) => {
-//         if (argelement.key === 'concat') {
-//           argelement.value = false;
+//       ele.script.args.forEach((argElement) => {
+//         if (argElement.key === 'concat') {
+//           argElement.value = false;
 //           ele.script.content = stageStateToBacklog.showText;
 //         }
 //       });

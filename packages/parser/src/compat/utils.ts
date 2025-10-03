@@ -6,7 +6,7 @@ import { type WebgalConfig, type WebGALStyle } from './config'
 /**
  * Preprocessor for scene text.
  *
- * Use two-pass to generate a new scene text that concats multiline sequences
+ * Use two-pass to generate a new scene text that concat multiline sequences
  * into a single line and add placeholder lines to preserve the original number
  * of lines.
  *
@@ -207,9 +207,9 @@ function placeholderLine(content = '') {
 //       // Multiline statement handling
 //       if (lastNonMultilineIndex >= 0) {
 //         // Concatenate to the previous non-multiline statement
-//         const trimedLine = line.trimStart();
-//         const addBlank = trimedLine.startsWith('-') ? ' ' : '';
-//         processedLines[lastNonMultilineIndex] += addBlank + trimedLine;
+//         const trimmedLine = line.trimStart();
+//         const addBlank = trimmedLine.startsWith('-') ? ' ' : '';
+//         processedLines[lastNonMultilineIndex] += addBlank + trimmedLine;
 //       }
 
 //       // Add the special comment line
@@ -301,11 +301,11 @@ const getCompatConfig = (inputArticle: CompatArticle): WebgalConfig => {
 // todo
 export const styleParser = {
   parse: (scssText: string): WebGALStyle => {
-    return scss2cssinjsParser(scssText)
+    return scss2CssInJsParser(scssText)
   },
 }
 
-export function scss2cssinjsParser(scssString: string): WebGALStyle {
+export function scss2CssInJsParser(scssString: string): WebGALStyle {
   const [classNameStyles, others] = parseCSS(scssString)
   return {
     classNameStyles,
