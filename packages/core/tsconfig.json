@@ -1,11 +1,12 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "lib": ["ESNext"],
     "target": "es6",
     "strict": true,
     "declaration": true,
     "types": ["node"],
-    "moduleResolution": "node",
+    "moduleResolution": "Node",
     "paths": {
       "@/*": ["./src/*"]
     }

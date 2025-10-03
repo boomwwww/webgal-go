@@ -241,7 +241,7 @@ export const defineParserConfig = (parserOptions?: ParserOptions): ParserConfig 
     escapeConfigs: [
       ...(parserOptions?.escapeConfigs || []),
       ...defaultParserConfig.escapeConfigs.filter(
-        (defCfg) => !parserOptions?.escapeConfigs?.some((cfg) => cfg.key === defCfg.key)
+        (defCfg) => !parserOptions?.escapeConfigs?.some((cfg) => cfg.key === defCfg.key),
       ),
     ],
     plugins: [...defaultParserConfig.plugins, ...(parserOptions?.plugins || [])],

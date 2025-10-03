@@ -4,12 +4,26 @@
   "description": "webgal-go-project",
   "author": "boomwwww",
   "license": "MPL-2.0",
+  "type": "module",
   "scripts": {
-    "parser:build": "pnpm -F @webgal-go/parser run build",
-    "parser:test": "pnpm -F @webgal-go/parser run test",
-    "parser:lint": "pnpm -F @webgal-go/parser run lint",
+    "clear": "node ./scripts/clear",
+    "lint:prettier": "prettier --write .",
+    "build:parser": "pnpm -F @webgal-go/parser run build",
+    "test:parser": "pnpm -F @webgal-go/parser run test",
+    "lint:parser": "pnpm -F @webgal-go/parser run lint",
     "play": "pnpm -F @webgal-go/playground-vite run dev",
     "play:vue": "pnpm -F @webgal-go/playground-vite-vue run dev",
     "play:react": "pnpm -F @webgal-go/playground-vite-react run dev"
+  },
+  "devDependencies": {
+    "@types/node": "^24.6.2",
+    "prettier": "^3.6.2",
+    "tsdown": "^0.15.6",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0",
+    "pnpm": ">=10.0.0"
   }
 }

@@ -8,5 +8,5 @@ import '@/assets/style/modern-css-reset/index.css'
 createRoot(document.querySelector('#root')!).render(
   <StrictMode>
     <App />
-  </StrictMode>
+  </StrictMode>,
 )

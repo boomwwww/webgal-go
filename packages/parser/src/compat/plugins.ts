@@ -306,7 +306,7 @@ export const createCompatPlugin = (options: {
     assetsScannerPlugin,
     subSceneScannerPlugin,
     createAssetsPrefetcherPlugin(options.assetsPrefetcher),
-    _postPlugin
+    _postPlugin,
   )
   return _compatPlugin
 }

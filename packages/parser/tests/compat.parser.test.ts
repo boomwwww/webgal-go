@@ -10,7 +10,7 @@ describe('compat: parser', () => {
     (_assetList) => {},
     (fileName, _assetType) => fileName,
     ADD_NEXT_ARG_LIST,
-    SCRIPT_CONFIG
+    SCRIPT_CONFIG,
   )
 
   test('label', async () => {
@@ -161,7 +161,7 @@ Title_logos: 1.png | 2.png | Image Logo.png| -show -active=false -add=op! -count
       (_assetList) => {},
       (fileName, _assetType) => fileName,
       ADD_NEXT_ARG_LIST,
-      SCRIPT_CONFIG
+      SCRIPT_CONFIG,
     )
 
     const result = parser.parse(`wait:1000;`, 'test', 'test')
@@ -195,7 +195,7 @@ Title_logos: 1.png | 2.png | Image Logo.png| -show -active=false -add=op! -count
     const result = parser.parse(
       `changeBg:background.jpg -duration=2000 -enter=slideIn -transform={"alpha":0.8};`,
       'test',
-      'test'
+      'test',
     )
     expect(result.sentenceList).toContainEqual({
       command: commandType.changeBg,

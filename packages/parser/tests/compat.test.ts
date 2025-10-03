@@ -8,7 +8,7 @@ describe('SceneParser', () => {
     (_assetList) => {},
     (assetName, _assetType) => assetName,
     ADD_NEXT_ARG_LIST,
-    SCRIPT_CONFIG
+    SCRIPT_CONFIG,
   )
   it('should work', () => {
     expect(sceneParser).toBeDefined()

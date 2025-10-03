@@ -273,7 +273,7 @@ export const configParser = {
         curr.args.join('|') +
         curr.options.reduce((p, c) => `${p} -${c.key}=${c.value}`, '') +
         ';\n',
-      ''
+      '',
     )
   },
 }

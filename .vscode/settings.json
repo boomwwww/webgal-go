@@ -1,7 +1,7 @@
 {
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.patterns": {
-    "package.json": "package-lock.json,npm*,.npm*,yarn*,.yarn*,pnpm*,.pnpm*,.editorconfig,LICENSE*,.prettierrc",
+    "package.json": "package-lock.json,npm*,.npm*,yarn*,.yarn*,pnpm*,.pnpm*,.editorconfig,LICENSE*,prettier.config.js",
     "README.md": "*.md",
     ".gitignore": ".git*",
     "tsconfig.json": "tsconfig.*.json,env.d.ts",

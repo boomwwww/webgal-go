@@ -43,8 +43,8 @@ export const createParser = (parserOptions?: ParserOptions): Parser => {
       return Array.isArray(input)
         ? this._preParser.stringify(input, options)
         : options.raw
-        ? input.raw
-        : this._preParser.stringify(input.sections, { raw: false })
+          ? input.raw
+          : this._preParser.stringify(input.sections, { raw: false })
     },
   }
 }

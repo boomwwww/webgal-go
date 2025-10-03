@@ -49,10 +49,10 @@ export const attributePlugin: ParserPlugin = (inputArticle) => ({
         value: ['true', 'True', 'TRUE'].includes(attribute.value.toString())
           ? true
           : ['false', 'False', 'FALSE'].includes(attribute.value.toString())
-          ? false
-          : attribute.value !== '' && !isNaN(Number(attribute.value))
-          ? Number(attribute.value)
-          : attribute.value,
+            ? false
+            : attribute.value !== '' && !isNaN(Number(attribute.value))
+              ? Number(attribute.value)
+              : attribute.value,
       }
     }),
   })),

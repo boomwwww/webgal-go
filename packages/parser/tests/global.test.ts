@@ -5,7 +5,7 @@ describe('global-test', () => {
     (_assetList) => {},
     (fileName, _fileType) => fileName,
     ADD_NEXT_ARG_LIST,
-    SCRIPT_CONFIG
+    SCRIPT_CONFIG,
   )
   it('should work', () => {
     console.log(
@@ -27,11 +27,11 @@ changeFigure:stand2.png -right -next;
 {egine} 是使用 Web 技术开发的引擎，因此在网页端有良好的表现。 -v2.wav;
 由于这个特性，如果你将 {egine} 部署到服务器或网页托管平台上，玩家只需要一串链接就可以开始游玩！ -v3.wav;`,
           ``,
-          ``
+          ``,
         ),
         undefined,
-        2
-      )
+        2,
+      ),
     )
   })
 })

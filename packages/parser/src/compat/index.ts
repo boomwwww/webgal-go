@@ -25,7 +25,7 @@ export class SceneParser {
     assetSetter: AssetSetter,
     ADD_NEXT_ARG_LIST: CommandCodeList,
     SCRIPT_CONFIG_INPUT: Array<CommandCodeItem> | CommandCodeMap,
-    options?: SceneParserOptions
+    options?: SceneParserOptions,
   ) {
     this.assetsPrefetcher = assetsPrefetcher
 
@@ -57,7 +57,7 @@ export class SceneParser {
           prePlugins: options?.plugins?.pre,
           middlePlugins: options?.plugins?.middle,
           postPlugins: options?.plugins?.post,
-        })
+        }),
       )
     }
     this.parser = parser
@@ -130,7 +130,7 @@ export const createCompatSceneParser = (options?: CompatSceneParserOptions): Com
         prePlugins: options?.plugins?.pre,
         middlePlugins: options?.plugins?.middle,
         postPlugins: options?.plugins?.post,
-      })
+      }),
     )
   }
 
