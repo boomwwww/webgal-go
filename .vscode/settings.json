@@ -1,15 +1,13 @@
 {
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.patterns": {
-    "package.json": "package-lock.json,npm*,.npm*,pnpm*,.pnpm*,.editorconfig",
+    "package.json": "package-lock.json,npm*,.npm*,pnpm*,.pnpm*,env.d.ts",
     "README.md": "*.md,,LICENSE",
-    ".gitignore": ".git*",
-    "prettier.config.js": "prettier*,.prettier*",
-    "eslint.config.js": "eslint*,.eslint*",
-    "tsconfig.json": "tsconfig.*.json,env.d.ts",
+    ".gitignore": ".git*,commitlint.config.js",
+    ".editorconfig": "eslint*,.eslint*,prettier*,.prettier*,cspell.json",
+    "tsconfig.json": "tsconfig.*.json",
     "tsdown.config.ts": "*config.js,*config.ts,*config.json,*rc",
-    "vite.config.ts": "*config.js,*config.json,*rc,.eslint*,eslint*,.prettier*,prettier*",
-    "index.js": "index*"
+    "vite.config.ts": "*config.js,*config.json,*rc,.eslint*,eslint*,.prettier*,prettier*"
   },
   "oxc.enable": true
 }

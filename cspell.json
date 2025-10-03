@@ -1,0 +1,22 @@
+{
+  "import": ["@cspell/dict-typescript/cspell-ext.json"],
+  "caseSensitive": false,
+  "dictionaries": ["custom-dictionary"],
+  "dictionaryDefinitions": [
+    {
+      "name": "custom-dictionary",
+      "path": "./.cspell/custom-dictionary.txt",
+      "addWords": true
+    }
+  ],
+  "ignorePaths": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/docs/**",
+    "**/public/**",
+    "**/package.json",
+    "**/pnpm-lock.yaml",
+    ".gitignore",
+    ".prettierignore"
+  ]
+}

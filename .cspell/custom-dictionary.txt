@@ -1,0 +1,4 @@
+webgal
+pixi
+live2d
+live2dcubismcore

@@ -1,6 +1,6 @@
 export interface AppCore {
   use(plugin: AppPlugin): this
-  unuse(plugin: AppPlugin): this
+  unUse(plugin: AppPlugin): this
   hasUsedPlugin(plugin: AppPlugin): boolean
 }
 
@@ -18,7 +18,7 @@ export const createAppCore = (): AppCore => {
       _plugins.set(plugin, uninstall)
       return this
     },
-    unuse(plugin) {
+    unUse(plugin) {
       const hasUsed = this.hasUsedPlugin(plugin)
       if (!hasUsed) {
         throw new Error(`Plugin '${plugin.name}' has not been used`)
@@ -40,7 +40,7 @@ export const createAppCore = (): AppCore => {
       return Reflect.set(target, property, value, receiver)
     },
     deleteProperty(target, property) {
-      if ((['version', 'use', 'unuse', 'hasUsedPlugin'] as (string | symbol)[]).includes(property)) {
+      if ((['version', 'use', 'unUse', 'hasUsedPlugin'] as (typeof property)[]).includes(property)) {
         throw new Error(`Cannot delete property '${String(property)}'`)
       }
       return Reflect.deleteProperty(target, property)
