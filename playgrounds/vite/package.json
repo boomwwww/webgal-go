@@ -1,5 +1,5 @@
 {
-  "name": "@webgal-go/playground-demo-vite",
+  "name": "@webgal-go/playground-vite",
   "version": "0.0.0",
   "type": "module",
   "scripts": {

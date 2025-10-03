@@ -12,7 +12,7 @@ export const createAppCore = (): AppCore => {
     use(plugin) {
       const hasUsed = this.hasUsedPlugin(plugin)
       if (hasUsed) {
-        throw new Error(`Plugin '${plugin.name}' has been used`)
+        throw new Error(`Cannot use a plugin that has already been used!`)
       }
       const uninstall = plugin(this)
       _plugins.set(plugin, uninstall)

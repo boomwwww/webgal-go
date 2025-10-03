@@ -1,5 +1,5 @@
 {
-  "name": "@webgal-go/playground-demo-vue",
+  "name": "@webgal-go/playground-vite-vue",
   "version": "0.0.0",
   "type": "module",
   "scripts": {

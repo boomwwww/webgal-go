@@ -8,8 +8,8 @@
     "parser:build": "pnpm -F @webgal-go/parser run build",
     "parser:test": "pnpm -F @webgal-go/parser run test",
     "parser:lint": "pnpm -F @webgal-go/parser run lint",
-    "play": "pnpm -F @webgal-go/playground-demo-vite run dev",
-    "play:vue": "pnpm -F @webgal-go/playground-demo-vue run dev",
-    "play:react": "pnpm -F @webgal-go/playground-demo-react run dev"
+    "play": "pnpm -F @webgal-go/playground-vite run dev",
+    "play:vue": "pnpm -F @webgal-go/playground-vite-vue run dev",
+    "play:react": "pnpm -F @webgal-go/playground-vite-react run dev"
   }
 }
