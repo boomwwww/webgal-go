@@ -21,7 +21,8 @@
     "lint:parser": "pnpm -F @webgal-go/parser run lint",
     "play": "pnpm -F @webgal-go/playground-vite run dev",
     "play:vue": "pnpm -F @webgal-go/playground-vite-vue run dev",
-    "play:react": "pnpm -F @webgal-go/playground-vite-react run dev"
+    "play:react": "pnpm -F @webgal-go/playground-vite-react run dev",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.1.0",
@@ -38,6 +39,7 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-vue": "^10.5.0",
     "globals": "^16.3.0",
+    "husky": "^9.1.7",
     "prettier": "^3.6.2",
     "tsdown": "^0.15.6",
     "typescript": "^5.9.3",
