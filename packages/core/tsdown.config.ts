@@ -1,5 +1,5 @@
 import { defineConfig } from 'tsdown'
-import packageJson from './package.json'
+import packageJson from './package.json' with { type: 'json' }
 
 export default defineConfig({
   dts: true,
