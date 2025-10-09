@@ -7,7 +7,7 @@ declare module '@webgal-go/core' {
   }
 }
 
-export const innerPluginVersion: AppPlugin = (app) => {
+export const versionInnerPlugin: AppPlugin = (app) => {
   app.version = config.version
-  return () => delete app.version
+  return () => {}
 }

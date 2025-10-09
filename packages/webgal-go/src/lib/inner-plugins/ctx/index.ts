@@ -72,13 +72,10 @@ const defineContext = () => {
   return _useContext
 }
 
-export const innerPluginContext: AppPlugin = (app) => {
+export const contextInnerPlugin: AppPlugin = (app) => {
   const useContext = defineContext()
   const [_ctx, _eff] = useContext()
   app.ctx = _ctx
   app.eff = _eff
-  return () => {
-    delete app.ctx
-    delete app.eff
-  }
+  return () => {}
 }

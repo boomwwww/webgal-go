@@ -9,18 +9,13 @@ declare module '@webgal-go/core' {
 
 type Bus = ReturnType<typeof mitt<Required<BusEvents>>>
 
-export interface BusEvents {
-  'text-settle': null
-  'user-interact-next': null
-  'fullscreen-db-click': null
-  'style-update': null
-}
+export interface BusEvents {}
 
 const createBus = (): Bus => {
   return mitt()
 }
 
-export const innerPluginBus: AppPlugin = (app) => {
+export const busInnerPlugin: AppPlugin = (app) => {
   app.bus = createBus()
-  return () => delete app.bus
+  return () => {}
 }

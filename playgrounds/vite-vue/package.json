@@ -25,7 +25,8 @@
     "vue": "^3.5.18",
     "vue-router": "^4.5.1",
     "webgal-go": "workspace:*",
-    "@webgal-go/test-plugin": "workspace:*"
+    "@webgal-go/test-plugin": "workspace:*",
+    "@webgal-go/plugin-legacy": "workspace:*"
   },
   "engines": {
     "node": "^20.19.0 || >=22.12.0"

@@ -1,39 +1,35 @@
 import { createAppCore, type AppCore } from '@webgal-go/core'
-import { innerPluginVersion } from './version'
-import { innerPluginContext } from './ctx'
-import { innerPluginParser } from './parser'
-import { innerPluginBus } from './bus'
-import { createInnerPluginDebugger } from './debugger'
+import { createInnerPlugin } from './inner-plugins'
 
 declare module '@webgal-go/core' {
   export interface AppCore {
-    use(plugin: WebgalPlugin): this
-    unUse(plugin: WebgalPlugin): this
+    use(plugin: WebgalPlugin): Webgal
+    unUse(plugin: WebgalPlugin): Webgal
     hasUsedPlugin(plugin: WebgalPlugin): boolean
     version?: string
   }
 }
 
-export type Webgal = Required<AppCore>
+export interface Webgal extends Required<AppCore> {}
 
 export type WebgalPlugin = (webgal: Webgal) => () => void
 
-export interface CreateWebgalAppOptions {
+export interface WebgalOptions {
   debug?: boolean
 }
 
-export const createWebgal = (options?: CreateWebgalAppOptions): Webgal => {
+export const createWebgal = (userOptions?: WebgalOptions): Webgal => {
   const webgal = createAppCore() as Webgal
 
-  webgal
-    .use(innerPluginVersion)
-    .use(innerPluginContext)
-    .use(innerPluginParser)
-    .use(innerPluginBus)
-    .use(createInnerPluginDebugger({ debug: options?.debug ?? false }))
+  webgal.use(createInnerPlugin({ debug: userOptions?.debug ?? false }))
+
+  webgal.log(`WebGAL_GO v${webgal.version}`)
+  webgal.log('Github: https://github.com/OpenWebGAL/WebGAL ')
+  webgal.log('Made with ❤ by OpenWebGAL')
 
   return webgal
 }
 
-export type { Context, Effect } from './ctx'
-export type { BusEvents } from './bus'
+export type { Context, Effect } from './inner-plugins/ctx'
+export type { BusEvents } from './inner-plugins/bus'
+export type { Debugger } from './inner-plugins/debugger'

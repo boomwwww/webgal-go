@@ -17,7 +17,7 @@ const createParser = (): CompatSceneParser => {
   })
 }
 
-export const innerPluginParser: AppPlugin = (app) => {
+export const parserInnerPlugin: AppPlugin = (app) => {
   app.parser = createParser()
-  return () => delete app.parser
+  return () => {}
 }

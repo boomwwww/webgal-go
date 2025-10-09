@@ -4,7 +4,9 @@ export interface AppCore {
   hasUsedPlugin(plugin: AppPlugin): boolean
 }
 
-export type AppPlugin = (appCore: AppCore) => () => void
+export interface AppPlugin {
+  (appCore: AppCore): () => void
+}
 
 export const createAppCore = (): AppCore => {
   const _plugins = new WeakMap<AppPlugin, () => void>()

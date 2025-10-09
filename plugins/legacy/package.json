@@ -1,11 +1,12 @@
 {
-  "name": "@webgal-go/test-plugin",
+  "name": "@webgal-go/plugin-legacy",
   "version": "0.0.1",
-  "description": "webgal-go-test-plugin",
+  "description": "WebGAL_GO Legacy Plugin",
   "keywords": [
     "webgal",
     "webgal-go",
-    "plugin"
+    "plugin",
+    "legacy"
   ],
   "author": "boomwwww",
   "license": "MPL-2.0",
