@@ -57,7 +57,6 @@ export const getCompatParserConfig = (): ParserConfig => ({
     sectionEnd: ['\r\n', '\n', '\r'],
   },
   escapeConfigs: getDefaultEscapeConfigs(),
-  plugins: [],
 })
 
 /** 场景 */

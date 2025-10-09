@@ -2,19 +2,23 @@
 export interface Article {
   name: string // 文章名
   url: string // 文章url
-  sections: Array<Section> // 段落列表
-  readonly raw: string // 原始文章字符串
+  sections: Array<Section> // 文章段落列表
+  readonly raw: string // 文章原始字符串
 }
 
 /** 段落 */
 export interface Section {
   header: string | undefined // 段落头
   body: string | undefined // 段落体
-  attributes: Array<Attribute>
+  attributes: Array<Attribute> // 段落属性列表
   comment: string | undefined // 段落注释
   str: string // 段落字符串(转义后)
   readonly raw: string // 段落原始字符串(转义前)
-  readonly position: { index: number; line: number; column: number } // 段落起始位置在整个字符串中的索引
+  readonly position: {
+    readonly index: number
+    readonly line: number
+    readonly column: number
+  } // 段落起始位置在整个字符串中的索引
 }
 
 /** 属性 */
@@ -25,51 +29,52 @@ export interface Attribute {
 
 /** 预解析器 */
 export interface PreParser {
-  _config: PreParserConfig
-  parse: (str: string) => Array<Section>
-  stringify: (input: Array<Section>, options?: { raw: boolean }) => string
+  config: PreParserConfig
+  parse(str: string): Array<Section>
+  stringify(input: Array<Section>, options?: { raw: boolean }): string
 }
 
 /** 解析器 */
 export interface Parser {
-  _config: ParserConfig
-  _preParser: PreParser
-  use: (plugin: ParserPlugin) => this
-  preParse: (str: string) => Array<Section>
-  parse: (rawArticle: { name: string; url: string; str: string }) => Article
-  stringify: (input: Article | Array<Section>, options?: { raw: boolean }) => string
+  preParser: PreParser
+  plugins: Array<ParserPlugin>
+  use(plugin: ParserPlugin): this
+  preParse(str: string): Array<Section>
+  parse(rawArticle: { name: string; url: string; str: string }): Article
+  stringify(input: Article | Array<Section>, options?: { raw: boolean }): string
+}
+
+/** 预解析器选项 */
+export type PreParserOptions = {
+  separators?: SeparatorOptions
+  escapeConfigs?: Array<EscapeConfig>
 }
 
 /** 预解析器配置 */
-export interface PreParserConfig {
-  separators: Required<SeparatorConfig>
+export type PreParserConfig = {
+  separators: SeparatorConfig
   escapeConfigs: Array<EscapeConfig>
 }
 
 /** 解析器选项 */
-export interface ParserOptions {
-  separators?: SeparatorConfig // 分隔符配置
-  escapeConfigs?: Array<EscapeConfig> // 转义规则配置
-  plugins?: Array<ParserPlugin> // 解析器插件
-}
+export type ParserOptions = PreParserOptions
 
 /** 解析器配置 */
-export interface ParserConfig {
-  separators: Required<SeparatorConfig>
-  escapeConfigs: Array<EscapeConfig>
-  plugins: Array<ParserPlugin>
-}
+export type ParserConfig = PreParserConfig
 
 /** 解析器插件 */
 export type ParserPlugin = (input: Article) => Article
 
+/** 分隔符选项 */
+export type SeparatorOptions = Partial<SeparatorConfig>
+
 /** 分隔符配置 */
-export interface SeparatorConfig {
-  bodyStart?: Array<string> // 用于分隔header和body的字符(如':')
-  attributeStart?: Array<string> // 用于开始新属性的字符(如' -')
-  attributeKeyValue?: Array<string> // 用于分隔属性键值的字符(如'=')
-  commentSeparators?: Array<{ start: string; end: Array<string> }> // 用于分隔注释的分隔符(如';')
-  sectionEnd?: Array<string> // 用于结束section的分隔符(如'\n')
+export type SeparatorConfig = {
+  bodyStart: Array<string> // 用于分隔header和body的字符(如':')
+  attributeStart: Array<string> // 用于开始新属性的字符(如' -')
+  attributeKeyValue: Array<string> // 用于分隔属性键值的字符(如'=')
+  commentSeparators: Array<{ start: string; end: Array<string> }> // 用于分隔注释的分隔符(如';')
+  sectionEnd: Array<string> // 用于结束section的分隔符(如'\n')
 }
 
 /**  转义配置 */
@@ -214,7 +219,7 @@ export const getDefaultEscapeConfigs = (): Array<EscapeConfig> => [
  * @return DefaultParserConfig
  * @pure
  */
-export const getDefaultParserConfig = (): ParserConfig => ({
+export const getDefaultPreParserConfig = (): ParserConfig => ({
   separators: {
     bodyStart: [':'],
     attributeStart: [' -'],
@@ -223,27 +228,35 @@ export const getDefaultParserConfig = (): ParserConfig => ({
     sectionEnd: [],
   },
   escapeConfigs: getDefaultEscapeConfigs(),
-  plugins: [],
 })
 
-/** 合并用户配置与默认配置
- * @param parserOptions 用户配置
- * @return 合并后的配置
+/** 定义预解析器配置
+ * @param userOptions 用户选项
+ * @return 合并后的配置的use函数
  * @pure
  */
-export const defineParserConfig = (parserOptions?: ParserOptions): ParserConfig => {
-  const defaultParserConfig = getDefaultParserConfig()
-  return {
+export const definePreParserConfig = (userOptions?: PreParserOptions): (() => PreParserConfig) => {
+  const defaultConfig = getDefaultPreParserConfig()
+  const config = {
     separators: {
-      ...defaultParserConfig.separators,
-      ...parserOptions?.separators,
+      ...defaultConfig.separators,
+      ...userOptions?.separators,
     },
     escapeConfigs: [
-      ...(parserOptions?.escapeConfigs || []),
-      ...defaultParserConfig.escapeConfigs.filter(
-        (defCfg) => !parserOptions?.escapeConfigs?.some((cfg) => cfg.key === defCfg.key),
+      ...(userOptions?.escapeConfigs || []),
+      ...defaultConfig.escapeConfigs.filter(
+        (defCfg) => !userOptions?.escapeConfigs?.some((cfg) => cfg.key === defCfg.key),
       ),
     ],
-    plugins: [...defaultParserConfig.plugins, ...(parserOptions?.plugins || [])],
   }
+  return () => config
+}
+
+/** 定义解析器配置
+ * @param userOptions 用户选项
+ * @return 合并后的配置的use函数
+ * @pure
+ */
+export const defineParserConfig = (userOptions?: ParserOptions): (() => ParserConfig) => {
+  return definePreParserConfig(userOptions)
 }

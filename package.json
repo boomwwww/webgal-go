@@ -14,6 +14,7 @@
     "clear": "node ./scripts/clear",
     "precommit": "lint-staged",
     "commit": "git-cz",
+    "test":"pnpm -r run test",
     "build": "pnpm -r run build",
     "lint": "pnpm run lint:prettier && pnpm run lint:eslint && pnpm run lint:spell",
     "lint:prettier": "prettier --write .",

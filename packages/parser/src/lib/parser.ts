@@ -5,46 +5,45 @@ import { pipe } from './utils'
 
 /**
  * 创建解析器
- * @param parserOptions 解析器配置
+ * @param userOptions 用户选项
  * @returns 解析器
  * @pure
  */
-export const createParser = (parserOptions?: ParserOptions): Parser => {
-  const _config = defineParserConfig(parserOptions)
-
-  const _preParser = createPreParser(_config)
+export const createParser = (userOptions?: ParserOptions): Parser => {
+  const useConfig = defineParserConfig(userOptions)
+  const _preParser = createPreParser(useConfig())
 
   return {
-    _config,
+    preParser: _preParser,
 
-    _preParser,
+    plugins: [],
 
     use(plugin: ParserPlugin) {
-      this._config.plugins.push(plugin)
+      this.plugins.push(plugin)
       return this
     },
 
     preParse(str) {
-      return this._preParser.parse(str)
+      return this.preParser.parse(str)
     },
 
     parse(rawArticle) {
-      const initialSections = this._preParser.parse(rawArticle.str)
+      const initialSections = this.preParser.parse(rawArticle.str)
       const initialArticle = {
         name: rawArticle.name,
         url: rawArticle.url,
         sections: initialSections,
         raw: rawArticle.str,
       }
-      return pipe(...this._config.plugins)(initialArticle)
+      return pipe(...this.plugins)(initialArticle)
     },
 
     stringify(input, options = { raw: false }) {
       return Array.isArray(input)
-        ? this._preParser.stringify(input, options)
+        ? this.preParser.stringify(input, options)
         : options.raw
           ? input.raw
-          : this._preParser.stringify(input.sections, { raw: false })
+          : this.preParser.stringify(input.sections, { raw: false })
     },
   }
 }

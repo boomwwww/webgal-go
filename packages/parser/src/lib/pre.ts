@@ -1,19 +1,21 @@
-import { type Section, type PreParser, type PreParserConfig } from './config'
+import type { Section, PreParser, PreParserOptions, PreParserConfig } from './config'
+import { definePreParserConfig } from './config'
 import { concat, getPositionByIndex } from './utils'
 
 /** Create a pre parser
- * @param preParserConfig pre parser config
+ * @param userOptions pre parser config
  * @returns pre parser
  * @pure
  */
-export const createPreParser = (preParserConfig: PreParserConfig): PreParser => {
-  const _config = preParserConfig
+export const createPreParser = (userOptions?: PreParserOptions): PreParser => {
+  const useConfig = definePreParserConfig(userOptions)
+  const _config = useConfig()
 
   return {
-    _config,
+    config: _config,
 
     parse(str) {
-      const ctx = createContext(str, this._config) // 初始化上下文
+      const ctx = createContext(str, _config) // 初始化上下文
       ctx.current.header = '' // 段落头初始化为字符串
 
       while (ctx.p < ctx.raw.length) {
@@ -21,7 +23,7 @@ export const createPreParser = (preParserConfig: PreParserConfig): PreParser => 
       }
 
       if (ctx.current.str !== '') {
-        ctx.current.attributeKey && pushCurrentAttribute(ctx)
+        if (ctx.current.attributeKey) pushCurrentAttribute(ctx)
         pushCurrentSection(ctx) // 处理可能遗漏的最后一个段落
       }
 
@@ -197,7 +199,7 @@ const enterAttributeKey = (ctx: Context): boolean => {
   const { attributeStart } = ctx.config.separators
   const matchedAttributeStart = attributeStart.find((sep) => ctx.raw.startsWith(sep, ctx.p))
   if (!matchedAttributeStart) return false
-  ;(ctx.state === 'attributeKey' || ctx.state === 'attributeValue') && pushCurrentAttribute(ctx)
+  if (ctx.state === 'attributeKey' || ctx.state === 'attributeValue') pushCurrentAttribute(ctx)
   pushSeparator(ctx, matchedAttributeStart)
   ctx.state = 'attributeKey'
   ctx.current.attributeKey = ''
@@ -233,7 +235,7 @@ const enterComment = (ctx: Context): boolean => {
   const matchedCommentStart = commentSeparators.find((sep) => ctx.raw.startsWith(sep.start, ctx.p))?.start
   if (!matchedCommentStart) return false
   ctx.current.commentStart = matchedCommentStart
-  ;(ctx.state === 'attributeKey' || ctx.state === 'attributeValue') && pushCurrentAttribute(ctx)
+  if (ctx.state === 'attributeKey' || ctx.state === 'attributeValue') pushCurrentAttribute(ctx)
   pushSeparator(ctx, matchedCommentStart)
   ctx.state = 'comment'
   ctx.current.comment = ''
@@ -270,7 +272,7 @@ const exitSection = (ctx: Context): boolean => {
   const { sectionEnd } = ctx.config.separators
   const matchedSectionEnd = sectionEnd.find((sep) => ctx.raw.startsWith(sep, ctx.p))
   if (!matchedSectionEnd) return false
-  ;(ctx.state === 'attributeKey' || ctx.state === 'attributeValue') && pushCurrentAttribute(ctx)
+  if (ctx.state === 'attributeKey' || ctx.state === 'attributeValue') pushCurrentAttribute(ctx)
   pushSeparator(ctx, matchedSectionEnd)
   pushCurrentSection(ctx)
   ctx.state = 'header'
