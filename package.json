@@ -12,7 +12,7 @@
   },
   "scripts": {
     "clear": "node ./scripts/clear",
-    "precommit": "lint-staged",
+    "precommit": "git add . && lint-staged",
     "commit": "git-cz",
     "test": "pnpm -r run test",
     "build": "pnpm -r run build",

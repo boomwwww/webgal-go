@@ -1,6 +1,6 @@
 {
   "name": "@webgal-go/playground-vite-vue",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -24,8 +24,5 @@
     "webgal-go": "workspace:*",
     "@webgal-go/test-plugin": "workspace:*",
     "@webgal-go/plugin-legacy": "workspace:*"
-  },
-  "engines": {
-    "node": "^20.19.0 || >=22.12.0"
   }
 }
