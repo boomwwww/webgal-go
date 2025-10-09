@@ -27,8 +27,5 @@
   "exports": {
     ".": "./dist/index.js",
     "./package.json": "./package.json"
-  },
-  "devDependencies": {
-    "vitest": "^3.0.0"
   }
 }

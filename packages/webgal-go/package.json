@@ -27,9 +27,6 @@
     ".": "./dist/index.js",
     "./package.json": "./package.json"
   },
-  "devDependencies": {
-    "vitest": "^3.2.4"
-  },
   "dependencies": {
     "@webgal-go/core": "workspace:*",
     "@webgal-go/parser": "workspace:*"
