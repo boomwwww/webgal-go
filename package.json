@@ -22,6 +22,8 @@
     "lint:spell": "cspell lint .",
     "build:parser": "pnpm -F @webgal-go/parser run build",
     "test:parser": "pnpm -F @webgal-go/parser run test",
+    "build:parser5": "pnpm -F @webgal-go/parser5 run build",
+    "test:parser5": "pnpm -F @webgal-go/parser5 run test",
     "play": "pnpm -F @webgal-go/playground-vite run dev",
     "play:vue": "pnpm -F @webgal-go/playground-vite-vue run dev",
     "play:react": "pnpm -F @webgal-go/playground-vite-react run dev",

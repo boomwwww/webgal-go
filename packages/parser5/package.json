@@ -1,0 +1,31 @@
+{
+  "name": "@webgal-go/parser5",
+  "version": "0.0.11",
+  "description": "webgal-go/parser5",
+  "keywords": [
+    "webgal",
+    "webgal-go",
+    "parser"
+  ],
+  "author": "boomwwww",
+  "license": "MPL-2.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsdown",
+    "test": "vitest",
+    "lint": "npx oxlint@latest"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
+  }
+}

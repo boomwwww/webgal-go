@@ -8,9 +8,7 @@ import { getCompatParserConfig } from '@/compat/config'
 describe('PreParser', () => {
   const test1Txt = fs.readFileSync(path.join(__dirname, './scene/test1.txt'), 'utf-8')
 
-  const useParserConfig = defineParserConfig()
-
-  const parser = createPreParser(useParserConfig())
+  const parser = createPreParser(defineParserConfig())
 
   it('should parse basic header, body and comment', () => {
     const input = 'webgal:hello;say hello\n'
@@ -81,7 +79,7 @@ describe('PreParser', () => {
         bodyStart: ['==>'],
         attributeStart: ['|>>'],
       },
-    })()
+    })
     const customParser = createPreParser(config)
     const input = 'test==>body|>>key=val|>>boo;comment\n'
     const result = customParser.parse(input)
@@ -119,7 +117,7 @@ describe('PreParser', () => {
           }),
         },
       ],
-    })()
+    })
     const customParser = createPreParser(config)
     const input = 'header:&lt;body&gt; -key=&lt;value&gt;;\n'
     const result = customParser.parse(input)
