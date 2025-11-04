@@ -88,6 +88,8 @@ importers:
 
   packages/parser: {}
 
+  packages/parser5: {}
+
   packages/webgal-go:
     dependencies:
       '@webgal-go/core':

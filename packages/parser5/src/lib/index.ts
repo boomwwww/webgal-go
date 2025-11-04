@@ -1,9 +1,16 @@
-export { type Article, type Section, type Attribute } from './config'
-export { type PreParser, type Parser } from './config'
-export { type ParserPlugin } from './config'
-export { type ParserOptions, type ParserConfig } from './config'
-export { type SeparatorConfig, type EscapeConfig } from './config'
-export { getDefaultPreParserConfig, getDefaultEscapeConfigs } from './config'
-export { createPreParser } from './pre'
-export { createParser } from './parser'
-export * from './plugins'
+import type { WebgalScript } from './types'
+
+/**
+ * 创建一个解析器
+ * @pure
+ */
+export const createParser = (userOptions: WebgalScript.ParserOptions): WebgalScript.Parser => {
+  return {
+    parse(rawArticle) {
+      return rawArticle as unknown as WebgalScript.Article
+    },
+    stringify(input) {
+      return input as unknown as string
+    },
+  }
+}
