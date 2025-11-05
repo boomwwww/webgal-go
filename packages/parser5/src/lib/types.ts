@@ -28,26 +28,49 @@ export namespace WebgalScript {
     export type Type = 'auxiliary' | 'sentence'
     export interface Base {
       type: Type
-      tokens: Token[]
     }
     export interface Auxiliary extends Base {
       type: 'auxiliary'
+      tokens: Token[]
     }
     export interface Sentence extends Base {
       type: 'sentence'
+      head: Token.Unquoted | Token.Quote
+      body: Token.Unquoted | Token.Quote | Token.Blank
+      attributes: Record<string, string>
     }
   }
   export type Node = Node.Auxiliary | Node.Sentence
 
   export namespace Sentence {
-    export interface Head {}
-    export interface Body {}
-    export interface Attributes {}
+    export type Head =
+      | {
+          hasHead: false
+        }
+      | {
+          hasHead: true
+          quoted: boolean
+          content: string
+        }
+    export interface Body {
+      quoted: boolean
+      content: string
+    }
+    export interface Attribute {
+      key: {
+        quoted: boolean
+        content: string
+      }
+      value: {
+        quoted: boolean
+        content: string
+      }
+    }
   }
   export interface Sentence {
     head: Sentence.Head
     body: Sentence.Body
-    attributes: Sentence.Attributes
+    attributes: Sentence.Attribute[]
   }
 
   export namespace Parser {
@@ -71,13 +94,7 @@ export namespace WebgalScript {
     export interface Options {
       customQuotationMarks?: Options.QuotationMark[]
       customCommentSymbols?: Options.CommentSymbol[]
-      node?: {
-        separator: {
-          // 'head-body': string[]
-          // 'attribute-start': string[]
-          // 'attribute-key-value': string[]
-        }
-      }
+      customEndOfSentence?: []
       sentence?: {
         // separator: string
       }

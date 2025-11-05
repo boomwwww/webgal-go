@@ -14,6 +14,9 @@ export const parse = (raw: string, options: WebgalScript.Parser.Options): Webgal
   return ctx.tokens
 }
 
+/**
+ * 解析上下文
+ */
 type Context = {
   state: 'new' | 'blank' | 'unquoted' | 'quote' | 'comment'
   raw: string
@@ -26,6 +29,13 @@ type Context = {
   done: boolean
 }
 
+/**
+ * 创建一个解析上下文
+ * @param raw 待解析的字符串
+ * @param options 解析选项
+ * @returns 解析上下文
+ * @pure
+ */
 const createContext = (raw: string, options: WebgalScript.Parser.Options): Context => {
   const defaultQuotationMarks: WebgalScript.Parser.Options.QuotationMark[] = [
     {
@@ -96,7 +106,7 @@ const createContext = (raw: string, options: WebgalScript.Parser.Options): Conte
  * @param ctx 上下文对象
  * @mutates ctx
  */
-const next = (ctx: Context) => {
+const next = (ctx: Context): void => {
   if (ctx.raw.length === 0) {
     ctx.done = true
     return

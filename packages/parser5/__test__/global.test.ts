@@ -5,7 +5,7 @@ describe('global-test', () => {
     const parser = createParser()
     console.log(
       parser.tokenParse(`
-intro: "你好|欢迎来到 {engine} 的世界"sss ;'''
+intro: "你好|欢迎来到 {engine} 的世界"
 changeBg:WebGalEnter.png -next;
 setTransition: -target=bg-main -exit=shockwaveOut;
 :你好|欢迎来到 {engine} 的世界;
