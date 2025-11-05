@@ -1,49 +1,72 @@
-import { type Parser, type ParserOptions, type ParserPlugin } from './config'
-import { defineParserConfig } from './config'
-import { createPreParser } from './pre'
-import { pipe } from './utils'
+import { WebgalScript } from './types'
+import * as Token from './token'
+import * as Node from './node'
+import * as Sentence from './sentence'
 
 /**
- * 创建解析器
- * @param userOptions 用户选项
- * @returns 解析器
+ * 创建一个解析器
  * @pure
  */
-export const createParser = (userOptions?: ParserOptions): Parser => {
-  const useConfig = defineParserConfig(userOptions)
-  const _preParser = createPreParser(useConfig())
-
+export const createParser = (userOptions?: WebgalScript.Parser.Options): WebgalScript.Parser => {
+  checkOptions(userOptions ?? {})
   return {
-    preParser: _preParser,
-
-    plugins: [],
-
-    use(plugin: ParserPlugin) {
-      this.plugins.push(plugin)
-      return this
+    options: userOptions ?? {},
+    tokenParse(raw) {
+      return Token.parse(raw, this.options)
     },
-
-    preParse(str) {
-      return this.preParser.parse(str)
+    nodeParse(tokens) {
+      return Node.parse(tokens, this.options)
     },
+    sentenceParse(nodes) {
+      return Sentence.parse(nodes, this.options)
+    },
+    parse(raw) {
+      return this.sentenceParse(this.nodeParse(this.tokenParse(raw)))
+    },
+  }
+}
 
-    parse(rawArticle) {
-      const initialSections = this.preParser.parse(rawArticle.str)
-      const initialArticle = {
-        name: rawArticle.name,
-        url: rawArticle.url,
-        sections: initialSections,
-        raw: rawArticle.str,
+const checkOptions = (options: WebgalScript.Parser.Options) => {
+  const { customQuotationMarks, customCommentSymbols } = options
+  if (customQuotationMarks !== undefined) {
+    customQuotationMarks.forEach((q) => {
+      if (q.start === '') throw new Error('Invalid quotation mark: start cannot be empty')
+      if (q.end === '') throw new Error('Invalid quotation mark: end cannot be empty')
+      if (q.start.includes('\\')) throw new Error('Invalid quotation mark: start cannot contain escape character')
+      if (q.end.includes('\\')) throw new Error('Invalid quotation mark: end cannot contain escape character')
+      if (q.start.includes(' ')) throw new Error('Invalid quotation mark: start cannot contain space')
+      if (q.end.includes(' ')) throw new Error('Invalid quotation mark: end cannot contain space')
+      if (q.start.includes('\t')) throw new Error('Invalid quotation mark: start cannot contain tab')
+      if (q.end.includes('\t')) throw new Error('Invalid quotation mark: end cannot contain tab')
+      if (q.start.includes('\n')) throw new Error('Invalid quotation mark: start cannot contain new line')
+      if (q.end.includes('\n')) throw new Error('Invalid quotation mark: end cannot contain new line')
+      if (q.start.includes('\r')) throw new Error('Invalid quotation mark: start cannot contain new line')
+      if (q.end.includes('\r')) throw new Error('Invalid quotation mark: end cannot contain new line')
+    })
+  }
+  if (customCommentSymbols !== undefined) {
+    customCommentSymbols.forEach((c) => {
+      if (c.isMultiLine) {
+        if (c.start === '') throw new Error('Invalid comment symbol: start cannot be empty')
+        if (c.end === '') throw new Error('Invalid comment symbol: end cannot be empty')
+        if (c.start.includes('\\')) throw new Error('Invalid comment symbol: start cannot contain escape character')
+        if (c.end.includes('\\')) throw new Error('Invalid comment symbol: end cannot contain escape character')
+        if (c.start.includes(' ')) throw new Error('Invalid comment symbol: start cannot contain space')
+        if (c.end.includes(' ')) throw new Error('Invalid comment symbol: end cannot contain space')
+        if (c.start.includes('\t')) throw new Error('Invalid comment symbol: start can not contain tab')
+        if (c.end.includes('\t')) throw new Error('Invalid comment symbol: end can not contain tab')
+        if (c.start.includes('\n')) throw new Error('Invalid comment symbol: start cannot contain new line')
+        if (c.end.includes('\n')) throw new Error('Invalid comment symbol: end cannot contain new line')
+        if (c.start.includes('\r')) throw new Error('Invalid comment symbol: start cannot contain carriage return')
+        if (c.end.includes('\r')) throw new Error('Invalid comment symbol: end cannot contain carriage return')
+      } else {
+        if (c.start === '') throw new Error('Invalid comment symbol: start cannot be empty')
+        if (c.start.includes('\\')) throw new Error('Invalid comment symbol: start cannot contain escape character')
+        if (c.start.includes(' ')) throw new Error('Invalid comment symbol: start cannot contain space')
+        if (c.start.includes('\t')) throw new Error('Invalid comment symbol: start can not contain tab')
+        if (c.start.includes('\n')) throw new Error('Invalid comment symbol: start can not contain new line')
+        if (c.start.includes('\r')) throw new Error('Invalid comment symbol: start can not contain carriage return')
       }
-      return pipe(...this.plugins)(initialArticle)
-    },
-
-    stringify(input, options = { raw: false }) {
-      return Array.isArray(input)
-        ? this.preParser.stringify(input, options)
-        : options.raw
-          ? input.raw
-          : this.preParser.stringify(input.sections, { raw: false })
-    },
+    })
   }
 }

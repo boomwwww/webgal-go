@@ -1,48 +1,4 @@
-/** 文章 */
-export interface Article {
-  name: string // 文章名
-  url: string // 文章url
-  sections: Array<Section> // 文章段落列表
-  readonly raw: string // 文章原始字符串
-}
-
-/** 段落 */
-export interface Section {
-  header: string | undefined // 段落头
-  body: string | undefined // 段落体
-  attributes: Array<Attribute> // 段落属性列表
-  comment: string | undefined // 段落注释
-  str: string // 段落字符串(转义后)
-  readonly raw: string // 段落原始字符串(转义前)
-  readonly position: {
-    readonly index: number
-    readonly line: number
-    readonly column: number
-  } // 段落起始位置在整个字符串中的索引
-}
-
-/** 属性 */
-export interface Attribute {
-  key: string | undefined // 属性键
-  value: string | boolean | number | undefined // 属性值
-}
-
-/** 预解析器 */
-export interface PreParser {
-  config: PreParserConfig
-  parse(str: string): Array<Section>
-  stringify(input: Array<Section>, options?: { raw: boolean }): string
-}
-
-/** 解析器 */
-export interface Parser {
-  preParser: PreParser
-  plugins: Array<ParserPlugin>
-  use(plugin: ParserPlugin): this
-  preParse(str: string): Array<Section>
-  parse(rawArticle: { name: string; url: string; str: string }): Article
-  stringify(input: Article | Array<Section>, options?: { raw: boolean }): string
-}
+import { WebgalScript } from './types'
 
 /** 预解析器选项 */
 export type PreParserOptions = {
@@ -61,9 +17,6 @@ export type ParserOptions = PreParserOptions
 
 /** 解析器配置 */
 export type ParserConfig = PreParserConfig
-
-/** 解析器插件 */
-export type ParserPlugin = (input: Article) => Article
 
 /** 分隔符选项 */
 export type SeparatorOptions = Partial<SeparatorConfig>

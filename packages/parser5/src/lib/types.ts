@@ -1,56 +1,93 @@
 export namespace WebgalScript {
-  export interface Attribute {
-    key: string | undefined // 属性键
-    value: string | boolean | number | undefined // 属性值
-  }
-  export interface Section {
-    header: string | undefined // 段落头
-    body: string | undefined // 段落体
-    attributes: Array<Attribute> // 段落属性列表
-    comment: string | undefined // 段落注释
-    str: string // 段落字符串(转义后)
-    readonly raw: string // 段落原始字符串(转义前)
-    readonly position: {
-      readonly index: number
-      readonly line: number
+  export namespace Token {
+    export type Type = 'blank' | 'unquoted' | 'quote' | 'comment'
+    export interface Base {
+      type: Type
+      raw: string
+    }
+    export interface Blank extends Base {
+      type: 'blank'
+    }
+    export interface Unquoted extends Base {
+      type: 'unquoted'
+    }
+    export interface Quote extends Base {
+      type: 'quote'
+      start: string
+      end: string
+    }
+    export interface Comment extends Base {
+      type: 'comment'
+      start: string
+      end: string
     }
   }
-  export interface Article {
-    name: string // 文章名
-    url: string // 文章url
-    sections: Array<Section> // 文章段落列表
-    readonly raw: string // 文章原始字符串
-  }
+  export type Token = Token.Blank | Token.Unquoted | Token.Quote | Token.Comment
 
-  export interface QuotationOption {
-    start: string
-    end: string[]
-    allowLineBreak: boolean
-  }
-
-  export type CommentOption =
-    | {
-        start: string
-        end: string[]
-        allowLineBreak: boolean
-      }
-    | {
-        start: string
-        delimiter: (string | { symbols: 'eol' | 'eof' })[]
-        allowLineBreak: boolean
-      }
-
-  export interface ParserOptions {
-    token: {
-      eol: string[]
-      whitespace: string[]
-      quotation: QuotationOption[]
-      comment: CommentOption[]
+  export namespace Node {
+    export type Type = 'auxiliary' | 'sentence'
+    export interface Base {
+      type: Type
+      tokens: Token[]
+    }
+    export interface Auxiliary extends Base {
+      type: 'auxiliary'
+    }
+    export interface Sentence extends Base {
+      type: 'sentence'
     }
   }
+  export type Node = Node.Auxiliary | Node.Sentence
 
+  export namespace Sentence {
+    export interface Head {}
+    export interface Body {}
+    export interface Attributes {}
+  }
+  export interface Sentence {
+    head: Sentence.Head
+    body: Sentence.Body
+    attributes: Sentence.Attributes
+  }
+
+  export namespace Parser {
+    export namespace Options {
+      export interface QuotationMark {
+        start: string
+        end: string
+        isMultiLine: boolean
+      }
+      export interface SingleLineCommentSymbol {
+        isMultiLine: false
+        start: string
+      }
+      export interface MultiLineCommentSymbol {
+        isMultiLine: true
+        start: string
+        end: string
+      }
+      export type CommentSymbol = SingleLineCommentSymbol | MultiLineCommentSymbol
+    }
+    export interface Options {
+      customQuotationMarks?: Options.QuotationMark[]
+      customCommentSymbols?: Options.CommentSymbol[]
+      node?: {
+        separator: {
+          // 'head-body': string[]
+          // 'attribute-start': string[]
+          // 'attribute-key-value': string[]
+        }
+      }
+      sentence?: {
+        // separator: string
+      }
+    }
+  }
   export interface Parser {
-    parse(rawArticle: { name: string; url: string; str: string }): Article
-    stringify(input: Article | Array<Section>, options?: { raw: boolean }): string
+    options: Parser.Options
+    tokenParse(raw: string): Token[]
+    nodeParse(tokens: Token[]): Node[]
+    sentenceParse(nodes: Node[]): Sentence[]
+    parse(raw: string): Sentence[]
   }
 }
