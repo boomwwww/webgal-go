@@ -170,29 +170,106 @@ const next = (ctx: Context) => {
         throw new Error('Unclosed quote')
       }
 
-      let quotationMarks = ctx.quotationMarks.filter((q) => q.start === ctx.current.start)
-
       if (['\n', '\r'].includes(ctx.raw[ctx.p1])) {
-        quotationMarks = quotationMarks.filter((q) => q.isMultiLine)
+        if (ctx.current.isMultiLine) {
+          ctx.p1++
+          return
+        }
+        const quotationMarks = ctx.quotationMarks
+          .filter((q) => q.start === ctx.current.start)
+          .filter((q) => q.isMultiLine)
         if (quotationMarks.length === 0) {
           throw new Error('Unclosed quote')
         }
         ctx.current.isMultiLine = true
-      }
-
-      if (ctx.raw[ctx.p1] === '\\') {
         ctx.p1++
         return
       }
 
-      const matchedQuotationMark = quotationMarks.find((q) => ctx.raw.slice(ctx.p1).startsWith(q.end))
+      if (ctx.raw[ctx.p1] === '\\') {
+        ctx.p1++
 
+        if (ctx.p1 >= ctx.raw.length) {
+          throw new Error('Unclosed escape')
+        }
+
+        if (['\n', '\r'].includes(ctx.raw[ctx.p1])) {
+          if (ctx.current.isMultiLine) {
+            ctx.p1++
+            return
+          }
+          const quotationMarks = ctx.quotationMarks
+            .filter((q) => q.start === ctx.current.start)
+            .filter((q) => q.isMultiLine)
+          if (quotationMarks.length === 0) {
+            throw new Error('Unclosed quote')
+          }
+          ctx.current.isMultiLine = true
+          ctx.p1++
+          return
+        }
+
+        ctx.p1++
+        return
+      }
+
+      const quotationMarks = ctx.quotationMarks
+        .filter((q) => q.start === ctx.current.start)
+        .filter((q) => (ctx.current.isMultiLine ? q.isMultiLine : true))
+      const matchedQuotationMark = quotationMarks.find((q) => ctx.raw.slice(ctx.p1).startsWith(q.end))
       if (matchedQuotationMark !== undefined) {
         ctx.current.end = matchedQuotationMark.end
+        ctx.p1 += matchedQuotationMark.end.length
+        push(ctx)
+        return
       }
+
+      ctx.p1++
+      return
     }
     case 'comment': {
-      break
+      if (ctx.p1 >= ctx.raw.length) {
+        push(ctx)
+        ctx.done = true
+        return
+      }
+
+      if (['\n', '\r'].includes(ctx.raw[ctx.p1])) {
+        if (ctx.current.isMultiLine) {
+          ctx.p1++
+          return
+        }
+        const commentSymbols = ctx.commentSymbols.filter((c) => c.start === ctx.current.start)
+        const singleLineCommentSymbols = commentSymbols.filter((c) => !c.isMultiLine)
+        const multiLineCommentSymbols = commentSymbols.filter((c) => c.isMultiLine)
+
+        if (multiLineCommentSymbols.length > 0) {
+          ctx.current.isMultiLine = true
+          ctx.p1++
+          return
+        }
+
+        if (singleLineCommentSymbols.length > 0) {
+          push(ctx)
+          return
+        }
+
+        throw new Error(`Invalid comment symbol: no matching comment symbol found`)
+      }
+
+      const commentSymbols = ctx.commentSymbols
+        .filter((c) => c.start === ctx.current.start)
+        .filter((c) => c.isMultiLine)
+      const matchedCommentSymbol = commentSymbols.find((c) => ctx.raw.slice(ctx.p1).startsWith(c.end))
+      if (matchedCommentSymbol) {
+        ctx.current.end = matchedCommentSymbol.end
+        ctx.p1 += matchedCommentSymbol.end.length
+        push(ctx)
+        return
+      }
+
+      ctx.p1++
+      return
     }
 
     default: {
