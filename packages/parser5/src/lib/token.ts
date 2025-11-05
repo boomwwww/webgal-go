@@ -220,6 +220,7 @@ const next = (ctx: Context) => {
       if (matchedQuotationMark !== undefined) {
         ctx.current.end = matchedQuotationMark.end
         ctx.p1 += matchedQuotationMark.end.length
+        ctx.p1--
         push(ctx)
         return
       }
@@ -227,6 +228,7 @@ const next = (ctx: Context) => {
       ctx.p1++
       return
     }
+
     case 'comment': {
       if (ctx.p1 >= ctx.raw.length) {
         push(ctx)
@@ -250,6 +252,7 @@ const next = (ctx: Context) => {
         }
 
         if (singleLineCommentSymbols.length > 0) {
+          ctx.p1--
           push(ctx)
           return
         }
