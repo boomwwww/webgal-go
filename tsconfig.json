@@ -7,8 +7,8 @@
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "esnext",
+    "moduleResolution": "Node",
     "target": "esnext",
     "types": [],
     // For nodejs:
@@ -42,6 +42,8 @@
     "moduleDetection": "force",
     "skipLibCheck": true,
 
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+
+    "resolveJsonModule": true
   }
 }

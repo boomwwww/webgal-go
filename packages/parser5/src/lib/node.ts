@@ -18,10 +18,13 @@ export const parse = (tokens: WebgalScript.Token[], options: WebgalScript.Parser
  * 解析上下文
  */
 type Context = {
-  state: 'new' | 'blank' | 'unquoted' | 'quote' | 'comment'
+  state: 'new' | 'auxiliary' | 'sentence'
+  subState: '' | 'quote-start' | 'unquoted-start'
   tokens: WebgalScript.Token[]
+  endOfSentence: WebgalScript.Parser.Options.EndOfSentence[]
   p0: number
   p1: number
+  current: { head: WebgalScript.Token[]; body: WebgalScript.Token[]; attributes: WebgalScript.Token[][] }
   nodes: WebgalScript.Node[]
   done: boolean
 }
@@ -34,14 +37,26 @@ type Context = {
  * @pure
  */
 const createContext = (tokens: WebgalScript.Token[], options: WebgalScript.Parser.Options): Context => {
+  const defaultEndOfSentence = [';']
   return {
     state: 'new',
+    subState: '',
     tokens: [],
+    endOfSentence: [...(options.customEndOfSentence ?? []), ...defaultEndOfSentence],
     p0: 0,
     p1: 0,
+    current: { head: [], body: [], attributes: [] },
     nodes: [],
     done: false,
   }
 }
 
 const next = (context: Context): void => {}
+
+const pushAuxiliary = (context: Context, node: WebgalScript.Node): void => {
+  context.nodes.push(node)
+}
+
+const pushSentence = (context: Context, node: WebgalScript.Node): void => {
+  context.nodes.push(node)
+}

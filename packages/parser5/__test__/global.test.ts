@@ -2,16 +2,29 @@ import { createParser } from '@/index'
 
 describe('global-test', () => {
   it('createParser', () => {
-    const parser = createParser()
+    const parser = createParser({
+      customCommentSymbols: [
+        {
+          isMultiLine: false,
+          start: '；',
+        },
+      ],
+    })
     console.log(
       parser.tokenParse(`
-intro: "你好|欢迎来到 {engine} 的世界"
-changeBg:WebGalEnter.png -next;
+intro:' {engine} -next;\
+' a;'
+changeBg: WebGalEnter.png -next;
 setTransition: -target=bg-main -exit=shockwaveOut;
-:你好|欢迎来到 {engine} 的世界;
-changeBg:bg.png -next;
+:hello {engine} world! -v0.wav
+changeBg:bg.png
+- next
+ok, I will unlock the CG
+- v0.wav
 setTransition: -target=bg-main -enter=shockwaveIn -next;
-unlockCg:bg.png -name=良い夜; // 解锁CG并赋予名称
+unlockCg:bg.png -name=良い夜 // 解锁CG并赋予名称
+- when = true
+setVar: a = 1
 changeFigure:stand.png -left -enter=enter-from-left -next;
 miniAvatar:miniAvatar.png;
 {heroine}:欢迎使用 {engine}！这是一款全新的网页端视觉小说引擎。 -v1.wav;

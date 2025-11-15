@@ -1,3 +1,6 @@
 export * from './types'
+export * as Utils from './utils'
 export * as Token from './token'
+export * as Node from './node'
+export * as Sentence from './sentence'
 export * from './parser'

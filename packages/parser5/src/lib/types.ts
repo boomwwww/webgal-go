@@ -31,13 +31,13 @@ export namespace WebgalScript {
     }
     export interface Auxiliary extends Base {
       type: 'auxiliary'
-      tokens: Token[]
+      token: Token
     }
     export interface Sentence extends Base {
       type: 'sentence'
-      head: Token.Unquoted | Token.Quote
-      body: Token.Unquoted | Token.Quote | Token.Blank
-      attributes: Record<string, string>
+      head: Token[]
+      body: Token[]
+      attributes: Token[][]
     }
   }
   export type Node = Node.Auxiliary | Node.Sentence
@@ -90,14 +90,12 @@ export namespace WebgalScript {
         end: string
       }
       export type CommentSymbol = SingleLineCommentSymbol | MultiLineCommentSymbol
+      export type EndOfSentence = string
     }
     export interface Options {
       customQuotationMarks?: Options.QuotationMark[]
       customCommentSymbols?: Options.CommentSymbol[]
-      customEndOfSentence?: []
-      sentence?: {
-        // separator: string
-      }
+      customEndOfSentence?: Options.EndOfSentence[]
     }
   }
   export interface Parser {

@@ -6,7 +6,7 @@
     "strict": true,
     "declaration": true,
     "types": ["node"],
-    "moduleResolution": "NodeNext",
+    "moduleResolution": "Node",
     "paths": {
       "@/*": ["./src/*"]
     }

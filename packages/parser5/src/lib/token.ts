@@ -91,11 +91,7 @@ const createContext = (raw: string, options: WebgalScript.Parser.Options): Conte
     commentSymbols: [...(options.customCommentSymbols ?? []), ...defaultCommentSymbols],
     p0: 0,
     p1: 0,
-    current: {
-      isMultiLine: false,
-      start: '',
-      end: '',
-    },
+    current: { isMultiLine: false, start: '', end: '' },
     tokens: [],
     done: false,
   }
@@ -204,6 +200,8 @@ const next = (ctx: Context): void => {
         }
 
         if (['\n', '\r'].includes(ctx.raw[ctx.p1])) {
+          console.log('@@@') //todo
+
           if (ctx.current.isMultiLine) {
             ctx.p1++
             return
